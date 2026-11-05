@@ -1,0 +1,22 @@
+[
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\.env.example",
+    "State": "changed"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\README.md",
+    "State": "changed"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\tsconfig.tsbuildinfo",
+    "State": "changed"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\supabase\\server.ts",
+    "State": "changed"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\supabase\\README.md",
+    "State": "changed"
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "port": 3005,
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "brandPresent": true
+    },
+    {
+      "path": "/admin/dashboard",
+      "status": 200,
+      "brandPresent": true
+    },
+    {
+      "path": "/teacher/dashboard",
+      "status": 200,
+      "brandPresent": true
+    },
+    {
+      "path": "/student/dashboard",
+      "status": 200,
+      "brandPresent": true
+    },
+    {
+      "path": "/parent/dashboard",
+      "status": 200,
+      "brandPresent": true
+    },
+    {
+      "path": "/accountant/dashboard",
+      "status": 200,
+      "brandPresent": true
+    }
+  ],
+  "scope": "HTTP smoke checks; no browser or authentication tests"
+}

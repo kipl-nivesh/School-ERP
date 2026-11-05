@@ -1,0 +1,26 @@
+[
+  {
+    "focused": "parent-children",
+    "hash": "#parent-children"
+  },
+  {
+    "focused": "parent-attendance",
+    "hash": "#parent-attendance"
+  },
+  {
+    "focused": "parent-homework",
+    "hash": "#parent-homework"
+  },
+  {
+    "focused": "parent-results",
+    "hash": "#parent-results"
+  },
+  {
+    "focused": "parent-fees",
+    "hash": "#parent-fees"
+  },
+  {
+    "focused": "parent-notices",
+    "hash": "#parent-notices"
+  }
+]

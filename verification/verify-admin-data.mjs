@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+const source = fs.readFileSync('src/features/admin-dashboard/data/mock-dashboard.ts', 'utf8');
+const output = ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2020}}).outputText;
+const data = await import('data:text/javascript;base64,' + Buffer.from(output).toString('base64'));
+assert.equal(data.totalStudents, 1248);
+assert.equal(data.studentDistribution.reduce((n,g)=>n+g.students,0), data.totalStudents);
+for(const day of data.attendance) { assert.equal(day.present+day.absent,data.totalStudents); assert.ok(day.present>=0 && day.absent>=0); }
+assert.equal(data.todayAttendance.date, data.mockSchool.snapshotDate);
+assert.equal(data.attendancePercent.toFixed(1),'94.8');
+assert.equal(data.fees.collected,1845000);
+assert.equal(data.monthlyCollections.reduce((n,m)=>n+m.amount,0),data.fees.collected);
+assert.equal(data.assessedFees,2080000);
+assert.equal(data.collectionPercent.toFixed(1),'88.7');
+assert.equal(data.dashboardStats.find(s=>s.icon==='exams').value,String(data.examSchedule.length));
+for(const exam of data.examSchedule) assert.ok(exam.date>data.mockSchool.snapshotDate);
+for(const event of data.upcomingEvents) assert.ok(event.date>data.mockSchool.snapshotDate);
+for(const item of data.recentActivities) assert.ok(item.timestamp.startsWith(data.mockSchool.snapshotDate));
+assert.ok(data.recentActivities.every((a,i,items)=>i===0||a.timestamp<=items[i-1].timestamp));
+console.log('PASS: enrollment, attendance, snapshot dates, monthly fees, balance, progress, exam count, future events, and activity order.');

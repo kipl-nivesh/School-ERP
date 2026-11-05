@@ -1,0 +1,8 @@
+import { Clock3,CalendarDays,BookOpen } from 'lucide-react';
+import { studentExams,studentSubjects,studentProfile } from '../data/mock-dashboard';
+import { getStudentSubject,daysBetween,formatStudentDate,formatStudentTime } from '../lib/calculations';
+import { StudentSection } from './section';
+import { SubjectIcon } from './subject-icon';
+export function StudentExams() {
+  return <StudentSection id="student-exams" title="A little preparation goes a long way" description="Upcoming exams · fictional schedule" badge={studentExams.length+' assessments'}><ol className="sd-exam-list">{studentExams.map(exam=>{const subject=getStudentSubject(exam.subjectId,studentSubjects);const days=daysBetween(studentProfile.referenceDate,exam.date);return <li key={exam.id} className={'sd-exam sd-tone-'+subject.accent}><div className="sd-exam-main"><span className="sd-icon"><SubjectIcon subjectId={subject.id}/></span><div><span className="sd-exam-subject">{subject.name}</span><h3>{exam.title}</h3><p><CalendarDays size={12}/><time dateTime={exam.date}>{formatStudentDate(exam.date,{day:'numeric',month:'short',year:'numeric'})}</time></p><p><Clock3 size={12}/>{formatStudentTime(exam.start)} – {formatStudentTime(exam.end)}</p></div><div className="sd-countdown"><strong>{days}</strong><span>days to go</span></div></div><span className="sd-exam-preparation"><BookOpen size={12}/>{exam.preparation}</span></li>;})}</ol><p className="sd-footnote">Calendar-day countdowns from the fixed sample date: {formatStudentDate(studentProfile.referenceDate,{day:'numeric',month:'long',year:'numeric'})}.</p></StudentSection>;
+}

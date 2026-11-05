@@ -1,0 +1,7 @@
+import { Megaphone, CalendarDays, BookOpen, Check } from 'lucide-react';
+import { announcements, activities, formatTeacherDate, teacherProfile } from '../data/mock-dashboard';
+import { TeacherSection } from './section';
+const icons = { notice: Megaphone, calendar: CalendarDays, book: BookOpen };
+export function TeacherAnnouncements() {
+  return <div className="td-updates-grid"><TeacherSection title="Around the school" description="Sample announcements & academic reminders" badge="Fictional notices"><ul className="td-announcement-list">{announcements.map(item=>{const Icon=icons[item.icon];return <li key={item.title} className={'td-announcement td-tone-'+item.accent}><span className="td-icon"><Icon size={18}/></span><div><span className="td-update-category">{item.category} · <time dateTime={item.date}>{formatTeacherDate(item.date)}</time></span><h3>{item.title}</h3><p>{item.description}</p></div></li>;})}</ul></TeacherSection><TeacherSection title="Your day, in little moments" description="Recent activities · sample timestamps in IST" badge={formatTeacherDate(teacherProfile.referenceDate)}><ol className="td-activity-list">{activities.map(item=><li key={item.timestamp} className={'td-activity td-tone-'+item.accent}><span className="td-activity-icon"><Check size={15}/></span><div><h3>{item.title}</h3><p>{item.description}</p><time dateTime={item.timestamp}>{item.time} · sample activity</time></div></li>)}</ol></TeacherSection></div>;
+}

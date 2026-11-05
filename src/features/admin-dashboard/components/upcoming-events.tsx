@@ -1,0 +1,5 @@
+import { BookOpen, Users, Trophy, Lightbulb } from 'lucide-react';
+import { upcomingEvents, formatDemoDate } from '../data/mock-dashboard';
+import { DashboardSection } from './section';
+const icons = [BookOpen, Users, Trophy, Lightbulb];
+export function UpcomingEvents() { return <DashboardSection title="Something to look forward to" subtitle="Upcoming events · fictional schedule" badge="November"><ol className="ad-event-list">{upcomingEvents.map((event,i)=>{const Icon=icons[i];return <li key={event.title} className={'ad-event ad-tone-'+event.accent}><div className="ad-event-date"><strong>{formatDemoDate(event.date,{day:'2-digit'})}</strong><span>{formatDemoDate(event.date,{month:'short'})}</span></div><div className="ad-event-copy"><span className="ad-event-category"><Icon size={12}/>{event.category}</span><h3>{event.title}</h3><p>{event.description}</p></div><time dateTime={event.date} className="sr-only">{formatDemoDate(event.date,{day:'numeric',month:'long',year:'numeric'})}</time></li>;})}</ol></DashboardSection>; }

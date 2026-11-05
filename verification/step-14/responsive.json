@@ -1,0 +1,32 @@
+[
+  {
+    "emailVisible": true,
+    "overflow": false,
+    "reviewMode": true,
+    "width": 320
+  },
+  {
+    "emailVisible": true,
+    "overflow": false,
+    "reviewMode": true,
+    "width": 375
+  },
+  {
+    "emailVisible": true,
+    "overflow": false,
+    "reviewMode": true,
+    "width": 768
+  },
+  {
+    "emailVisible": true,
+    "overflow": false,
+    "reviewMode": true,
+    "width": 1024
+  },
+  {
+    "emailVisible": true,
+    "overflow": false,
+    "reviewMode": true,
+    "width": 1440
+  }
+]

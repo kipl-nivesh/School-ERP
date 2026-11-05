@@ -1,0 +1,52 @@
+[
+  {
+    "badges": 5,
+    "homework": 3,
+    "illustrationOverlapsText": false,
+    "illustrationWidth": 223,
+    "periods": 6,
+    "scrollWidth": 305,
+    "stats": 6,
+    "width": 320
+  },
+  {
+    "badges": 5,
+    "homework": 3,
+    "illustrationOverlapsText": false,
+    "illustrationWidth": 278,
+    "periods": 6,
+    "scrollWidth": 360,
+    "stats": 6,
+    "width": 375
+  },
+  {
+    "badges": 5,
+    "homework": 3,
+    "illustrationOverlapsText": false,
+    "illustrationWidth": 240,
+    "periods": 6,
+    "scrollWidth": 753,
+    "stats": 6,
+    "width": 768
+  },
+  {
+    "badges": 5,
+    "homework": 3,
+    "illustrationOverlapsText": false,
+    "illustrationWidth": 249,
+    "periods": 6,
+    "scrollWidth": 1009,
+    "stats": 6,
+    "width": 1024
+  },
+  {
+    "badges": 5,
+    "homework": 3,
+    "illustrationOverlapsText": false,
+    "illustrationWidth": 398,
+    "periods": 6,
+    "scrollWidth": 1425,
+    "stats": 6,
+    "width": 1440
+  }
+]

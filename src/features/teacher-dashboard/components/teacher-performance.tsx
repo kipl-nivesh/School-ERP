@@ -1,0 +1,10 @@
+import { HeartHandshake } from 'lucide-react';
+import { performance, performanceBands, overallAverage, studentsNeedingSupport, totalStudents, classAverage, getTeacherClass } from '../data/mock-dashboard';
+import { TeacherSection } from './section';
+export function TeacherPerformance() {
+  return <TeacherSection title="Progress worth celebrating" description="Preview analytics · one fictional assessment out of 100" badge="Aggregate data only"><div className="td-performance-layout"><div className="td-class-averages"><div className="td-average-head"><strong>{overallAverage.toFixed(1)}<small>/100</small></strong><span>Weighted average · {totalStudents} learners</span></div><h3>Class averages</h3>{performance.map(item => {
+    const group = getTeacherClass(item.classId);
+    const average = classAverage(item);
+    return <div key={item.classId} className={'td-average-row td-tone-' + group.accent}><div><span>{group.name} {group.section} · {group.subject}</span><strong>{average.toFixed(1)}</strong></div><div className="td-average-track" role="img" aria-label={group.name + ' ' + group.section + ': average ' + average.toFixed(1) + ' marks out of 100'}><span style={{width:average + '%'}}/></div></div>;
+  })}</div><figure className="td-performance-distribution"><figcaption>Learning milestones <span>Students by score band</span></figcaption><div className="td-performance-stacked" role="img" aria-label={performanceBands.map(band=>band.label + ': ' + band.count + ' students').join('; ')}>{performanceBands.map(band=><span key={band.label} className={'td-tone-'+band.accent} style={{width:band.count / totalStudents * 100 + '%'}}/>)}</div><ul>{performanceBands.map(band=><li className={'td-tone-'+band.accent} key={band.label}><span className="td-legend-dot"/><div><strong>{band.label}</strong><small>{band.range}</small></div><b>{band.count}</b></li>)}</ul></figure></div><div className="td-support-note"><HeartHandshake size={22}/><p><strong>{studentsNeedingSupport} learners may benefit from extra support.</strong> Demo scores below 50/100 · an invitation to encourage, not a live student assessment.</p></div></TeacherSection>;
+}

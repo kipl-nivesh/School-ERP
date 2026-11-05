@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/",
+    "heading": "Brighter days.\nBetter connected.",
+    "title": "Brightcamp · School workspace"
+  },
+  {
+    "path": "/admin/dashboard",
+    "heading": "School overview",
+    "title": "Admin overview · Brightcamp"
+  },
+  {
+    "path": "/teacher/dashboard",
+    "heading": "My teaching workspace",
+    "title": "Teacher overview · Brightcamp"
+  },
+  {
+    "path": "/student/dashboard",
+    "heading": "My learning space",
+    "title": "Student overview · Brightcamp"
+  },
+  {
+    "path": "/parent/dashboard",
+    "heading": "Parent overview",
+    "title": "Parent overview · Brightcamp"
+  },
+  {
+    "path": "/accountant/dashboard",
+    "heading": "Finance overview",
+    "title": "Accountant overview · Brightcamp"
+  }
+]

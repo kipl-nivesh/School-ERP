@@ -1,0 +1,62 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/admin/dashboard",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/teacher/dashboard",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/student/dashboard",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/parent/dashboard",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/accountant/dashboard",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/login/staff",
+    "status": 200,
+    "location": null
+  },
+  {
+    "route": "/staff",
+    "status": 307,
+    "location": "/login/staff"
+  },
+  {
+    "route": "/staff/admin",
+    "status": 307,
+    "location": "/login/staff"
+  },
+  {
+    "route": "/staff/teacher",
+    "status": 307,
+    "location": "/login/staff"
+  },
+  {
+    "route": "/staff/accountant",
+    "status": 307,
+    "location": "/login/staff"
+  },
+  {
+    "route": "/staff/unknown",
+    "status": 404,
+    "location": null
+  }
+]

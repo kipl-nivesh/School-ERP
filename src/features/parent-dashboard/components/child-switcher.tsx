@@ -1,0 +1,7 @@
+import { CheckCircle2, GraduationCap, UserRound } from 'lucide-react';
+import type { Child, ChildId } from '../types';
+import { ParentSection } from './section';
+export function ChildSwitcher({learners,selected,onSelect}:{learners:Child[];selected:Child;onSelect:(id:ChildId)=>void}) {
+  return <ParentSection id="parent-children" title="My children" description="Choose a child to explore their school day." badge="Your family"><fieldset className="pd-child-options"><legend className="sr-only">Choose a child</legend>{learners.map(child=><label className={'pd-child-option pd-tone-'+child.tone+(child.id===selected.id?' is-selected':'')} key={child.id}><input type="radio" name="parent-child" value={child.id} checked={child.id===selected.id} onChange={()=>onSelect(child.id)}/><span className="pd-child-avatar" aria-hidden="true">{child.initials}</span><span className="pd-child-copy"><strong>{child.name}</strong><span>Class {child.className} · Roll {child.rollNumber}</span></span><span className="pd-selected-mark">{child.id===selected.id?<><CheckCircle2 size={17}/><span>Selected</span></>:<><UserRound size={17}/><span>View</span></>}</span></label>)}</fieldset><div className="pd-child-profile" data-child-id={selected.id}><GraduationCap size={20}/><div><strong>{selected.name} · Class {selected.className}</strong><span>Roll {selected.rollNumber} · Class teacher: {selected.teacher} · {selected.id==='aarav'?'Middle school':'Primary school'}</span></div></div></ParentSection>;
+}
+

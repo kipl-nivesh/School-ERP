@@ -1,0 +1,52 @@
+[
+  {
+    "children": 2,
+    "clientWidth": 305,
+    "illustrationWidth": 227.1999969482422,
+    "overflow": [],
+    "overlap": false,
+    "scrollWidth": 305,
+    "stats": 6,
+    "viewport": 320
+  },
+  {
+    "children": 2,
+    "clientWidth": 360,
+    "illustrationWidth": 282.3999938964844,
+    "overflow": [],
+    "overlap": false,
+    "scrollWidth": 360,
+    "stats": 6,
+    "viewport": 375
+  },
+  {
+    "children": 2,
+    "clientWidth": 753,
+    "illustrationWidth": 277.875,
+    "overflow": [],
+    "overlap": false,
+    "scrollWidth": 753,
+    "stats": 6,
+    "viewport": 768
+  },
+  {
+    "children": 2,
+    "clientWidth": 1009,
+    "illustrationWidth": 291.63751220703125,
+    "overflow": [],
+    "overlap": false,
+    "scrollWidth": 1009,
+    "stats": 6,
+    "viewport": 1024
+  },
+  {
+    "children": 2,
+    "clientWidth": 1425,
+    "illustrationWidth": 444.9875183105469,
+    "overflow": [],
+    "overlap": false,
+    "scrollWidth": 1425,
+    "stats": 6,
+    "viewport": 1440
+  }
+]

@@ -1,0 +1,69 @@
+# Step 11 — Guardian identity models
+
+## Step 12 current singleton login scope
+
+Owner-approved initial scope: one Student has at most one active explicitly provisioned login-eligible Parent; one Parent login identity is linked to exactly one Student. Exactly two fields remain for each family role: registration number and its independent six-digit PIN. No Parent Login ID, Guardian Reference/ID, extra username, selection step or third field. Student and Parent have separate internal identities/credentials. Multiple children per Parent and multiple independently login-eligible guardians per Student are **deferred**, while richer non-login guardian relationships remain conceptually supported.
+
+The Step 11 multi-guardian BLOCKED finding is **historical for that earlier scope and remains valid**, not erased or disproven. The new singleton policy removes only that specific selection ambiguity; zero, multiple, inactive, revoked, stale or inconsistent mappings deny. Six-digit production security, provider/Supabase sessions, durable throttling and RLS remain unverified. Only Super Admin provisions/manages grants; five primary roles and immutable audit/finance boundaries remain unchanged.
+
+Current local source updates replace the unused guardianReferenceRequired true flag with false and add pure input/cardinality/evidence-state contracts. The model returns no genuine session and is not wired to routes. Existing public mock dashboards, including the Parent two-child demo, remain unchanged and are not production relationship evidence. Any older instructions to retain the true flag or require a multi-child login mapping below are superseded for this initial phase.
+
+See [singleton identity policy](STEP-12-SIMPLIFIED-PARENT-IDENTITY.md), [contracts](STEP-12-AUTH-CONTRACTS.md), [verification](STEP-12-SECURITY-VERIFICATION.md) and [next integration gate](STEP-12-NEXT-INTEGRATION-GATE.md). Statuses remain separate: **LOCAL FOUNDATION COMPLETE**; **ISOLATED PROVIDER PROOF PENDING**; **PRODUCTION AUTHENTICATION NOT APPROVED**. Step 13 has not started.
+
+## Retained earlier architecture and findings
+
+Checked **2026-11-05**. Approved visible Parent inputs are exactly linked Student Registration Number and six-digit Parent PIN. No Guardian Reference/ID, third field, guardian picker, invisible phone/email selector or added factor is adopted. Six digits is a UX preference, not security approval. Overall multi-guardian fresh-login design: **C. BLOCKED**.
+
+## Information available to the verifier
+
+Let r denote a registration number, P the space of six-character decimal strings with size N = 10^6, and G(r,t) the set of currently eligible guardian identities for that child at time t. A first-login request contains (role=Parent, r, p). The verifier also knows protected school relationships and credential records, but has no independent observation of which person submitted the request.
+
+If two guardians g and h are both eligible for r and their credential values coincide, the request tuple is identical in the two possible claimant cases. A deterministic resolver produces the same output for both; it cannot correctly identify both distinct people. A randomized resolver can guess but cannot provide guaranteed exact identity. Audit attribution, custody restrictions and session subject cannot be recovered from identical information. A signed token issued afterward authenticates the resolver's choice, not a missing fact. **Deny ambiguous input**; never select the first record, oldest guardian or primary contact.
+
+If all eligible guardians' PIN values are distinct, a mathematical inverse of the mapping g → p_g exists for that registration. This is mathematical uniqueness only. An ordinary independently salted verifier supports checking a proposed credential for a known identity, not indexing an unknown identity by secret value. Comparing p against every candidate hash is expressly forbidden here. Plaintext, reversible PIN storage, unsalted deterministic hashes and an easily enumerable secret-to-guardian index are also forbidden. Merely stating “PINs are unique” supplies neither a permitted resolver nor secure collision enforcement.
+
+Two random independently issued guardian secrets collide with probability 1/N within one scope, before any rejection policy. For k independently issued secrets, the birthday approximation is 1 − exp(−k(k−1)/(2N)); this is not a justification for accepting rare collisions. Exact identity is a guarantee, not a probabilistic hope. Uniform issuance does not prevent user reuse or reset collisions. Independently stored credentials can coincidentally have equal values; equality never authorizes a shared identity.
+
+Before authentication, the system can detect that the registration has multiple eligible guardians without listing them to the user, then conservatively deny. Detecting that *this supplied secret* matches multiple guardians requires credential-equality information or checking candidates, which the ordinary salted-hash scheme does not supply within these rules. Avoid designing collision detection that first verifies a list of secrets and calls the list “resolution.”
+
+## Model comparison
+
+| Model | Mathematical possibility / documented basis | Required controls and lifecycle implications | Decision under current rules |
+| --- | --- | --- | --- |
+| A — Unique PIN within registration scope | Distinct values could define an inverse; no acceptable resolver or atomic equality mechanism is specified | Secret-as-selector directory, collision prevention across linked children, resets, simultaneous provisioning, key compromise and shared scope abuse all require a reviewed protocol | **Reject as an established solution / BLOCKED**; uniqueness alone is insufficient |
+| B — Trusted prior authenticated context | An actually verified current session can identify its existing guardian | First device, cleared cookies, expired session, device loss and guardian switching require an independently authenticated binding; shared browser state cannot choose a person | Useful for continuing an existing identity only; **not a complete first-login solution** |
+| C — Provider-owned privacy-preserving resolution | OIDC starts after upstream authentication; no exact supported school resolver was established | Named protocol, independent review, active attacks/compromise model, collision/equality semantics, canonical binding and supported session lifecycle required | **Unverified / BLOCKED**; generic extensibility is not evidence |
+| D — One designated login guardian per child | A singleton eligible login identity can be selected by r without secret search | School must explicitly change independent multi-guardian login policy; define siblings, separated families, custody, alternate access and reassignment | **Not adopted**; possible policy change with serious access consequences, PIN risk remains |
+| E — Additional cryptographic/possession evidence | A verified authenticator can carry independent identity evidence | Enrollment, extra challenge/user gesture, account discovery/choice, shared-device privacy, loss/recovery and provider support | **Not adopted**; requires explicit approval of changed interaction/factor despite two typed fields |
+
+## A — Unique-per-scope credentials in detail
+
+For a guardian linked to several children, a single independent guardian PIN would need to avoid every other guardian's PIN in the union of those children's login scopes. A later new link can introduce a collision even without credential rotation. Reset must check every affected scope; concurrent resets/assignments must serialize conflicting reservations. Removing a guardian and reusing its value can make old leaked credentials select a different person unless lifecycle rules prevent this. Suspension/revocation must remove eligibility and invalidate sessions atomically; suspended candidates cannot accidentally remain matchable.
+
+None of this is solved by a UNIQUE database constraint on salted verifier bytes: the same PIN with different salts has different hash bytes. A reversible mapping would violate restrictions. An unkeyed deterministic digest is enumerable over a million values. A keyed tag/HMAC can reduce exposure from a database-only breach while the key is separate, but it is still a secret-derived selector directory; online lookup or combined key/database compromise can enumerate the small domain. It is **not proposed as an approved workaround**. A key-backed design would require a formal threat model including key access, online oracle budgets, credential verification separate from lookup, atomic cross-scope collisions, rotation and recovery. No such independently reviewed implementation/protocol is established here.
+
+Per-registration throttling can protect the unresolved stage but lets one attacker lock out all guardians. Per-guardian throttling cannot rely on knowing the guardian before it is resolved; use aggregate pre-resolution controls if later approved, then canonical identity budgets afterward. This operational conflict and offline risk remain even if mathematical uniqueness is imposed. No PIN-to-guardian table, hashing scheme or code is implemented.
+
+## B — Prior context is continuation, not first login
+
+A verified nonrevoked provider session identifies its subject; live school links still determine authorized children. It must never silently bind a two-field attempt to a different family member merely because the browser has a cookie. If the person intends to switch guardians, clear/end the old context and require an approved independent identity-authentication path. An expired credential, localStorage ID, cached profile or “remembered guardian” display is untrusted. Device trust itself needs approved enrollment and recovery; school onboarding is an extra process, not a fact available on all new devices.
+
+Do not bind an anonymous session ID to a guardian based on registration alone (session fixation). Shared devices need explicit logout, minimal cached data and verified account continuity; device possession does not necessarily identify the current guardian. B cannot satisfy the required first-login/new-device/cleared-cookie cases without an approved requirement change.
+
+## C — What would count as evidence
+
+A provider must document exact two-input resolution or supply a formally specified custom protocol for independent review. Required evidence includes how a canonical guardian is selected without candidate-wide verification; equality/collision detection and concurrent reset; credential and key storage; pre-resolution vs identity/global rate limits; offline and online enumeration; correct subject issuance; suspended/revoked/link changes; and recovery without hidden phone/email identity selection. Keycloak's [Authentication SPI](https://www.keycloak.org/docs/latest/server_development/index.html#_auth_spi) documents extensibility and internal-API risk, not that protocol. [OIDC Core](https://openid.net/specs/openid-connect-core-1_0.html) standardizes federated identity assertions; it does not discover the intended guardian from ambiguous credentials. Checked 2026-11-05. No independently reviewed school-specific protocol was found or invented.
+
+This is not a theorem that every possible future privacy-preserving cryptographic protocol is impossible. The impossibility statement concerns identical observable inputs with no distinguishing evidence. Distinct-secret resolution is a separate unresolved security/protocol problem. The present project has neither acceptable evidence nor permission to invent a live resolver.
+
+## D — Explicit policy change only
+
+Designating exactly one login guardian for each child could remove selection ambiguity for that child while retaining other guardians as non-login relationship records. It would deny independent login to the other guardian through that child, conflict with current independent multi-guardian access, and can create difficult sibling configurations. Families must not be told to share the primary guardian's PIN; audit identity would be wrong and custody restrictions could be bypassed. Withdrawal, death, separation, access restrictions and reassignment need supervised policy and revocation. No one-guardian policy is assumed from a test fixture with one guardian.
+
+## E — Additional evidence only with approval
+
+[WebAuthn](https://www.w3.org/TR/webauthn-3/) specifies signed public-key authentication with account/credential bindings. A provider could use approved cryptographic credentials to distinguish guardians, but real enrollment, user verification/gesture and recovery would be added interactions. Discoverable-credential account choice may itself introduce a selection step, prohibited in the current UX; it cannot be hidden as an unchanged login. Device-bound or school-managed enrollment likewise changes first-use/recovery assumptions. Phone possession is not an invisible selector and a shared number cannot identify a guardian. Passkeys are an alternative to evaluate after approval, not a claim of current Supabase/Keycloak school-flow support. Checked 2026-11-05.
+
+## Consequences
+
+A singleton guardian scope can resolve one candidate before verifying its own credential, but this limited case is not the required multi-guardian architecture and is not production-approved. A longer PIN alone improves guessing resistance but still permits equal values and does not provide a permitted exact resolver. The smallest informational change is an explicit guardian-specific identifier; it has been rejected and is listed only as a decision that would need reversal, never as the current form. If the two fields must remain, approving an independently verified extra factor/enrollment/interaction or changing login eligibility policy is necessary before another credible proof plan can be established. See [decision gate](STEP-11-DECISION-GATE.md).

@@ -1,0 +1,12 @@
+{
+  "countdowns": [
+    "6",
+    "7",
+    "9"
+  ],
+  "pencilIterations": "2",
+  "reducedMotion": false,
+  "starIterations": "2",
+  "statHover": "matrix(1, 0, 0, 1, 0, -3)",
+  "subjectBars": 5
+}

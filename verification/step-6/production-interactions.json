@@ -1,0 +1,194 @@
+{
+  "periods": [
+    {
+      "aging": [
+        "Not yet due₹4,560.00",
+        "1–30 days₹2,640.00",
+        "31–60 days₹0.00",
+        "Over 60 days₹0.00"
+      ],
+      "caption": "1–31 Oct 2026 · 4 fictional invoices · 6 sample payment attempts · balances aged at 31 Oct 2026.",
+      "cashMonths": 1,
+      "classRows": [
+        "Grades 1–5Primary₹30,000.00₹27,600.00₹2,400.0092.0%Partially collected",
+        "Grades 6–8Middle₹27,000.00₹24,840.00₹2,160.0092.0%Partially collected",
+        "Grades 9–10Secondary₹33,000.00₹30,360.00₹2,640.0092.0%Partially collected",
+        "Grades 11–12Senior secondary₹37,000.00₹37,000.00₹0.00100.0%Fully collected"
+      ],
+      "expenses": [
+        "Staff salaries₹47,000.0066.2% of paid expenses",
+        "Utilities₹5,500.007.7% of paid expenses",
+        "Maintenance₹4,250.006.0% of paid expenses",
+        "Transport₹7,000.009.9% of paid expenses",
+        "Learning materials₹4,500.006.3% of paid expenses",
+        "Administration₹2,750.003.9% of paid expenses"
+      ],
+      "filteredSubtotal": "₹1,19,800.00",
+      "kpis": [
+        {
+          "label": "Total fees billed",
+          "value": "₹1,27,000.00"
+        },
+        {
+          "label": "Total fees collected",
+          "value": "₹1,19,800.00"
+        },
+        {
+          "label": "Outstanding fees",
+          "value": "₹7,200.00"
+        },
+        {
+          "label": "Overdue fees",
+          "value": "₹2,640.00"
+        },
+        {
+          "label": "Total expenses",
+          "value": "₹71,000.00"
+        },
+        {
+          "label": "Net cash flow",
+          "value": "₹48,800.00"
+        }
+      ],
+      "months": [
+        "2026-10"
+      ],
+      "period": "month",
+      "transactions": "6 matching sample transactions · showing 1–6 · 6 total attempts in this period"
+    },
+    {
+      "aging": [
+        "Not yet due₹4,560.00",
+        "1–30 days₹2,640.00",
+        "31–60 days₹10,440.00",
+        "Over 60 days₹21,000.00"
+      ],
+      "caption": "1 Aug–31 Oct 2026 · 12 fictional invoices · 18 sample payment attempts · balances aged at 31 Oct 2026.",
+      "cashMonths": 3,
+      "classRows": [
+        "Grades 1–5Primary₹87,000.00₹74,120.00₹12,880.0085.2%Partially collected",
+        "Grades 6–8Middle₹78,000.00₹66,470.00₹11,530.0085.2%Partially collected",
+        "Grades 9–10Secondary₹96,000.00₹81,770.00₹14,230.0085.2%Partially collected",
+        "Grades 11–12Senior secondary₹1,08,000.00₹1,08,000.00₹0.00100.0%Fully collected"
+      ],
+      "expenses": [
+        "Staff salaries₹1,38,000.0066.3% of paid expenses",
+        "Utilities₹16,200.007.8% of paid expenses",
+        "Maintenance₹12,300.005.9% of paid expenses",
+        "Transport₹20,400.009.8% of paid expenses",
+        "Learning materials₹13,200.006.3% of paid expenses",
+        "Administration₹8,100.003.9% of paid expenses"
+      ],
+      "filteredSubtotal": "₹3,30,360.00",
+      "kpis": [
+        {
+          "label": "Total fees billed",
+          "value": "₹3,69,000.00"
+        },
+        {
+          "label": "Total fees collected",
+          "value": "₹3,30,360.00"
+        },
+        {
+          "label": "Outstanding fees",
+          "value": "₹38,640.00"
+        },
+        {
+          "label": "Overdue fees",
+          "value": "₹34,080.00"
+        },
+        {
+          "label": "Total expenses",
+          "value": "₹2,08,200.00"
+        },
+        {
+          "label": "Net cash flow",
+          "value": "₹1,22,160.00"
+        }
+      ],
+      "months": [
+        "2026-08",
+        "2026-09",
+        "2026-10"
+      ],
+      "period": "quarter",
+      "transactions": "18 matching sample transactions · showing 1–10 · 18 total attempts in this period"
+    },
+    {
+      "aging": [
+        "Not yet due₹4,560.00",
+        "1–30 days₹2,640.00",
+        "31–60 days₹10,440.00",
+        "Over 60 days₹55,800.00"
+      ],
+      "caption": "1 May–31 Oct 2026 · 24 fictional invoices · 36 sample payment attempts · balances aged at 31 Oct 2026.",
+      "cashMonths": 6,
+      "classRows": [
+        "Grades 1–5Primary₹1,65,000.00₹1,40,520.00₹24,480.0085.2%Partially collected",
+        "Grades 6–8Middle₹1,47,000.00₹1,25,220.00₹21,780.0085.2%Partially collected",
+        "Grades 9–10Secondary₹1,83,000.00₹1,55,820.00₹27,180.0085.1%Partially collected",
+        "Grades 11–12Senior secondary₹2,07,000.00₹2,07,000.00₹0.00100.0%Fully collected"
+      ],
+      "expenses": [
+        "Staff salaries₹2,67,000.0066.4% of paid expenses",
+        "Utilities₹31,500.007.8% of paid expenses",
+        "Maintenance₹23,250.005.8% of paid expenses",
+        "Transport₹39,000.009.7% of paid expenses",
+        "Learning materials₹25,500.006.3% of paid expenses",
+        "Administration₹15,750.003.9% of paid expenses"
+      ],
+      "filteredSubtotal": "₹6,28,560.00",
+      "kpis": [
+        {
+          "label": "Total fees billed",
+          "value": "₹7,02,000.00"
+        },
+        {
+          "label": "Total fees collected",
+          "value": "₹6,28,560.00"
+        },
+        {
+          "label": "Outstanding fees",
+          "value": "₹73,440.00"
+        },
+        {
+          "label": "Overdue fees",
+          "value": "₹68,880.00"
+        },
+        {
+          "label": "Total expenses",
+          "value": "₹4,02,000.00"
+        },
+        {
+          "label": "Net cash flow",
+          "value": "₹2,26,560.00"
+        }
+      ],
+      "months": [
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08",
+        "2026-09",
+        "2026-10"
+      ],
+      "period": "half",
+      "transactions": "36 matching sample transactions · showing 1–10 · 36 total attempts in this period"
+    }
+  ],
+  "reference": [
+    "TX-DEMO-61SFIC-121Grades 1–512 OctTuitionCard₹27,600.00Settled"
+  ],
+  "studentCount": 2,
+  "pending": 6,
+  "empty": "No matching sample transactions\n\nTry another reference, fictional student ID, or filter combination.\n\nReset transaction filters",
+  "page": "Page 2 of 4",
+  "reset": {
+    "disabledReports": true,
+    "method": "all",
+    "page": "Page 1 of 1",
+    "query": "",
+    "rows": 6,
+    "status": "all"
+  }
+}

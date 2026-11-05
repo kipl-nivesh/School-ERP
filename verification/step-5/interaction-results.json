@@ -1,0 +1,40 @@
+[
+  {
+    "mode": "All 6",
+    "shown": [
+      "MathematicsAlgebra practiceMs Aanya Rao · Due 3 NovOverdue",
+      "ScienceScience worksheetMr Rohan Shah · Due 5 NovDue soon",
+      "Social ScienceMap discovery journalMr Dev Verma · Due 9 NovPending",
+      "EnglishA chapter, a new perspectiveMs Meera Sen · Due 4 NovCompletedSample completion · 3 Nov",
+      "Computer ScienceLittle logic challengesMr Karan Das · Due 3 NovCompletedSample completion · 2 Nov",
+      "MathematicsGeometry sketchbookMs Aanya Rao · Due 6 NovCompletedSample completion · 3 Nov"
+    ]
+  },
+  {
+    "mode": "Completed 3",
+    "shown": [
+      "EnglishA chapter, a new perspectiveMs Meera Sen · Due 4 NovCompletedSample completion · 3 Nov",
+      "Computer ScienceLittle logic challengesMr Karan Das · Due 3 NovCompletedSample completion · 2 Nov",
+      "MathematicsGeometry sketchbookMs Aanya Rao · Due 6 NovCompletedSample completion · 3 Nov"
+    ]
+  },
+  {
+    "mode": "Pending 3",
+    "shown": [
+      "MathematicsAlgebra practiceMs Aanya Rao · Due 3 NovOverdue",
+      "ScienceScience worksheetMr Rohan Shah · Due 5 NovDue soon",
+      "Social ScienceMap discovery journalMr Dev Verma · Due 9 NovPending"
+    ]
+  },
+  {
+    "keyboardCompleted": 3
+  },
+  {
+    "science": "Science · 87.0%",
+    "bars": 1
+  },
+  {
+    "history": "₹20,000 · 2 Nov\nTerm II tuition\nDEMO-A02 · Sample bank transfer\nSample record\n₹30,000 · 8 Jul\nTerm I tuition\nDEMO-A01 · Sample bank transfer\nSample record",
+    "disabled": true
+  }
+]

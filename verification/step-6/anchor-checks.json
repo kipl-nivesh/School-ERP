@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Fee collections",
+    "focus": "accountant-collections",
+    "hash": "#accountant-collections"
+  },
+  {
+    "title": "Payment history",
+    "focus": "accountant-payments",
+    "hash": "#accountant-payments"
+  },
+  {
+    "title": "Outstanding fees",
+    "focus": "accountant-outstanding",
+    "hash": "#accountant-outstanding"
+  },
+  {
+    "title": "Expenses",
+    "focus": "accountant-expenses",
+    "hash": "#accountant-expenses"
+  },
+  {
+    "title": "Financial reports",
+    "focus": "accountant-reports",
+    "hash": "#accountant-reports"
+  },
+  {
+    "title": "Alerts",
+    "focus": "accountant-alerts",
+    "hash": "#accountant-alerts"
+  },
+  {
+    "title": "View collections",
+    "focus": "accountant-collections",
+    "hash": "#accountant-collections"
+  },
+  {
+    "title": "View reports",
+    "focus": "accountant-reports",
+    "hash": "#accountant-reports"
+  }
+]

@@ -1,0 +1,177 @@
+.accountant-demo {--ac-accent:var(--primary);--ac-soft:var(--indigo-soft);--ac-ink:#443ab0;display:flex;flex-direction:column;gap:24px;min-width:0;max-width:1600px;margin:0 auto;font-variant-numeric:tabular-nums}
+.accountant-demo .ac-tone-indigo {--ac-accent:var(--primary);--ac-soft:var(--indigo-soft);--ac-ink:#443ab0}
+.accountant-demo .ac-tone-emerald {--ac-accent:var(--emerald);--ac-soft:var(--emerald-soft);--ac-ink:#167447}
+.accountant-demo .ac-tone-amber {--ac-accent:var(--amber);--ac-soft:var(--amber-soft);--ac-ink:#835e08}
+.accountant-demo .ac-tone-rose {--ac-accent:var(--rose);--ac-soft:var(--rose-soft);--ac-ink:#a03b55}
+.accountant-demo .ac-tone-violet {--ac-accent:var(--violet);--ac-soft:var(--violet-soft);--ac-ink:#7150a6}
+.accountant-demo .ac-tone-sky {--ac-accent:var(--sky);--ac-soft:var(--sky-soft);--ac-ink:#146789}
+.accountant-demo .ac-page-heading {display:flex;justify-content:space-between;align-items:center;gap:16px}
+.accountant-demo .ac-eyebrow {display:block;font-size:9px;font-weight:800;letter-spacing:1.8px;color:#167447;margin-bottom:8px}
+.accountant-demo .ac-page-heading p {font-size:12px;margin-top:7px}
+.accountant-demo .ac-demo,.accountant-demo .ac-label {display:inline-flex;align-items:center;gap:6px;background:var(--emerald-soft);color:#37735a;font-size:10px;font-weight:700;padding:7px 10px;border-radius:8px;line-height:1.6}
+.accountant-demo .ac-demo {white-space:nowrap}
+.accountant-demo .ac-welcome {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:center;background:linear-gradient(112deg,#edf7f2,#f1f7f6 55%,#eeeffa);border:1px solid #dcebe5;border-radius:24px;padding:28px 30px 20px;min-height:310px;overflow:hidden}
+.accountant-demo .ac-welcome-copy {min-width:0}
+.accountant-demo .ac-kicker {display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#527969;margin-bottom:15px}
+.accountant-demo .ac-welcome h2 {font-size:clamp(25px,2.45vw,34px);line-height:1.35;letter-spacing:-1px;color:#2e4a43}
+.accountant-demo .ac-welcome p {font-size:12px;color:#63786f;max-width:390px;margin:14px 0 20px}
+.accountant-demo .ac-hero-actions {display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.accountant-demo .ac-hero-actions a[data-slot] {font-size:11px;background:#286b52;color:white}
+.accountant-demo .ac-secondary-link {display:flex;align-items:center;gap:7px;min-height:44px;font-size:11px;color:#3b6d59;font-weight:750}
+.accountant-demo .ac-welcome small {display:block;font-size:9px;color:#6b7e75;line-height:1.9;margin-top:18px}
+.accountant-demo .ac-illustration {display:block;width:100%;height:auto;max-width:460px;justify-self:center;animation:ac-reveal .45s ease-out both}
+.accountant-demo .ac-coin-float {animation:ac-float 2.6s ease-in-out 2}
+.accountant-demo .ac-period-toolbar {display:flex;justify-content:space-between;align-items:center;gap:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:19px 22px}
+.accountant-demo .ac-period-toolbar>div:first-child {display:flex;align-items:center;gap:12px}
+.accountant-demo .ac-period-toolbar h2 {font-size:13px;line-height:1.7}
+.accountant-demo .ac-period-toolbar p {font-size:10px;margin-top:3px}
+.accountant-demo .ac-icon {display:inline-grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:12px;background:var(--ac-soft);color:var(--ac-ink)}
+.accountant-demo .ac-period-control {display:flex;align-items:center;gap:12px;flex-shrink:0}
+.accountant-demo label {font-size:10px;font-weight:700;display:block;color:#5b6479}
+.accountant-demo select,.accountant-demo input {min-height:44px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--foreground);font:inherit;font-size:11px;padding:10px 12px;min-width:0;max-width:100%}
+.accountant-demo input:focus-visible {outline:3px solid var(--ring);outline-offset:3px}
+.accountant-demo .ac-scope {font-size:10px;margin-top:-11px;padding:0 4px}
+.accountant-demo .ac-ledger-notice {background:#f0f3f7;border:1px solid #e1e7ed;border-radius:12px;padding:14px 18px;margin-top:-10px}
+.accountant-demo .ac-ledger-notice strong {font-size:10px;color:#526276}
+.accountant-demo .ac-ledger-notice p {font-size:10px;margin-top:5px;line-height:1.9}
+.accountant-demo .ac-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.accountant-demo .ac-stat {background:var(--card);border:1px solid var(--border);border-radius:17px;padding:19px;box-shadow:var(--shadow);min-width:0;position:relative}
+.accountant-demo .ac-stat h2 {font-size:11px;font-weight:700;letter-spacing:0;margin:15px 0 10px;color:#5e687d}
+.accountant-demo .ac-stat>strong {display:block;font-size:clamp(20px,2.3vw,31px);font-weight:800;letter-spacing:-.8px;white-space:nowrap;line-height:1.4}
+.accountant-demo .ac-stat p {font-size:10px;margin-top:8px}
+.accountant-demo .ac-stat>small {display:block;font-size:9px;color:#7b8495;margin-top:10px}
+.accountant-demo .ac-panel {background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;box-shadow:var(--shadow);min-width:0}
+.accountant-demo section[id] {scroll-margin-top:90px;min-width:0}
+.accountant-demo section[id]:focus {outline:2px solid var(--ring);outline-offset:7px;border-radius:8px}
+.accountant-demo .ac-section-header {display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:23px}
+.accountant-demo .ac-section-header h2 {font-size:16px;line-height:1.5;letter-spacing:-.4px}
+.accountant-demo .ac-section-header p {font-size:10px;margin-top:6px}
+.accountant-demo .ac-section-header .ac-label {background:var(--background);color:#687287;font-size:9px;max-width:150px;text-align:center;flex-shrink:0}
+.accountant-demo .ac-two-columns {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+.accountant-demo .ac-metric-pair {display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.accountant-demo .ac-metric-pair>div {display:flex;flex-direction:column;gap:8px}
+.accountant-demo .ac-metric-pair span {font-size:10px;color:#647087}
+.accountant-demo .ac-metric-pair strong {font-size:22px;letter-spacing:-.6px}
+.accountant-demo .ac-collected-text {color:#167447}
+.accountant-demo .ac-progress-caption {display:flex;justify-content:space-between;gap:12px;font-size:10px;margin:21px 0 10px}
+.accountant-demo .ac-progress-caption strong {color:#167447;font-weight:700}
+.accountant-demo .ac-progress-caption span {color:var(--muted-foreground);font-size:9px}
+.accountant-demo .ac-progress {height:8px;border-radius:8px;background:var(--muted);position:relative;overflow:hidden}
+.accountant-demo .ac-progress-fill {display:block;position:absolute;inset:0;transform-origin:left;background:var(--ac-accent);border-radius:inherit}
+.accountant-demo figure {margin:0}
+.accountant-demo .ac-collection-chart {margin-top:25px;position:relative}
+.accountant-demo .ac-collection-chart figcaption {display:flex;justify-content:space-between;gap:10px;font-size:10px;font-weight:750}
+.accountant-demo .ac-collection-chart figcaption small {font-size:9px;font-weight:500;color:var(--muted-foreground)}
+.accountant-demo .ac-chart-legend {display:flex;gap:15px;flex-wrap:wrap;font-size:9px;color:var(--muted-foreground);margin:15px 0}
+.accountant-demo .ac-chart-legend>span {display:flex;align-items:center;gap:5px}
+.accountant-demo .ac-chart-legend i {display:inline-block;width:7px;height:7px;border-radius:2px}
+.accountant-demo .ac-key-indigo {background:var(--primary)}
+.accountant-demo .ac-key-emerald {background:var(--emerald)}
+.accountant-demo .ac-key-violet {background:var(--violet)}
+.accountant-demo .ac-collection-scale {position:absolute;top:69px;bottom:29px;left:0;display:flex;flex-direction:column;justify-content:space-between;font-size:8px;color:#778197;width:25px}
+.accountant-demo .ac-collection-bars {display:flex;gap:12px;height:181px;margin:20px 0 0 33px;border-bottom:1px solid var(--border);background:repeating-linear-gradient(to top,transparent 0,transparent 77px,#e9edf3 78px,#e9edf3 79px)}
+.accountant-demo .ac-month-pair {flex:1;min-width:0;position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding-bottom:24px}
+.accountant-demo .ac-pair-bars {display:flex;justify-content:center;align-items:flex-end;gap:5px;height:100%;min-width:0}
+.accountant-demo .ac-pair-bars span {display:block;width:30%;max-width:26px;min-width:5px;border-radius:4px 4px 0 0}
+.accountant-demo .ac-bar-billed {background:#9a96e9}
+.accountant-demo .ac-bar-collected {background:#67bd91}
+.accountant-demo .ac-month-pair>strong {position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;font-weight:600;color:#758095}
+.accountant-demo .ac-trend {font-size:10px;margin-top:19px;color:#4f6c60}
+.accountant-demo .ac-details {border-top:1px solid var(--border);margin-top:20px;padding-top:14px}
+.accountant-demo summary {font-size:10px;font-weight:700;line-height:2;color:#5148a5;cursor:pointer;min-height:30px}
+.accountant-demo summary:focus-visible,.accountant-demo .ac-table-scroll:focus-visible {outline:3px solid var(--ring);outline-offset:3px;border-radius:5px}
+.accountant-demo .ac-table-scroll {overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain;scrollbar-width:thin}
+.accountant-demo table {border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap}
+.accountant-demo table caption {text-align:left;white-space:normal;color:var(--muted-foreground);font-size:9px;padding:10px 0 15px;line-height:1.8}
+.accountant-demo th,.accountant-demo td {text-align:right;padding:15px 13px;border-bottom:1px solid var(--border);font-weight:500}
+.accountant-demo th:first-child {text-align:left;padding-left:0}
+.accountant-demo thead th {background:var(--background);font-size:9px;color:#667188;font-weight:700}
+.accountant-demo thead th:first-child {padding-left:12px;border-radius:7px 0 0 7px}
+.accountant-demo tbody th strong {display:block;font-weight:700;font-size:11px}
+.accountant-demo tbody th small {display:block;font-weight:400;font-size:9px;color:var(--muted-foreground);margin-top:6px}
+.accountant-demo tfoot th,.accountant-demo tfoot td {font-weight:750;background:#fafbfe}
+.accountant-demo .ac-class-table {min-width:780px}
+.accountant-demo .ac-payment-table {min-width:900px}
+.accountant-demo .ac-payment-table td:nth-child(2),.accountant-demo .ac-payment-table td:nth-child(3),.accountant-demo .ac-payment-table td:nth-child(4),.accountant-demo .ac-payment-table td:nth-child(5) {text-align:left}
+.accountant-demo .ac-note {font-size:9px;margin-top:17px;line-height:1.9}
+.accountant-demo .ac-status {display:inline-flex;align-items:center;gap:4px;padding:5px 7px;border-radius:6px;font-size:9px;font-weight:700;line-height:1.6}
+.accountant-demo .ac-status-settled {color:#167447;background:var(--emerald-soft)}
+.accountant-demo .ac-status-pending {color:#835e08;background:var(--amber-soft)}
+.accountant-demo .ac-status-failed {color:#a03b55;background:var(--rose-soft)}
+.accountant-demo .ac-payment-filters {display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:end}
+.accountant-demo .ac-payment-filters label {margin-bottom:8px}
+.accountant-demo .ac-payment-filters select {width:100%}
+.accountant-demo .ac-search-field>div {position:relative}
+.accountant-demo .ac-search-field svg {position:absolute;left:12px;top:14px;color:#798299}
+.accountant-demo .ac-search-field input {padding-left:35px;width:100%}
+.accountant-demo .ac-payment-filters>button {font-size:10px}
+.accountant-demo .ac-view-summary {font-size:10px;margin:16px 0 6px}
+.accountant-demo .ac-empty {display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;background:var(--background);border-radius:13px;padding:35px 20px;margin-top:15px;color:#727e96}
+.accountant-demo .ac-empty h3 {font-size:13px;color:var(--foreground)}
+.accountant-demo .ac-empty p {font-size:11px;max-width:350px}
+.accountant-demo .ac-empty button {font-size:10px;margin-top:5px}
+.accountant-demo .ac-payment-footer {display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:21px}
+.accountant-demo .ac-payment-footer p {font-size:10px}
+.accountant-demo .ac-payment-footer p strong {display:block;font-size:17px;color:#167447;margin-top:4px}
+.accountant-demo .ac-payment-footer p small {display:block;font-size:9px;margin-top:3px}
+.accountant-demo .ac-pagination {display:flex;align-items:center;gap:12px;flex-shrink:0}
+.accountant-demo .ac-pagination span {font-size:10px;color:var(--muted-foreground)}
+.accountant-demo .ac-outstanding-totals {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.accountant-demo .ac-outstanding-totals>div {display:flex;flex-direction:column;gap:9px;background:var(--amber-soft);padding:15px;border-radius:12px}
+.accountant-demo .ac-outstanding-totals>div:first-child {grid-column:1/-1;background:var(--background)}
+.accountant-demo .ac-outstanding-totals>div:nth-child(2) {background:var(--rose-soft)}
+.accountant-demo .ac-outstanding-totals span {font-size:10px;color:#6c6874;display:flex;align-items:center;gap:5px}
+.accountant-demo .ac-outstanding-totals strong {font-size:20px;letter-spacing:-.5px}
+.accountant-demo .ac-outstanding-totals>div:nth-child(2) strong {color:#a03b55}
+.accountant-demo .ac-aging {margin-top:23px}
+.accountant-demo .ac-aging figcaption {font-size:11px;font-weight:700}
+.accountant-demo .ac-aging-row {margin-top:17px}
+.accountant-demo .ac-aging-row>div:first-child,.accountant-demo .ac-expense-row>div:first-child {display:flex;justify-content:space-between;gap:10px;font-size:10px;margin-bottom:8px;line-height:1.7}
+.accountant-demo .ac-aging-row strong {font-size:10px}
+.accountant-demo .ac-balance-list {list-style:none;padding:0;margin:8px 0 0}
+.accountant-demo .ac-balance-list li {display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--border);font-size:10px}
+.accountant-demo .ac-expense-total {display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.accountant-demo .ac-expense-total span {font-size:10px;color:var(--muted-foreground)}
+.accountant-demo .ac-expense-total strong {font-size:27px;font-weight:800;letter-spacing:-.7px}
+.accountant-demo .ac-expense-row {margin:20px 0}
+.accountant-demo .ac-expense-row small {display:block;text-align:right;font-size:9px;color:var(--muted-foreground);margin-top:6px}
+.accountant-demo .ac-obligations {background:var(--violet-soft);border:1px solid #e9def7;border-radius:12px;padding:16px;margin-top:23px}
+.accountant-demo .ac-obligations span {font-size:10px;color:#71588c}
+.accountant-demo .ac-obligations strong {display:block;font-size:19px;color:#7150a6;margin:7px 0}
+.accountant-demo .ac-obligations p {font-size:9px;color:#786888}
+.accountant-demo .ac-cash-summary {background:var(--indigo-soft);border-radius:13px;padding:18px;margin-bottom:24px}
+.accountant-demo .ac-cash-summary span {font-size:10px;color:#665f92}
+.accountant-demo .ac-cash-summary strong {display:block;font-size:26px;font-weight:800;letter-spacing:-.6px;color:#5145ac;margin:8px 0}
+.accountant-demo .ac-cash-summary p {font-size:9px;color:#6a6683}
+.accountant-demo .ac-cash-chart figcaption {font-size:10px;font-weight:700}
+.accountant-demo .ac-cash-month {border-bottom:1px solid var(--border);padding:15px 0}
+.accountant-demo .ac-cash-month>strong {font-size:10px;color:#626d84;display:block;margin-bottom:10px}
+.accountant-demo .ac-cash-row {display:grid;grid-template-columns:75px minmax(0,1fr) 100px;gap:9px;align-items:center;margin:9px 0;font-size:9px}
+.accountant-demo .ac-cash-row>span {color:#747e93}
+.accountant-demo .ac-cash-row>div {height:6px;border-radius:5px;background:var(--muted);overflow:hidden}
+.accountant-demo .ac-cash-row i {display:block;background:var(--ac-accent);height:100%;border-radius:5px}
+.accountant-demo .ac-cash-row b {text-align:right;font-size:9px;font-weight:650}
+.accountant-demo .ac-alerts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.accountant-demo .ac-alerts article {display:flex;align-items:flex-start;gap:13px;border:1px solid var(--border);padding:20px;border-radius:14px}
+.accountant-demo .ac-subtitle {font-size:9px;color:var(--muted-foreground)}
+.accountant-demo .ac-alerts h3 {font-size:12px;line-height:1.7;margin:6px 0 8px}
+.accountant-demo .ac-alerts p {font-size:10px}
+.accountant-demo .ac-severity {display:inline-block;margin-top:12px;background:var(--ac-soft);color:var(--ac-ink);padding:4px 7px;border-radius:5px;font-size:9px;font-weight:700}
+.accountant-demo .ac-reports {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.accountant-demo .ac-reports article {border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:flex-start}
+.accountant-demo .ac-reports h3 {font-size:12px;line-height:1.7;margin:16px 0 7px}
+.accountant-demo .ac-reports p {font-size:10px;margin-bottom:18px}
+.accountant-demo .ac-reports button {font-size:9px;margin-top:auto;min-height:40px}
+.accountant-demo .ac-quick-links {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.accountant-demo .ac-quick-links a {display:flex;flex-direction:column;align-items:flex-start;gap:18px;background:var(--ac-soft);color:var(--ac-ink);border-radius:13px;padding:17px;min-height:127px;position:relative}
+.accountant-demo .ac-quick-links a>span {font-size:11px;font-weight:750;line-height:1.7}
+.accountant-demo .ac-quick-links a>svg:last-child {position:absolute;right:12px;top:17px}
+.accountant-demo .ac-endnote {text-align:center;font-size:12px;font-weight:650;color:#668172;padding:8px 0}
+.accountant-demo .ac-endnote span {display:block;font-size:9px;font-weight:400;color:var(--muted-foreground);margin-top:6px}
+@keyframes ac-reveal {from {opacity:0;transform:translateY(7px)} to {opacity:1;transform:none}}
+@keyframes ac-float {0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media(min-width:1800px){.accountant-demo .ac-stats {grid-template-columns:repeat(6,minmax(0,1fr))}.accountant-demo .ac-stat>strong {font-size:23px}}
+@media(max-width:1199px){.accountant-demo .ac-two-columns {grid-template-columns:1fr}.accountant-demo .ac-welcome {padding:25px}.accountant-demo .ac-period-toolbar {align-items:flex-start}.accountant-demo .ac-period-control {flex-direction:column;align-items:stretch;gap:7px}.accountant-demo .ac-quick-links {grid-template-columns:repeat(3,minmax(0,1fr))}.accountant-demo .ac-payment-filters {grid-template-columns:repeat(2,minmax(0,1fr))}.accountant-demo .ac-stat>strong {font-size:23px}.accountant-demo .ac-reports {grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:639px){.accountant-demo {gap:20px}.accountant-demo .ac-page-heading {align-items:flex-start;flex-direction:column;gap:12px}.accountant-demo .ac-welcome {grid-template-columns:1fr;gap:18px;padding:24px 20px 10px}.accountant-demo .ac-welcome h2 {font-size:26px}.accountant-demo .ac-welcome p {font-size:11px}.accountant-demo .ac-illustration {max-width:340px}.accountant-demo .ac-hero-actions {gap:8px;flex-direction:column;align-items:stretch}.accountant-demo .ac-hero-actions>a {justify-content:center}.accountant-demo .ac-welcome small {font-size:8px}.accountant-demo .ac-period-toolbar {flex-direction:column;padding:17px 16px;gap:17px}.accountant-demo .ac-period-toolbar h2 {font-size:12px}.accountant-demo .ac-period-control {width:100%}.accountant-demo .ac-scope {font-size:9px;margin-top:-7px}.accountant-demo .ac-ledger-notice {padding:13px 15px}.accountant-demo .ac-ledger-notice p {font-size:9px}.accountant-demo .ac-stats {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.accountant-demo .ac-stat {padding:15px 12px}.accountant-demo .ac-stat h2 {font-size:10px;min-height:30px;line-height:1.6}.accountant-demo .ac-stat>strong {font-size:17px;letter-spacing:-.6px}.accountant-demo .ac-stat p {font-size:9px;line-height:1.9}.accountant-demo .ac-stat>small {font-size:8px}.accountant-demo .ac-icon {width:34px;height:34px;border-radius:10px}.accountant-demo .ac-panel {padding:20px 16px;border-radius:17px}.accountant-demo .ac-section-header {flex-direction:column;gap:9px;margin-bottom:20px}.accountant-demo .ac-section-header h2 {font-size:15px}.accountant-demo .ac-section-header .ac-label {max-width:none}.accountant-demo .ac-metric-pair {gap:12px}.accountant-demo .ac-metric-pair strong {font-size:17px;letter-spacing:-.6px}.accountant-demo .ac-metric-pair span {font-size:9px}.accountant-demo .ac-progress-caption {font-size:9px;flex-wrap:wrap}.accountant-demo .ac-collection-chart figcaption {flex-direction:column;gap:6px}.accountant-demo .ac-collection-scale {top:85px}.accountant-demo .ac-collection-bars {gap:7px;margin-left:25px}.accountant-demo .ac-pair-bars {gap:3px}.accountant-demo .ac-month-pair>strong {font-size:8px}.accountant-demo .ac-table-scroll {margin:0}.accountant-demo .ac-payment-filters {grid-template-columns:1fr;gap:14px}.accountant-demo .ac-payment-footer {flex-direction:column;align-items:flex-start;gap:18px}.accountant-demo .ac-pagination {width:100%;justify-content:space-between}.accountant-demo .ac-pagination button {width:44px;height:44px}.accountant-demo .ac-outstanding-totals {gap:10px}.accountant-demo .ac-outstanding-totals>div {padding:13px 10px}.accountant-demo .ac-outstanding-totals span {font-size:9px}.accountant-demo .ac-outstanding-totals strong {font-size:17px;letter-spacing:-.6px}.accountant-demo .ac-outstanding-totals>div:first-child strong {font-size:24px}.accountant-demo .ac-aging-row>div:first-child,.accountant-demo .ac-expense-row>div:first-child {font-size:9px}.accountant-demo .ac-aging-row strong {font-size:9px}.accountant-demo .ac-expense-total strong {font-size:25px}.accountant-demo .ac-cash-summary {padding:16px 12px}.accountant-demo .ac-cash-summary strong {font-size:23px}.accountant-demo .ac-cash-row {grid-template-columns:65px minmax(0,1fr) 88px;gap:6px;font-size:8px}.accountant-demo .ac-cash-row b {font-size:8px}.accountant-demo .ac-alerts {grid-template-columns:1fr;gap:15px}.accountant-demo .ac-alerts article {padding:17px 13px;gap:10px}.accountant-demo .ac-reports {grid-template-columns:1fr;gap:14px}.accountant-demo .ac-reports article {padding:18px}.accountant-demo .ac-quick-links {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.accountant-demo .ac-quick-links a {padding:14px;min-height:118px;gap:14px}.accountant-demo .ac-quick-links a>span {font-size:10px}.accountant-demo .ac-endnote {font-size:11px}.accountant-demo .ac-endnote span {font-size:8px}}
+@media(max-width:359px){.accountant-demo .ac-stat>strong {font-size:14px;letter-spacing:-.5px}.accountant-demo .ac-metric-pair {grid-template-columns:1fr}.accountant-demo .ac-metric-pair strong {font-size:21px}.accountant-demo .ac-outstanding-totals {grid-template-columns:1fr}.accountant-demo .ac-outstanding-totals strong {font-size:21px}.accountant-demo .ac-outstanding-totals>div:first-child strong {font-size:24px}}
+@media(prefers-reduced-motion:reduce){.accountant-demo *,.accountant-demo *::before,.accountant-demo *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}

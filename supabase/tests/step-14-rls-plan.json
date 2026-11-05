@@ -1,0 +1,126 @@
+{
+  "status": "NOT RUN",
+  "requires": "Separate owner approval, isolated synthetic records and real authenticated JWT/session context; no service-role proof",
+  "scenarios": [
+    {
+      "id": "R01",
+      "scenario": "Anonymous access denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R02",
+      "scenario": "Student unrelated Student denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R03",
+      "scenario": "Parent unrelated Student denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R04",
+      "scenario": "Revoked Parent and withdrawn Student denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R05",
+      "scenario": "Teacher unassigned class denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R06",
+      "scenario": "Accountant role grant denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R07",
+      "scenario": "Ordinary Admin user creation denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R08",
+      "scenario": "Super Admin requires live Admin membership and genuine aal2",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R09",
+      "scenario": "Role revocation invalidates contexts",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R10",
+      "scenario": "Suspended accounts denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R11",
+      "scenario": "Cross-role data access denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R12",
+      "scenario": "Direct privileged Data API writes denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R13",
+      "scenario": "Audit update/delete/truncate denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R14",
+      "scenario": "Financial integrity remains unchanged; domain integration deferred",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R15",
+      "scenario": "Missing/stale/expired/revoked context denied",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R16",
+      "scenario": "Storage private access; no public bucket policy added",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R17",
+      "scenario": "Concurrent eligible Parent insert/update conflicts; reverse Parent uniqueness",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R18",
+      "scenario": "Context activation cannot revive revoked session context",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R19",
+      "scenario": "Provider logout/ban/session removal denies live-session helper",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    },
+    {
+      "id": "R20",
+      "scenario": "MFA enrollment/verification/cookie refresh and recovery under approved ceremony",
+      "result": "NOT RUN",
+      "notes": "Domain access remains default-deny where unfinished; a denial alone does not prove future positive scope."
+    }
+  ]
+}

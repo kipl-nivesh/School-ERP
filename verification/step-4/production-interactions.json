@@ -1,0 +1,14 @@
+{
+  "anchor": {
+    "focus": "student-homework",
+    "hash": "#student-homework"
+  },
+  "allHomework": 6,
+  "completedHomework": 3,
+  "pendingHomework": 3,
+  "science": {
+    "bars": 1,
+    "summary": "Science · 87.0%"
+  },
+  "lockedBadges": 2
+}

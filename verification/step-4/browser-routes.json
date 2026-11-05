@@ -1,0 +1,44 @@
+[
+  {
+    "adminUI": false,
+    "heading": "Brighter days.Better connected.",
+    "route": "/",
+    "studentUI": false,
+    "teacherUI": false
+  },
+  {
+    "adminUI": true,
+    "heading": "School overview",
+    "route": "/admin/dashboard",
+    "studentUI": false,
+    "teacherUI": false
+  },
+  {
+    "adminUI": false,
+    "heading": "My teaching workspace",
+    "route": "/teacher/dashboard",
+    "studentUI": false,
+    "teacherUI": true
+  },
+  {
+    "adminUI": false,
+    "heading": "Closer to their school day.",
+    "route": "/parent/dashboard",
+    "studentUI": false,
+    "teacherUI": false
+  },
+  {
+    "adminUI": false,
+    "heading": "A clearer view of school finances.",
+    "route": "/accountant/dashboard",
+    "studentUI": false,
+    "teacherUI": false
+  },
+  {
+    "adminUI": false,
+    "heading": "My learning space",
+    "route": "/student/dashboard",
+    "studentUI": true,
+    "teacherUI": false
+  }
+]

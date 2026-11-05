@@ -1,0 +1,32 @@
+[
+  {
+    "target": "student-homework",
+    "focusedSection": "student-homework",
+    "hash": "#student-homework"
+  },
+  {
+    "target": "student-timetable",
+    "focusedSection": "student-timetable",
+    "hash": "#student-timetable"
+  },
+  {
+    "target": "student-performance",
+    "focusedSection": "student-performance",
+    "hash": "#student-performance"
+  },
+  {
+    "target": "student-attendance",
+    "focusedSection": "student-attendance",
+    "hash": "#student-attendance"
+  },
+  {
+    "target": "student-achievements",
+    "focusedSection": "student-achievements",
+    "hash": "#student-achievements"
+  },
+  {
+    "target": "student-announcements",
+    "focusedSection": "student-announcements",
+    "hash": "#student-announcements"
+  }
+]

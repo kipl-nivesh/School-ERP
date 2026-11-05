@@ -1,0 +1,10 @@
+import { Clock3,CircleAlert } from 'lucide-react';
+import type { ReportingPeriod } from '../types';
+import { classGroups } from '../data/mock-dashboard';
+import { agingBucket,financialSummary,formatINR,percentage } from '../lib/financial-calculations';
+import { FinanceSection } from './section';
+import { FinanceProgress } from './motion';
+export function OutstandingFees({summary,period}:{summary:ReturnType<typeof financialSummary>;period:ReportingPeriod}) {
+  const buckets=['Not yet due','1–30 days','31–60 days','Over 60 days'] as const;
+  return <FinanceSection id="accountant-outstanding" title="Balances, with the right context" description={'Selected billed invoices · '+period.caption+' · aging as of 31 Oct 2026'} badge="As-of balance"><div className="ac-outstanding-totals"><div><span>Total outstanding</span><strong>{formatINR(summary.outstanding)}</strong></div><div><span><CircleAlert size={13}/>Overdue portion</span><strong>{formatINR(summary.overdue)}</strong></div><div><span><Clock3 size={13}/>Not yet due</span><strong>{formatINR(summary.notYetDue)}</strong></div></div><figure className="ac-aging"><figcaption>Outstanding by due-date category</figcaption>{buckets.map((bucket,i)=>{const amount=summary.balances.filter(b=>agingBucket(b.daysOverdue)===bucket).reduce((s,b)=>s+b.outstanding,0);return <div className={'ac-aging-row ac-tone-'+(i===0?'amber':'rose')} key={bucket} data-aging-bucket={bucket}><div><span>{bucket}</span><strong>{formatINR(amount)}</strong></div><div className="ac-progress" role="img" aria-label={bucket+': '+formatINR(amount)}><FinanceProgress value={percentage(amount,summary.outstanding)}/></div></div>;})}</figure><details className="ac-details"><summary>View class-wise outstanding balances</summary><ul className="ac-balance-list">{classGroups.map(g=><li key={g.id}><span>{g.label}</span><strong>{formatINR(summary.balances.filter(b=>b.classId===g.id).reduce((s,b)=>s+b.outstanding,0))}</strong></li>)}</ul></details><p className="ac-note">Buckets are mutually exclusive and sum to outstanding. Due today is not overdue. The overdue buckets are included in the balance, not added again.</p></FinanceSection>;
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "classes": 3,
+    "illustrationWidth": 223,
+    "periods": 5,
+    "scrollWidth": 305,
+    "statCards": 6,
+    "width": 320
+  },
+  {
+    "classes": 3,
+    "illustrationWidth": 278,
+    "periods": 5,
+    "scrollWidth": 360,
+    "statCards": 6,
+    "width": 375
+  },
+  {
+    "classes": 3,
+    "illustrationWidth": 240,
+    "periods": 5,
+    "scrollWidth": 753,
+    "statCards": 6,
+    "width": 768
+  },
+  {
+    "classes": 3,
+    "illustrationWidth": 300,
+    "periods": 5,
+    "scrollWidth": 1009,
+    "statCards": 6,
+    "width": 1024
+  },
+  {
+    "classes": 3,
+    "illustrationWidth": 439,
+    "periods": 5,
+    "scrollWidth": 1425,
+    "statCards": 6,
+    "width": 1440
+  }
+]

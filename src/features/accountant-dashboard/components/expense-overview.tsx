@@ -1,0 +1,8 @@
+import { expenseCategories } from '../data/mock-dashboard';
+import type { ReportingPeriod } from '../types';
+import { financialSummary,formatINR,percentage,sumAmounts } from '../lib/financial-calculations';
+import { FinanceSection } from './section';
+import { FinanceProgress } from './motion';
+export function ExpenseOverview({summary,period}:{summary:ReturnType<typeof financialSummary>;period:ReportingPeriod}) {
+  return <FinanceSection id="accountant-expenses" title="Where school resources go" description={'Cash expenses paid · '+period.caption} badge="Paid amounts only"><div className="ac-expense-total"><span>Total paid expenses</span><strong>{formatINR(summary.paidExpenses)}</strong></div><figure className="ac-expense-chart"><figcaption className="sr-only">Paid expenses by category. Amounts and percentage of paid expenses follow each label.</figcaption>{expenseCategories.map(category=>{const amount=sumAmounts(summary.expenses.filter(e=>e.status==='Paid'&&e.category===category));return <div className="ac-expense-row ac-tone-violet" key={category} data-expense-category={category}><div><span>{category}</span><strong>{formatINR(amount)}</strong></div><div className="ac-progress" role="img" aria-label={`${category}: ${formatINR(amount)}, ${percentage(amount,summary.paidExpenses).toFixed(1)} percent`}><FinanceProgress value={percentage(amount,summary.paidExpenses)}/></div><small>{percentage(amount,summary.paidExpenses).toFixed(1)}% of paid expenses</small></div>;})}</figure><div className="ac-obligations"><span>Unpaid expense obligations</span><strong>{formatINR(summary.unpaidExpenses)}</strong><p>Recorded in the selected window. Excluded from paid-expense totals and net cash flow.</p></div></FinanceSection>;
+}

@@ -1,0 +1,1206 @@
+[
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\.env.example",
+    "Hash": "C9745E5AE68D89D2822BD320E0F7D473D3DD0616A252170F93B83708F1FF97EA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\.gitignore",
+    "Hash": "0344CF5FD95FDCF63A500F207AF6D692ADD3AFCF8256CE3F032BC7033B4891E0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\AGENTS.md",
+    "Hash": "063098F6CB31BB44C6F8FBEA25B3876DE7EE1E5F7D00A50DBAB506F6415EB7F0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\components.json",
+    "Hash": "36B7E6023A4FF66A8A9F82A961E754860C742CAC9AEB089889CCE643BD5C9183"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\eslint.config.mjs",
+    "Hash": "994D5E6EAECF561EE3FC2EC74A7AFEBA4704D3E98E17F967B41901865D9E9980"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\next-env.d.ts",
+    "Hash": "1862AC4BBBC5192D4BF562161DF66EA547ED3E67173100656AB606AE9797DB2B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\package-lock.json",
+    "Hash": "107DBD150830C68C3B6516385C66C5966454F0173723E899460B43FEFA7A6053"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\package.json",
+    "Hash": "95E1BF5AA660761BD53528D173B818F4CA78D3511134D0A1662C7C25668035D3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\postcss.config.mjs",
+    "Hash": "664DD8C6E2CE9CDE1AA6EAE9482E4C26DBA2C5DF030CC5C4C73CEE99B7ADDB75"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\README.md",
+    "Hash": "DBBE850577CB266F916048C23A2D9FCE190DA9FDD919BCDD423E7FA0E82BD97F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-1-REPORT.md",
+    "Hash": "44C30CDCFE2326598DA5BAA02C508897124BA53B01C17D53CF1F469554923B0F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-10-REPORT.md",
+    "Hash": "A04A8D8EA6FE260CF78165D758AB404D27DBE06FBE8E5A993DEAA4E65571EEB0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-11-REPORT.md",
+    "Hash": "960CFEB9779A93A183969285E6A8B8ECBA4B39FCA130040BECA318F764C83553"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-12-REPORT.md",
+    "Hash": "7D265D2DB40932AE6678396A20723330C0C6207A8B7FB05DE05091A778E37270"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-13-REPORT.md",
+    "Hash": "FD2CAA3E5B8C16C62C705AF491BB052972C6A33F995C652B522F1BF8497290DF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-2-REPORT.md",
+    "Hash": "5141D535372634979CF2739A1BA4243D397E5E5E8ADD16FC3FE428F4F710D9CE"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-3-REPORT.md",
+    "Hash": "FE2B57E1C5435FF9DBEC99B4327D14F4FE87B9728B7F3AF8E4E21FBBDB7DA1EB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-4-REPORT.md",
+    "Hash": "AD24601CCDCFC925BA29816ABCE1FA56753A23761C63E760CBD67166E57F35D9"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-5-REPORT.md",
+    "Hash": "F8D229083D32A937B8D0F56865E6C4F85373B8013943E91A911D6B00D5C3725F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-6-REPORT.md",
+    "Hash": "A44CBECC62E087D1B7E0A494B28CA7A9C2CE1D636D83F4E0A95429E01B71EA02"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-7-REPORT.md",
+    "Hash": "871D6A1F8B2D170F038F68D5A3B9AEA5BAF667581701FD76D36512E7AC9C2F52"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-8-REPORT.md",
+    "Hash": "76AA427EDB8236F5FE8E1370CA52046C244D527FEB2C250DD65601D2B7D7477D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-9-REPORT.md",
+    "Hash": "4877D962F49C51A232641530D8F7A879E36EADFF03711C7B1CB51D22B2587A3E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\tsconfig.json",
+    "Hash": "55134881A23EFD2A1F9266D2D0752731FF9C40D0E867136CD8863EA679560A09"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\tsconfig.tsbuildinfo",
+    "Hash": "7321C4061CDC6517ED80CACABE6E377DA1B955A9FD3C1A9A58C58974CC8CD7A5"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ARCHITECTURE-DECISIONS.md",
+    "Hash": "A643B4FD3DBB0DF53A80414DDAB5D563ABDB27E319E8CCA7404FBDCE15BD20AD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\AUTH-OPTIONS-COMPARISON.md",
+    "Hash": "E7C4B95FECC85FCBB69ECE557903F729E5F1FEE3D083B24158A4198C6E84055D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\AUTHENTICATION-PLAN.md",
+    "Hash": "AA83027414169354EB02988DFA7E2A9D57C65BCF0D0759064982EF6D243BD542"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\AUTHENTICATION-THREAT-MODEL.md",
+    "Hash": "26112AF1C556DC147D7FDE846720144983BE02490FA538F9011135A65FA9D938"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\DATABASE-SCHEMA-BLUEPRINT.md",
+    "Hash": "264FC41EDA051FDA490CA67E0191B25B4F5CE2E8B1DF7559C34BCD57D83EBDD8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ERD.md",
+    "Hash": "F98952F0A93E8F85D17B45AAF24CE166D7BBFB72D2D1256121FA7BDDA84EE7FF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\FINANCIAL-DATA-DESIGN.md",
+    "Hash": "77107AB7BC4FC571FEB8197478CBFD2380FAD61CBFAEB7E98854BF5515585242"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\IMPLEMENTATION-ROADMAP.md",
+    "Hash": "F0C4B8AA75755BB66381FBE1602931A6C7FF549191765A9E2B12BCAD01C5407F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\MOCK-TO-DATABASE-MAPPING.md",
+    "Hash": "1FE9B70FD2132E1A2CABC31C4E32E50FABFE1067147F6324AC4339CA422B47F4"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\PIN-SECURITY-POLICY.md",
+    "Hash": "7A9CE5DD7A439833FB47D4048BB776DD8BBF8CF7BF33AC22F3E8203FFC43EACC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\RISK-REGISTER.md",
+    "Hash": "80E99F406F020145619090E31728B9E937BBBB9A8181BCAA5803BB2F073A8885"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\RLS-SECURITY-BLUEPRINT.md",
+    "Hash": "882CDD7438DDF385DB966557161A3E13C43DA5714B37EEDED08E86B5838E36FA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ROLE-PERMISSIONS-MATRIX.md",
+    "Hash": "74D8EE357BB525403D38DF12AEE6E3642D03F38B5B820E994BC25020148102BB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SESSION-RLS-TRUST-BOUNDARIES.md",
+    "Hash": "ECDF92408F73C79C5F7BBC071C08D9E14E1330484FFDB470255DD88117D6CF82"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-10-AUTH-PROOF-PLAN.md",
+    "Hash": "800403657FC302F79976DEED743DE35D3F1C714E434803A4C9CFE4CD8C26C48B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-10-OWNER-APPROVAL-CHECKLIST.md",
+    "Hash": "9905CE3141A5DD86DFA22A1A9BFC216DFEA8900CAD1B74DCCEA98011BE643D4D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-10-SECURITY-TEST-MATRIX.md",
+    "Hash": "C03EDE5DF3185C1374D2FFAC3075627D27B93E30201CA247F847D1146A74032B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-10-SIX-DIGIT-PIN-RISK-ASSESSMENT.md",
+    "Hash": "9814BD9563C7EFE67A1BB3950D758A81752C5F79809C8C98A6B47EEC57E42FA6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-11-AUTH-SECURITY-TESTS.md",
+    "Hash": "ECA22FCCA4DF7B52D8841833915E52FB13365DC96AEECB2524570E69DB4A3049"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-11-DECISION-GATE.md",
+    "Hash": "008F0AE496E5301E687345DC8C6FB85E4FE03D3D5B9F4EE27F622096748911C0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-11-GUARDIAN-IDENTITY-MODELS.md",
+    "Hash": "4D52A424C403CF18C7725E2E02DD1873A5711D6B3DC28E60E5620BD3043D4462"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-11-TWO-FIELD-LOGIN-FEASIBILITY.md",
+    "Hash": "B4DA72A5DDB1406583AD07668C422FAC619FEF60EC7931BAE8CC31E8FD2A8815"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-12-AUTH-CONTRACTS.md",
+    "Hash": "89BD07CFA46F72AA39E9B29612568B7E80F8CA77EAC12E1A5C8149EE37FB73F6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-12-NEXT-INTEGRATION-GATE.md",
+    "Hash": "F898681FBAADC46ADD3DBAA95E42E3832D617F499B333C5CC5F48E8D7F40980B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-12-SECURITY-VERIFICATION.md",
+    "Hash": "14F412B91C4C6E65C285EFB05F428A0B8CA30BAEE0DA6C50AE425FA22B993596"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-12-SIMPLIFIED-PARENT-IDENTITY.md",
+    "Hash": "D9E6E618278488D9D43A10220FABA174BA57D1FB53A110B5D72E9DFFB4FE4B7E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-13-SUPABASE-FOUNDATION.md",
+    "Hash": "A35E691521734CD1C9D29E9EDBF525FB24629EF24335DC4FE067D99B39193C8A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-9-AUTH-FEASIBILITY.md",
+    "Hash": "61A7DB86D9CDB87E09AC18446DB71814E66F60E9BA1B20F662B6CE37FA164DBF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STEP-9-DECISION-GATE.md",
+    "Hash": "F4787B466A22C86BC190A5A7231C72ABE372C4A66A8082D3A108A7EC25AE0285"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STORAGE-SECURITY-PLAN.md",
+    "Hash": "99C9292339CA6EB0C9381190044B4E2E927E3C9ADE3321CBF7A3EB6513BFDFF4"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STUDENT-PARENT-LOGIN-SEQUENCES.md",
+    "Hash": "11FC4CFFC6062180D2D0E4BA0D80EA5BBC78529E243699E54EA9F06F72D2E3D7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STUDENT-PARENT-PIN-AUTH-DESIGN.md",
+    "Hash": "31468FC65EACC2D5E0C66C016D46F4AFE2C543D766A8C202DF34114E928250AC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SUPABASE-ENVIRONMENT-READINESS.md",
+    "Hash": "F7A6FC42EC4127CA1CA6CA7B6C7ACBD2F79D9CB665D3DFB29D62DA057EC7B04C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SUPER-ADMIN-ACCESS-MODEL.md",
+    "Hash": "91DA954C3EC0FD0FFFCBFA7E46BA2D467F4AA3CE0B5C5086B426A6E17B6075A9"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SUPER-ADMIN-BOOTSTRAP-PLAN.md",
+    "Hash": "89A5FFCB86DCBAD95861DCE54306EA5EFDA0505296EE7B3D68B0554DD886354A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SYSTEM-ARCHITECTURE.md",
+    "Hash": "94454C0F518FB403436D3433F0956BA647CBEC97A30216E75E332D3549A7E55B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\scripts\\check-supabase.mjs",
+    "Hash": "76C1E3F8E94C9EFF5B0EB41B0E1627707658545F63758D0126F73173077F0379"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\globals.css",
+    "Hash": "7366743B61B12449F30C04BFFBC35175887AE99A653EFF0B5A18A62893135616"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\layout.tsx",
+    "Hash": "06BDB670E1CC9981F5E486AB4A04BBF7B75E6E483902619F951F5AB1A4661977"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\page.tsx",
+    "Hash": "407A90348D663A28706F7206B9D7227750F8C8EC5244864982443CE580A8816F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\loading.tsx",
+    "Hash": "5CEF339A9BFDB840127CC9EBB2F391149BBAF13C550CBFB82E225A133A1C185E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\accountant\\layout.tsx",
+    "Hash": "16B5F4F96D7481F7FF81128D9C95C15BC3A76C0E2285362B85C83173B14052DD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\accountant\\dashboard\\page.tsx",
+    "Hash": "A125DE212D1CD4AEDD2CF570608BA518BA13BF146DC2C10DD246DB191BEA0F65"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\admin\\layout.tsx",
+    "Hash": "A158F904BFEF3599796156649498873F6FFF727CDFB61D477A3744088821EAD3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\admin\\dashboard\\page.tsx",
+    "Hash": "9BA743D7AF08C488A300811F606101429FB0E089BF92F45C8D4E491429788C03"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\parent\\layout.tsx",
+    "Hash": "5A1BF71B8EB108900B8D91393AFE73803495D001ACC64F476C5A71180B840D3E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\parent\\dashboard\\page.tsx",
+    "Hash": "A79F24229514966F11264253BD6EE758C1ADA604E3A622901CD12C7C03C5FB50"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\student\\layout.tsx",
+    "Hash": "B6B2BA049FC0269D159E7837DAD41B3E0E935D0D612B670CDDAA1566D814867C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\student\\dashboard\\page.tsx",
+    "Hash": "C0F9DAF593D62DD906314FC3F8EFD5164F8E211F32FE8A7F1C453A2516E6EE85"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\teacher\\layout.tsx",
+    "Hash": "C6A0016EE3C47456D6B0D45954390DD8AF40544669497690387F3C38030083FC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\teacher\\dashboard\\page.tsx",
+    "Hash": "0F29A86333F75CB927688679680625AF0A236BC357BE69ABFBF0EC88F1F296FD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\dashboard\\primitives.tsx",
+    "Hash": "A4153C8D62B43D834321F21DC17E8068F7FAF2982829C094D7B0505C32907E9B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\dashboard\\role-dashboard.tsx",
+    "Hash": "5230A9B8693880C5481202C5644E05D46CCDE8580A3CF8B7F19717421C73D5BB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\app-header.tsx",
+    "Hash": "32A6D8E20ADCEC006490D332F1A38BAD8919DB6906D6E915B7700E886CF2A6A7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\app-sidebar.tsx",
+    "Hash": "C8067FD18CA8661262926325094DD943E0CB454EF5DB06527646C2E4E2A9D155"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\dashboard-shell.tsx",
+    "Hash": "6FAF1F548BC97639AFD33B933DE5041A63A4403C7DCCC3A30288118F7C7699A7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\mobile-navigation.tsx",
+    "Hash": "F5F652263E1EFD4E4583805D639EE71F75BA9AC32EF502824445A128F8A45979"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\animation.tsx",
+    "Hash": "15844277BC67F4B63252156A30F870621828B417C7BB7998262D77B0A25F1D31"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\brand.tsx",
+    "Hash": "837F91BE4E6286927ACFDDB74648FC73F769787B230A85CF6CFD6BB59C9E7977"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\role-preview-switcher.tsx",
+    "Hash": "D4B581F17A2E560BB6EE5A714E3FB7F338CBBE1DBAD139F9C78BD55051B19684"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\ui\\button.tsx",
+    "Hash": "25ED9E3D352D2A7377B1D310EFED905BA84EAAE4A5F2950AF0A4FAFB56F83632"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\ui\\skeleton.tsx",
+    "Hash": "0CB1A2E2AC285D7992837C16AEE658CD9013847ED84DEC8366E1AA685DD36208"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\config\\navigation.ts",
+    "Hash": "B77DB50ED4FEC285C972577287AB65D4BCB9FD505C58F2078A8DBCE1F60490AF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\config\\roles.ts",
+    "Hash": "41D845100147480DE2C4211800FE2D62A72A19B0F0F3F688D62A20C1BF8040E5"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\README.md",
+    "Hash": "AECC7B8D69CF27E7B2F23375A3D0DFB475D168DB1B2B2DE7B64E92F29094844B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\accountant-dashboard.css",
+    "Hash": "225CBCA8DD36DE9E903DD49A10B381B42EF52583EBF3AFB275B5941B1F085B4D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\index.tsx",
+    "Hash": "0AE7432A824EB03739FA5437516B5FD9B9268DCAADBDF5549904D18E8129E0FE"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\types.ts",
+    "Hash": "7D4847F62D1081FCF6E2877CFC02FF118F5DD69CEFB4F6BB15193F39FFC3FA35"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\accountant-quick-access.tsx",
+    "Hash": "3BAEE6BBD56A29BDF5084B4BC12BF46C69C5FE5EE4440BC5259CF4C3F941FA9D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\accountant-welcome-banner.tsx",
+    "Hash": "F353E689BF071D02DE916C89F7B5E975DE725D4C3602B9E876EC1BFCE6F013C4"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\class-wise-fees.tsx",
+    "Hash": "E2A2048CB2B2C2DACD2FABB973295BF70F675D315204420AF126600B6103382B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\expense-overview.tsx",
+    "Hash": "9FB2054F1A4DE3DDDB1E6D31170100BBDF39B3C7D9A51480BED5F28BF479182D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\fee-collection-analytics.tsx",
+    "Hash": "A49CC1B17FDB70EE4ABF6FDE6F9DC0B26508750DAC60AC654D313AA292285BE6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\finance-illustration.tsx",
+    "Hash": "7E3C1944A0299CEE8800D6920E9CFCB1C9A194E9C124224BBA9A564999A34BAF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\financial-alerts.tsx",
+    "Hash": "378926CB9B39A8917CE1C636F9CBA9319B7031AE2F283FD797B8FB0BC673E5E8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\financial-reports.tsx",
+    "Hash": "FFC8C621275E2B321F6B6DE43258CCBEEA25CF03879D54AC0F63AF339C1E1F50"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\financial-stats-grid.tsx",
+    "Hash": "C2BCADFBF55981E58B50C7FDEBC9D9EBEE18CACBC2E6FA8D6D863CA9FCE44BCF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\financial-workspace.tsx",
+    "Hash": "BA4DB5E01484799C92D2FEC33E3604D9F31FED33CF3D8F28560D8C3151A680C6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\monthly-cash-flow.tsx",
+    "Hash": "E91084D78F9C44F4C9CD425F3C859B445EEC2DC1D5D6AD73E9360E72572EFFA2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\motion.tsx",
+    "Hash": "5E6BE4B55427953D15069693279E2620BBAFF3BBD61051B963A60C94C843E47C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\outstanding-fees.tsx",
+    "Hash": "999CEA85A61A4D8524F8101484E8416AAB958C6D964E14C4150119DB02DB2AE2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\payment-history.tsx",
+    "Hash": "453BC0003DAE2BA0255D4CDF68A3EBA6844B8936E64C77E214F3B2DB3C1F2DB7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\components\\section.tsx",
+    "Hash": "7AD2FEC0F7604D44D997D869E26838EECE9C17E3351E75633FB6C5F42855E9DA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\data\\mock-dashboard.ts",
+    "Hash": "D7E80B2332D78BB6FE61C1262C661854F9A573E0817FA5CD8DFFBF4C150DA553"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\accountant-dashboard\\lib\\financial-calculations.ts",
+    "Hash": "CF9801CD1D3F85324A508DB7BF1D5E1674895C1001AF492BDF2F742184EA3EA1"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\admin-dashboard.css",
+    "Hash": "BC94C83A0CF0335823D42EEF3A4691409ABE993EB0343D0901D30C5885F41B45"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\index.tsx",
+    "Hash": "4D8B92B228B31E2D0816E91A029400571AA1859C921ECDFD9558B985F7D5E808"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\types.ts",
+    "Hash": "B6FB8B2B58C4B4D6E681C4C63A2446DD1DFFF20871EA4ED9A426AE356E57F0EC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\admin-stats-grid.tsx",
+    "Hash": "00BB934906157692C1A644C99AF464A42032C0CC1D77BDC0D10788F8B33556AD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\admin-welcome-banner.tsx",
+    "Hash": "A8808CB1E6A8042BF3AF3084698815DE243520A6E0B9371014F1461BAB12C95F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\attendance-analytics.tsx",
+    "Hash": "02F6673088301799A00F124F6D6DCFE1F6AE3B58515A8ADDE074F157D9327369"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\fee-collection-overview.tsx",
+    "Hash": "B5367CD8BAF1FEBA7F8E222B2074F23C5ED2AFC36F521834B9D47E4FAA1C5997"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\motion.tsx",
+    "Hash": "BC660B833A63F054A76DEDB24ECE82DADA7E1CEDBE771B2FD165606EC01A218A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\quick-access-grid.tsx",
+    "Hash": "BC539FB558ABCB591FC9533FA4F5632BD46BB7C7326C971EAF6306A778AF6B6D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\recent-activities.tsx",
+    "Hash": "6198D6886CAB9EC7BE2DB8F7823BA2A9264958F0742D7CAECC4DA0DA7A0E0FC6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\section.tsx",
+    "Hash": "856CED6F194183E579F98D0DD4DB8E7934224E0E161606E0FCEC0D5797B93FE2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\student-distribution-chart.tsx",
+    "Hash": "8527EE1CDC7A95AE2EE104DB6A41A065CED773DEDEB333E929354370D0DEF1EC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\upcoming-events.tsx",
+    "Hash": "74517C0D6AC4AF8DB0D1B29918E823E5190F2AF2EDEA56B4BDB249C4F534E22B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\data\\mock-dashboard.ts",
+    "Hash": "234CB8C7EB7B10C91C43CBD9FEFA82C4121D0A439E702443374F9338CF12B6F2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\index.tsx",
+    "Hash": "1E37BC862A507FE357FD09ABD4B531EC01496DA7B23A73646F9B03F43EBE23EC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\parent-dashboard.css",
+    "Hash": "18EBEF8A00B564AFFBC0006E61E0D8C5AD3FE862F4D2B502950C41E36564B608"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\types.ts",
+    "Hash": "4BF4B44527164A5E75D25B393A23F47F71B6A853C0E6D437F5C5CD6883D2CCFA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\child-switcher.tsx",
+    "Hash": "D6D8E9B5DFE8086F78FD5F1917E9191A84F6A98E1C24E72D7E9B7D7AC70A21F7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\motion.tsx",
+    "Hash": "310FF27EE294805E9F9177385077A553A1F0DF464F01E8ABA107C0F3244AFB7D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-announcements.tsx",
+    "Hash": "D8B3B79FE7D26E4B8BA634B5834FDCEBAE9FA547AE08B4229322B072F8142DCF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-attendance.tsx",
+    "Hash": "5C0645186C26BCC9CF5F54DEAF9552B614774C3DBCA15B35667B0A6D0E0E8AD7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-exams.tsx",
+    "Hash": "1C7040938F7AF2B5DD7F52199792D1C01518A1464CDFF1C1A0366459E86F77DA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-fees.tsx",
+    "Hash": "25F01338B5DD55096FF4A1E5E36109435877CD8CCB7EDEA03AC57E2484F8559F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-homework.tsx",
+    "Hash": "37A4E1BD0AEE037DFE29718FBD86AC0256B5A34848437EAD0078D484EA9992E5"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-illustration.tsx",
+    "Hash": "1DE3C4E57A6EB393A48413B1759832260B374ADAE16BEB4A23C9DF0A66F95250"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-performance.tsx",
+    "Hash": "0461FA61494B511D1F59E9C3D9AB3BF20F4D8CBB0E586C572768F3A4E73FD23D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-portal.tsx",
+    "Hash": "C53ED175FBA137A740C33184FD5D65E4DA5C755B6AC5A09EB2E8410FA7ADBB05"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-progress.tsx",
+    "Hash": "9EF9B88264AB6727D367F536ACE315E3710D669BED2FC4B51C4B6273F839F81E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-quick-access.tsx",
+    "Hash": "99F911F47E7484C527F68EEC9BF8C925369C04E6055D88B2402A92FBB3A53A8C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-stats-grid.tsx",
+    "Hash": "87B4E6331D9B422EADC93DEB036E747C24D69F0E54C03A73558C24FF5373D134"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-timetable.tsx",
+    "Hash": "A8E5F9593A6B77750C3C6BF8E3C9A45284549EF5385B56472A382F07292A98DA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\parent-welcome-banner.tsx",
+    "Hash": "E33FD215C99454C40501B635A304FF80ED6CA7F67001C35302814F9AA7E3AB23"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\components\\section.tsx",
+    "Hash": "0E2BBDE2A106E44DF87D8E6C3FDC079E74066606D3B0F1AD6926C567227C95BB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\data\\mock-dashboard.ts",
+    "Hash": "620B005D1B089E3FE9134FF4D134F34F802BCF30D4540FDF6A1AF3275217FF6D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\parent-dashboard\\lib\\calculations.ts",
+    "Hash": "2862704DD2F9089C0F3EC199136727618BE51E65236F460482A360E254382A17"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\index.tsx",
+    "Hash": "C59D1A20F758A057A0577540F4E9DE74F76080AE53D47D4A4A2475C369C316B4"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\student-dashboard.css",
+    "Hash": "ED1CEAF485F383A211FE212997023A5444BF08588FB9386A35BE0873890CEBBC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\types.ts",
+    "Hash": "1F35F0385123CDDAAE29C534CEFB8B0721EC148C425D70F610428F20D044F018"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\badge-artwork.tsx",
+    "Hash": "C02D6EE9B41791BB2F3F7780C7AAACA05F67CD390E80D6908F9C4E2FD515D6AA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\motion.tsx",
+    "Hash": "E733E6EB3CF3AAA9BFBD057EDF35A2B1A1740A4BC8985CFB41EA9DEE0EEC6D76"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\section.tsx",
+    "Hash": "4A27FF2FB4F070E0DBD8314F2B5B54048B7C30A47244D832E23EBCB44F74A838"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-achievements.tsx",
+    "Hash": "9A35DE72A9AB930F8FE13C707C39B51D5FE8CDBA00865D06D7A7EBFA24A656DC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-announcements.tsx",
+    "Hash": "2D18B70A4296E626700E9EB1141ED95FC09B0458FFD9CDE712EC956E61F4A9FB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-attendance.tsx",
+    "Hash": "C02EFFB3242657B5B29976AA1B7C0FD60832C7E132B1A82BDF33BFD2EEAC3197"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-exams.tsx",
+    "Hash": "2C4930C51027D3A029EAAAD87FE8687FA87BBDFCFD520726B9C7C241F68DAB63"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-homework.tsx",
+    "Hash": "8FF8776D32A922B414E15B9F826E58D100FCC812C17250F432FC4A9DE59B64FB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-illustration.tsx",
+    "Hash": "33E749C2C0BF13D775E675CBFFCF2B14A68205E113DB365A040CBF94C704C73C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-learning-progress.tsx",
+    "Hash": "AC3BBE3AA5905509197A1CFE69AA8AC84382ADBAF8891B3528A27666481CDF8A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-performance.tsx",
+    "Hash": "24A03F5ED8A7E0A4F3A8BA2B550E7EAE31B71FE9760C815B077A1D9D847EFF3E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-quick-access.tsx",
+    "Hash": "30D4A59BAE86181E58E2DD0FA5089700B8B6C17CE76996B182342829613AFEF5"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-stats-grid.tsx",
+    "Hash": "A08BAA99B7DB3FD1C214C04A5556BAD2689BC30774E38237467644FF23B3A61C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-timetable.tsx",
+    "Hash": "E0BD0D57C7130E886220807BBCCF4E0EB9C6C46D285B5884AEA7D94F501535DD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\student-welcome-banner.tsx",
+    "Hash": "CD3A3F68A4EC7189DC7EFFB24FE60BCE46B997566B2F21ACED1AA3F0F0A97D59"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\components\\subject-icon.tsx",
+    "Hash": "9AE83A2457D32ECFEE898746E0221690E2FFF15F8A12C22A31CDE58917C55724"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\data\\mock-dashboard.ts",
+    "Hash": "0CC096BE3D468B62147E93BB62138A0880A16189141A27B04B92727773D87C2A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\student-dashboard\\lib\\calculations.ts",
+    "Hash": "DC36FADAFCDDE605A00B4C32D18DF60FA89EC438CD3538D293FEC8B9F4AD6610"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\index.tsx",
+    "Hash": "F7B509B38629C22EEB6E2F3689FF54CE1C06957B8E02446E253154239BF39850"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\teacher-dashboard.css",
+    "Hash": "DC3D98BE480AF5140D9A976B9F09B380208C405FF963CE5E5E03B71EF40E4C44"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\types.ts",
+    "Hash": "BFE90A359AED33A307587C54ECB80ED194A849E2BB45CA4ED4C40BBE8E194E3D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\motion.tsx",
+    "Hash": "822D0C858E1BFFF60290BEAE58DE0B1126C8C8E270C593105759B740E5A993E9"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\section.tsx",
+    "Hash": "12414DF4F537470668E6A241F9A7E7B0D3E5D7C9E27BFB272F986E0164EBD1C7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-announcements.tsx",
+    "Hash": "CF0CD05035DC98FE2C544C853BD12E422375B7F982584666CB889E232B51F986"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-attendance.tsx",
+    "Hash": "E33EC56E785E37E18C218D76B85714397CBAB66377902FCF515743496195CE73"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-classes.tsx",
+    "Hash": "BB3174060B18A87CE171FFFDAC3216E4A2C53EA3E698F9FA7DAFB016E372160B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-exams.tsx",
+    "Hash": "F71588F519FEA7C4F4C42F46CB4BBE966B6068A270C494710C3BBBE3FF2C12E2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-homework.tsx",
+    "Hash": "C4F2ACE4E927447618F399072072C15D635A36C468D4A74A7706A62F46BDC1A8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-illustration.tsx",
+    "Hash": "0DAF762C4615F74AB3E93194159B52D5CF3E94C885FAE3A1B8408393EE52DEF6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-performance.tsx",
+    "Hash": "E124BA50B838542C4E531E6F594F25DBCF3A7CF09F8EB12ACF0474F58DB41CB4"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-quick-access.tsx",
+    "Hash": "B3F1635EA1D6F4E2A77101FDAF25A51AED93E48847147CA4DE7092A5B0ED5CED"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-stats-grid.tsx",
+    "Hash": "B289A94FD6E8214D411B38F32CDCD27011EC10C2F22B0A27D3ED5E7008DEB261"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-timetable.tsx",
+    "Hash": "98FF09374FC518ECAF9545BBD3E79738F7E08D6BA28F13A8BDE4C2437378E051"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-welcome-banner.tsx",
+    "Hash": "BAD65391B4A169E2F9CE89C7878622710AB769AB1FD9B7FC11724F69912005B8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\data\\mock-dashboard.ts",
+    "Hash": "8DC725FE25709163CB16B905C9517C03EF68B86ADA5E803490FFDA4F4368BCF6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\hooks\\README.md",
+    "Hash": "5201B8AE015E698706AD06175B1AC65BF24DDD4E514FBB2643FC84823E533C2D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\utils.ts",
+    "Hash": "64FC84C1BE627F0D586FB4BA64D824A1604F44282381F5BAE68CDF86E10BB6EC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\authentication-flow.ts",
+    "Hash": "A1D8B4BEAD8E1BA3F6EA039FD99B500505111FCFDCD2A825C959AF52CDAAA71C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\authorization.ts",
+    "Hash": "3992F986A971BD22C4268AA99A0671B5A361A158857B89599E96001B3124A5CE"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\destinations.ts",
+    "Hash": "7E58FE9DF429E413B6ACAA51F5B12D0066D4FABF932B751BFF885939E9ED3F3E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\index.ts",
+    "Hash": "F7FCA70DE0A92A715916F29E8FDA4A6AEEFF4056DBD952B9621544FA40550226"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\input-contracts.ts",
+    "Hash": "59CE8678923066DB7F6FA49C4CEB354C8DA63AB638599463F1D02FF419FE2DF7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\login-methods.ts",
+    "Hash": "C14EB7276D9E246DEEC26AA2C7CA3EB1B4CCC71286D7D50A4A076081CD2C0C7F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\parent-identity.ts",
+    "Hash": "AE4AB17EC190BDA5A0A73FEC91152687337DEE5C2DF99AA2C3A460F82585F37F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\permissions.ts",
+    "Hash": "43FF1A5A3A055DB3A3BDEEDEA0FA079A7252763F9D8A802417A02D850692EA57"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\README.md",
+    "Hash": "CCD9D48FBB2C55A3CE833378A8185077AE3689CBE27DB64837D9B62714E4B781"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\roles.ts",
+    "Hash": "786AD86D1F302DFA48514F4589975BB8A3AC10E3FAF8B7A071E6E6BAD0E763F3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\auth\\types.ts",
+    "Hash": "F2C2C4BA3656BA2A5552E60208B351DC16813398CC7D8EA92BF289E135935722"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\supabase\\browser.ts",
+    "Hash": "99ED80E4A40E4E5B023F5BD7A66C151C7AE97CEFC7DCB58023612C54819619FD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\supabase\\config.ts",
+    "Hash": "E3146FA4B38B69703F257AFD28B55F32FB215AFCD135E9D54BFDD4301BA84714"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\supabase\\server.ts",
+    "Hash": "393C8FFBB45377488F9BEBE29B4F1602BA76ECF872FEEF8E61C5C153ECC4FD26"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\lib\\supabase\\staff-session.ts",
+    "Hash": "ABB0BF237CCCA46D8CB8F19F340B56E14A0849D640AA71E9E5DE009713D5AB06"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\types\\README.md",
+    "Hash": "CB90BD1B9117718A83C1D10E23E03427D8818C62CF33695BFF2A0C25BF8F05D6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\supabase\\README.md",
+    "Hash": "43B32E65B49816ED33EEEB9B19BCA7B591A4BAAABE9665F7EB3B8B0CA8231B3B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\supabase\\migrations\\20261105000100_identity_foundation.sql",
+    "Hash": "3595E2F46D25C8FEBA39572EF248BD79B1E042052A7DE0FBD3C9E5DF79DC1C8C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\admin-desktop.jpg",
+    "Hash": "BD9DD1A268346ED8C2EED82A85549B2108834B2100205E8321BC2A6DE2429540"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\auth-type-contracts.ts",
+    "Hash": "605574ACA3046BAD8C09F5B0F0FCBFE81B4997243152148A79ACEDB4C1130845"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\landing-desktop.jpg",
+    "Hash": "A5A72E02A3BCF757AA9CC04249ED6BC803D946600EFDD973696C4EA2E1CB4DB3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\landing-mobile.jpg",
+    "Hash": "7A0F3EA7E5262EEC35D5745AA8E8B74D7D5FD98BBAEA4EDE370122B1D15BA4F6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2-preserved-after.json",
+    "Hash": "F8A4F1942D10BDE378F01A505C81C1B8B6E9B345A85C538ADBC72A14205D4554"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2-preserved-before.json",
+    "Hash": "F8A4F1942D10BDE378F01A505C81C1B8B6E9B345A85C538ADBC72A14205D4554"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\student-mobile.jpg",
+    "Hash": "519E7A51F1B80FD8009B6B9503CAE7F4A250A5904D9364171A2DECCD2A199AE2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-accountant-data.mjs",
+    "Hash": "38E91120B39ADFE9193E4AE1810FA42829F818BB608F654AC5B54A7C1DAED53E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-admin-data.mjs",
+    "Hash": "7509BB43E693314E578382D7429EC6D834F0A409006BC1BC8046681E9C46F08F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-auth-contracts.mjs",
+    "Hash": "948D77232A77970F4E5980DD634D3734C5598D0FE8405734F24C8727BD9145F6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-auth-foundation.mjs",
+    "Hash": "FE30F46C20A7D0B0D223C4B7CC6BB8FD4B525FF66F338ACB354675C3FFD805B3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-parent-data.mjs",
+    "Hash": "B0371A4BE29A79741BC8DD2780AC55D0F7682514C618E40740546F6BE7D39492"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-student-data.mjs",
+    "Hash": "E9C2BB344B21B5DD14541FB6115CD08A49020578FB6960C63ED4C8BF9C7D8014"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-supabase-config.mjs",
+    "Hash": "CDD58F802098EC0E562D2DB7BEE9E2DBEA13EDB61F8C2835A1A5EB7A085F9AF3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\verify-teacher-data.mjs",
+    "Hash": "9E3FFD3CF9700EB595D6C2E016CF75C86E5CF4A91BA7E12A2B2EB2206F72925D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-1024.jpg",
+    "Hash": "36DBC4966AE22467432ACB3D972A7D759748C2BF59D5F16E96D1A0A18C3BD58D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-1440.jpg",
+    "Hash": "DF1F90B3989BD3F6BE1F6114631D25A6B66D1F361926A8F65E17084B7C51760D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-375.jpg",
+    "Hash": "1A964443C87978B6BA894AC097E84BB56A6C607D02DCAB35F95F1AACED3CB6AB"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-768.jpg",
+    "Hash": "4DDD646BD94FBC0C98C83565BA073278E6E47BC5DD8B5BDB2A6A0BE5824AB8CC"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-desktop.jpg",
+    "Hash": "DF92052BA09977D93763C1F24B52A6F7FEC28F9E87F1ECBADABC310B26563863"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-mobile.jpg",
+    "Hash": "5E74BA9C25E8941BD73C1E55ECFE40609D54A5826D0B6DE07D4FD7E4FD1D3BD1"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\admin-production.jpg",
+    "Hash": "E13FA5286EC3D92287293FDECFE3C114670076F5AC00B6C956AE56166F6E6DA0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-2\\production-routes.json",
+    "Hash": "1EC070A55178325D5FD56E1CCC591E2F3181F17C19EC9F50FC3BC24F20CB325D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\browser-routes.json",
+    "Hash": "74A1C59E9C31BC00701754740569D9B16B202BE782DEE01F417AF258F3A14183"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\preserved-after.json",
+    "Hash": "29FBE87037272B31090818906B594FF94B27599446313082A00A4F4166F3D62C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\preserved-before.json",
+    "Hash": "29FBE87037272B31090818906B594FF94B27599446313082A00A4F4166F3D62C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\production-routes.json",
+    "Hash": "E4F6C98CE1CB5EB0771B2580D48C73902B55535EFFF6D78664DCF8F2302584EF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\responsive-results.json",
+    "Hash": "B33C8E4064CB3AFB28D0396FFCD9A4D7D7C55831458DC4FEB5CC78A18A0605ED"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-1024.jpg",
+    "Hash": "C9EC8C511F0CE21968EE83A795D75FA3AE65D035AE920B1AFDFD41C2280ECE2E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-1440.jpg",
+    "Hash": "89DCD99CD9849EDBD103816385B462899AE4306FA995586F12628AC208BE9515"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-320.jpg",
+    "Hash": "A74DA60CE704A8F954C7C8544E0A709C638D4D2A9FAF689F686581F1FAD69556"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-375.jpg",
+    "Hash": "6D5873397D3FDECA211B85B7A9ED62AF2425F92C112B52599F6E58D1C20A9038"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-768.jpg",
+    "Hash": "D467DBA56D1E592F01BAEA887A0EC65597A534D28AF0FE5A5685E68BA53910E9"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-desktop.jpg",
+    "Hash": "88A982061A5F1100011092F2BF31FE8F06115962286FBC3D9BFF9541461EEFD8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-production.jpg",
+    "Hash": "798D15F23EA95CF59FC2320FBC883DC89FE4321267FBE4B31055E5727171A6B9"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-3\\teacher-timetable-320.jpg",
+    "Hash": "A0EF02B8717F3B3EAD1B24EA267DC11C5BC8EB0F27FAAF33F603A2CC5C39265C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\anchor-checks.json",
+    "Hash": "B89C73489329B995C65B0EFC546F89E6ED1D1026A56F77ADE86BCB3828DBBCF0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\browser-routes.json",
+    "Hash": "D225DCAAD32932AE266F081DD69C7B5CAA62B2B595C805DF7B965CC1C46FB614"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\drawer-keyboard-checks.json",
+    "Hash": "D3B5FD84C05E03312389B291D7BF4E46FFE2D78ED4AC7A203215E4255CA5DD17"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\motion-checks.json",
+    "Hash": "74C0B6DD465DEECAC4DBF0FBE31CDB3AEA548722241A1867B91302A057E4F303"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\preserved-after.json",
+    "Hash": "4E0FB05714D75FB1D56FEB7DFEDB61B7255F61D20FFDFA040ECADBEC44898BC6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\preserved-before.json",
+    "Hash": "4E0FB05714D75FB1D56FEB7DFEDB61B7255F61D20FFDFA040ECADBEC44898BC6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\production-interactions.json",
+    "Hash": "603F2D578DCE8217975EAA9A055B69B81E9F2D390EA2009F6A1D825905E5EAB8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\production-routes.json",
+    "Hash": "DC5FB0482441EA8ED3EEF902D0D80A109A7C994BB573338CDDFC017ED173496C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\responsive-results.json",
+    "Hash": "274C57A361BDCEF59D68FB10FBC381596CBB3008FD591811559476A80BD7A62C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\sidebar-checks.json",
+    "Hash": "50C01857F540C63E0CAB34C4A6EDBB2B813481073928F94B19D698DCE2D38BCE"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-1024.jpg",
+    "Hash": "BC7BD52CB9AFF99B1C25B8E5E9386B5A3C4CD2A7FC26D736BFB71080F545A22E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-1440.jpg",
+    "Hash": "55746BBFC3027DF5124B6D33F801D3D5FEEFF3D7C2304F611A04AD6E4681312D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-320.jpg",
+    "Hash": "759C237AF503174F726A59CE950028DAE3CCA9A46E5EB2E15C3C5DD15552BBA8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-375.jpg",
+    "Hash": "D9217B1EAAEA28BC7456573074F9807530E58606710217B56D2819990EBABBD3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-768.jpg",
+    "Hash": "98F9123D468408410547B6BA46F152333D09A3E009DC67BDD051226957DBF032"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-attendance-320.jpg",
+    "Hash": "E343EB4C103597DDFF5AE8FEBE4E868478F8933ADF5E8CFF15BE96ADC6053787"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-badges-320.jpg",
+    "Hash": "E5AD923B7D92523620D8F1E1F721DABCF52E6D973EC428CA8BB340A89B8C0937"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-homework-320.jpg",
+    "Hash": "FD60181E69503019645676EBFB3186353876FD653C71E5890DD333C6395326E7"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-production.jpg",
+    "Hash": "54C8470D119767586B4D8961F53A202AD602CDBC456A18C750C0FE8B236FA455"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-4\\student-timetable-320.jpg",
+    "Hash": "985813BC579F8AC869075B15716FD5FA03359BD1685B336849662DD0FBAA3ADF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\anchor-checks.json",
+    "Hash": "F121BD8A05C730E47A1D912EE429D7AB6C92294611177F567E728375E9F8341E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\browser-routes.json",
+    "Hash": "36ED941BCF30E37FDBFD3C188ED1006A1743560C7D1E3FFD9EFCB754AA636627"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\child-switch-results.json",
+    "Hash": "E10707FC0B67F2D79DB347F11719C2A895C1903E7A7F8AA8B71F321CDFD13409"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\interaction-results.json",
+    "Hash": "06D6EEE9BD41E1F5574885AD6B7004E5E98A00C0A685554C26ACD48F6D44CC21"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-1024.jpg",
+    "Hash": "9B6773BA8A5E646B19F7BC990B9A22AA85552E776438C6F8855F90C00B5E35C8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-1440.jpg",
+    "Hash": "7E6BAB6EE5EA295D63E0705788A1BB6B8DF9C04B0BED4B4FD76F9B9CC2196917"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-320.jpg",
+    "Hash": "58707F78E75AAF7536F1D1025BF7D98B469495072432B8C4CF9949F1AD6190DF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-375.jpg",
+    "Hash": "C07768273ADFE9DF1C65C52874F5CCF25CB978C78C07C7CEBD9EC68F0E8E3938"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-768.jpg",
+    "Hash": "6E1F6C093EC3ABB0A771BCB77F9A5EF3E5DEDFA2921F30C331A9F7A1F701A3F6"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-attendance-320.jpg",
+    "Hash": "8C77E980367999DC88CBFA0FF0589DE3234A7737D7571CE724F32E5AD93A861B"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-empty-320.jpg",
+    "Hash": "3A7545E431D59717239BDC47F3D7FB4D1AFA2E7FDC6B1DDC46B1F51A0537277C"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-fees-320.jpg",
+    "Hash": "B65AB5EF33C8D3573D990EEC486EE7764F8BB1C41FD428B9990E52263DD2773D"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-homework-320.jpg",
+    "Hash": "D6F7CC9A0F46218F460A6AFCBA96C0B9BCDC86D6486F5D5BFA960C01A075C428"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\parent-production.jpg",
+    "Hash": "5F498E55A697A3A5EA4FC0454C1835272017955B23E6BB5566BA73B147450F75"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\preserved-after.json",
+    "Hash": "87C2A97BB474D255AE811CCF43850E02F553C044BAD20EF1243BB62F24700B00"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\preserved-before.json",
+    "Hash": "87C2A97BB474D255AE811CCF43850E02F553C044BAD20EF1243BB62F24700B00"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\production-child-switch.json",
+    "Hash": "3B4610D82984D77C09E60915C8DD6F8A4842E34A7F968947FA2373953E4AAB4F"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\production-homework.json",
+    "Hash": "EEBFA65081A40831ED1061B9CB452A07E37891086C35C3839BEA2383752D8CCF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\production-routes.json",
+    "Hash": "032E906767AFA2FE6B5691919F89630AEB4590DE7CF4E2719436FACD725D37E0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-5\\responsive-results.json",
+    "Hash": "8577CAB7581A07F8B10297C73C319D26F583A58229BA21E71077CBDEA524E913"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-1024.jpg",
+    "Hash": "5571085856C93074D08A56CDEB9D2EF2CD1C12C3D05564364D198C32118696FA"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-1440.jpg",
+    "Hash": "3FD700EFA6DED62A99E5C892A1190BE91798A453DD858B9ECD7309AF936DC7F1"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-320.jpg",
+    "Hash": "E8B937C0B6FF06CD3E342A7D04284294DB8DA7BDB6F5E8425316114563E4A8F2"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-375.jpg",
+    "Hash": "017BFF2EC694D626C34474A169882C53276BA4EBCF7201D8C8A76CB5469897BD"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-768.jpg",
+    "Hash": "A0CC2ECBD5FC9E111861F860CDB6E06787468D518DE5D5FEB932489C61CBA912"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-collections-320.jpg",
+    "Hash": "4C6EE8DE0D0D57882A377D6A22024D24B2F1A9D1AD624825D554D7F840F720CE"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-empty-320.jpg",
+    "Hash": "DBE66EA51FC9B7A0FD433AA115A61B594F54B0E113E377DA65896AD60DA13CA3"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-payments-320.jpg",
+    "Hash": "244DB61F801A3EDCD01CC60D136C5378A2839A0C0D61B4AB4FE6AE704427DF56"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\accountant-production.jpg",
+    "Hash": "48C5E508FB5CBA7FE900A8C714804F438178875826F94AB03D6215954B3BE47A"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\anchor-checks.json",
+    "Hash": "C68CCA3E999DEE8BD70F744AAC958B366AB3C81F47B45F6C951526B45082D6C0"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\browser-routes.json",
+    "Hash": "E3BA38CA98EE88F2AB0DCD278ACBBB620E441908CE3CBBD2BA997141856ECE23"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\filter-search-browser.json",
+    "Hash": "B5D8DC06ABB072799B4EBD6F4CE9CE998ED25F7F2D72324B6767B26DEC25C395"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\pagination-browser.json",
+    "Hash": "D9FDC914C17B040B943E3644008E9E4F8DEA62B277AF1CF413B9CCE08C661973"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\period-browser-checks.json",
+    "Hash": "6A6858BDE574E319627FFC84DE2388A147E167AA7D1840789F5F0BB1AF8C3DA8"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\preserved-after.json",
+    "Hash": "BE0EECFCDC1BD86778FEB84E1A5739FBEA7C6F957157FEAD785ECC9444EFAE7E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\preserved-before.json",
+    "Hash": "BE0EECFCDC1BD86778FEB84E1A5739FBEA7C6F957157FEAD785ECC9444EFAE7E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\production-interactions.json",
+    "Hash": "BCC377F73D76081B6948566EE61B5E1B0EE4CDAD19F5EED39086176325181A23"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\production-mobile.json",
+    "Hash": "E4DBFCE50B35CCF79A5E44ED1D36D5730825C08C1F1A9822AF67677A4B82FCCF"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\production-routes.json",
+    "Hash": "582D199C3DD4D5903841FE4A4029D8BF67E117513A0919289934F7A728F0D87E"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-6\\responsive-results.json",
+    "Hash": "8FAC0CD6CA4479C5FB9C9C089B59305E1AC3B51FB790D6AFE7EE0BC82BC6E444"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-8\\preservation.json",
+    "Hash": "87E72B9984C08575129910759D943C4657AE16E5A226EEB5176F20E6FA352964"
+  },
+  {
+    "Path": "D:\\O\\Office Projects\\School ERP\\verification\\step-8\\production-routes.json",
+    "Hash": "AEFA8407E7D97E9287EEE8828C22E47E54302C7ACDE8C096D6569B18CB899FA3"
+  }
+]

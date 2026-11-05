@@ -1,0 +1,21 @@
+// Original Brightcamp decorative vector composition. No third-party illustration assets.
+export function FinanceIllustration() {
+  return <svg className="ac-illustration" viewBox="0 0 460 300" fill="none" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="finance-calc" x1="210" y1="85" x2="325" y2="255" gradientUnits="userSpaceOnUse"><stop stopColor="#7474CC"/><stop offset="1" stopColor="#4D4F99"/></linearGradient><linearGradient id="finance-ledger" x1="86" y1="154" x2="238" y2="267" gradientUnits="userSpaceOnUse"><stop stopColor="#87C9B3"/><stop offset="1" stopColor="#549E89"/></linearGradient><linearGradient id="finance-board" x1="123" y1="40" x2="333" y2="174" gradientUnits="userSpaceOnUse"><stop stopColor="#FFFFFF"/><stop offset="1" stopColor="#E9F0F4"/></linearGradient></defs>
+    <ellipse cx="249" cy="153" rx="170" ry="125" fill="#E4F0EE"/><circle cx="129" cy="97" r="45" fill="#E7E9FA"/>
+    <path d="M304 185v-57l39-23 40 23v57h-79Z" fill="#C1DCD4"/><path d="m294 129 49-30 49 30" stroke="#A9CEC2" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/><path d="M336 160h16v25h-16zM316 137h12v12h-12zM358 137h12v12h-12z" fill="#ECF7F3"/>
+    <ellipse cx="241" cy="280" rx="187" ry="10" fill="#CDDCD9" fillOpacity=".8"/>
+    <rect x="119" y="44" width="199" height="133" rx="15" fill="#B8D1D2"/><rect x="114" y="38" width="199" height="133" rx="15" fill="url(#finance-board)"/>
+    <path d="M135 63h54m-54 10h35" stroke="#B5C3CF" strokeWidth="4" strokeLinecap="round"/>
+    <path d="M137 146h151m-151-28h151m-151-28h151" stroke="#D9E1E7" strokeWidth="1.5"/>
+    <rect x="148" y="119" width="20" height="27" rx="4" fill="#A6CFC5"/><rect x="179" y="105" width="20" height="41" rx="4" fill="#7BBDA9"/><rect x="210" y="91" width="20" height="55" rx="4" fill="#58A88E"/><rect x="241" y="78" width="20" height="68" rx="4" fill="#7E80CA"/>
+    <path d="m145 107 42-20 35-6 50-21" stroke="#9D91D3" strokeWidth="3" strokeLinecap="round"/><path d="m261 59 13-2-5 12" stroke="#9D91D3" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="m75 171 104-34 75 96-111 37-68-99Z" fill="#438C78"/><path d="m76 163 103-34 75 96-111 37-67-99Z" fill="url(#finance-ledger)"/><path d="m88 169 87-29 61 78-92 30-56-79Z" fill="#FFFDF4"/><path d="m100 176 66-22m-56 35 67-22m-56 35 66-22m-56 35 67-22" stroke="#D9D8CF" strokeWidth="2"/><path d="m120 159 57 74" stroke="#E5B8BA" strokeWidth="2"/>
+    <g transform="rotate(9 274 177)"><rect x="211" y="87" width="126" height="172" rx="19" fill="#41447F"/><rect x="205" y="80" width="126" height="172" rx="19" fill="url(#finance-calc)"/><rect x="219" y="96" width="98" height="41" rx="8" fill="#D1E6DE"/><path d="M237 109h13m-13 5h13m-13-5c8 0 8 10 0 10l10 9" stroke="#5C8274" strokeWidth="2.5" strokeLinecap="round"/><path d="M274 122h6m7 0h6m7 0h5" stroke="#73998B" strokeWidth="4" strokeLinecap="round"/>
+    {[0,1,2].map(row=>[0,1,2].map(col=><rect key={row+'-'+col} x={219+col*34} y={150+row*28} width="27" height="20" rx="5" fill={col===2?'#AAA0DF':'#A1A2D7'}/>))}<path d="M228 160h9m25 0h9m25 0h9m-77 28h9m25 0h9m25 0h9m-77 28h9m25 0h9m25-4v9m-4-5h9" stroke="#E8E7FC" strokeWidth="2" strokeLinecap="round"/></g>
+    <g className="ac-coin-float"><ellipse cx="364" cy="217" rx="30" ry="10" fill="#D0A24F"/><path d="M334 217v17c0 13 60 13 60 0v-17" fill="#DFBA69"/><ellipse cx="364" cy="217" rx="30" ry="10" fill="#F1D28A"/><path d="M341 224v11m8-9v12m9-10v12m10-12v12m10-14v12m9-14v11" stroke="#CAA153" strokeWidth="2"/><ellipse cx="358" cy="201" rx="30" ry="10" fill="#D0A24F"/><path d="M328 201v10c0 13 60 13 60 0v-10" fill="#E2BF73"/><ellipse cx="358" cy="201" rx="30" ry="10" fill="#F7DFA2"/><path d="m348 198 16 5m-12-7 16 5m-20-3c11 3 8 8-3 5l11 7" stroke="#BB9450" strokeWidth="2" strokeLinecap="round"/></g>
+    <path d="m88 112 6-47" stroke="#C3B4E6" strokeWidth="11" strokeLinecap="round"/><path d="m88 114 3 13 6-12" fill="#E5CEAA"/><path d="m90 123 1 4 2-3" fill="#5A577B"/>
+    <circle cx="360" cy="67" r="27" fill="#D7EAE3"/><path d="M349 55h21m-21 7h21m-21-7c15 0 15 18 0 18l16 13" stroke="#689C85" strokeWidth="3" strokeLinecap="round"/>
+    <circle cx="116" cy="244" r="4" fill="#9AA5CB"/><circle cx="401" cy="158" r="5" fill="#A9C8CD"/><path d="m192 29 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7Z" fill="#C5B6E0"/>
+  </svg>;
+}

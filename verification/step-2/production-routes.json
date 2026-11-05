@@ -1,0 +1,44 @@
+[
+  {
+    "Route": "/",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/admin/dashboard",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": true,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/teacher/dashboard",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/student/dashboard",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/parent/dashboard",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/accountant/dashboard",
+    "Status": 200,
+    "MainLandmark": true,
+    "DemoAdmin": false,
+    "DevSwitcher": false
+  }
+]

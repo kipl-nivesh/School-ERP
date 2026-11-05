@@ -1,0 +1,32 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "44C30CDCFE2326598DA5BAA02C508897124BA53B01C17D53CF1F469554923B0F",
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-1-REPORT.md"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "5230A9B8693880C5481202C5644E05D46CCDE8580A3CF8B7F19717421C73D5BB",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\dashboard\\role-dashboard.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "EC81DE671BB312F4C4727E29DB05B7F2FD911973E366C231AE4B396416305123",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\teacher\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "53A0CCDFEE5BB35E6DCA843A9A2537AF8927838D8711375267F936FB2799CC1A",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\student\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "20BEE771E72C4CE88E1FCE7BEA6042FE0B1D28B32EDC8342B95C975567FC0A0E",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\parent\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "455ED28C0C29BC2915A868BAEAF9840C73A40DC9BCD173349606F76798D355E4",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\accountant\\dashboard\\page.tsx"
+  }
+]

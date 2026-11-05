@@ -1,0 +1,22 @@
+{
+  "baselineFiles": 247,
+  "unchangedExistingSource": true,
+  "unchangedReports1Through7": true,
+  "changedExistingFiles": [
+    "D:\\O\\Office Projects\\School ERP\\README.md",
+    "D:\\O\\Office Projects\\School ERP\\tsconfig.tsbuildinfo",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ARCHITECTURE-DECISIONS.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\AUTHENTICATION-PLAN.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\DATABASE-SCHEMA-BLUEPRINT.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ERD.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\FINANCIAL-DATA-DESIGN.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\IMPLEMENTATION-ROADMAP.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\MOCK-TO-DATABASE-MAPPING.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\RISK-REGISTER.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\RLS-SECURITY-BLUEPRINT.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\ROLE-PERMISSIONS-MATRIX.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\STORAGE-SECURITY-PLAN.md",
+    "D:\\O\\Office Projects\\School ERP\\docs\\architecture\\SYSTEM-ARCHITECTURE.md"
+  ],
+  "note": "SHA-256 comparison against pre-Step-8 baseline; changes confined to README, twelve architecture documents and generated tsconfig.tsbuildinfo."
+}

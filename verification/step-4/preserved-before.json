@@ -1,0 +1,282 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "A4153C8D62B43D834321F21DC17E8068F7FAF2982829C094D7B0505C32907E9B",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\dashboard\\primitives.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "5230A9B8693880C5481202C5644E05D46CCDE8580A3CF8B7F19717421C73D5BB",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\dashboard\\role-dashboard.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "32A6D8E20ADCEC006490D332F1A38BAD8919DB6906D6E915B7700E886CF2A6A7",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\app-header.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "C8067FD18CA8661262926325094DD943E0CB454EF5DB06527646C2E4E2A9D155",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\app-sidebar.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "6FAF1F548BC97639AFD33B933DE5041A63A4403C7DCCC3A30288118F7C7699A7",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\dashboard-shell.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "F5F652263E1EFD4E4583805D639EE71F75BA9AC32EF502824445A128F8A45979",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\layout\\mobile-navigation.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "15844277BC67F4B63252156A30F870621828B417C7BB7998262D77B0A25F1D31",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\animation.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "837F91BE4E6286927ACFDDB74648FC73F769787B230A85CF6CFD6BB59C9E7977",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\brand.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "D4B581F17A2E560BB6EE5A714E3FB7F338CBBE1DBAD139F9C78BD55051B19684",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\shared\\role-preview-switcher.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "25ED9E3D352D2A7377B1D310EFED905BA84EAAE4A5F2950AF0A4FAFB56F83632",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\ui\\button.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "0CB1A2E2AC285D7992837C16AEE658CD9013847ED84DEC8366E1AA685DD36208",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\components\\ui\\skeleton.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B77DB50ED4FEC285C972577287AB65D4BCB9FD505C58F2078A8DBCE1F60490AF",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\config\\navigation.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "41D845100147480DE2C4211800FE2D62A72A19B0F0F3F688D62A20C1BF8040E5",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\config\\roles.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BC94C83A0CF0335823D42EEF3A4691409ABE993EB0343D0901D30C5885F41B45",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\admin-dashboard.css"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "4D8B92B228B31E2D0816E91A029400571AA1859C921ECDFD9558B985F7D5E808",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\index.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B6FB8B2B58C4B4D6E681C4C63A2446DD1DFFF20871EA4ED9A426AE356E57F0EC",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\types.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "00BB934906157692C1A644C99AF464A42032C0CC1D77BDC0D10788F8B33556AD",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\admin-stats-grid.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "A8808CB1E6A8042BF3AF3084698815DE243520A6E0B9371014F1461BAB12C95F",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\admin-welcome-banner.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "02F6673088301799A00F124F6D6DCFE1F6AE3B58515A8ADDE074F157D9327369",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\attendance-analytics.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B5367CD8BAF1FEBA7F8E222B2074F23C5ED2AFC36F521834B9D47E4FAA1C5997",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\fee-collection-overview.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BC660B833A63F054A76DEDB24ECE82DADA7E1CEDBE771B2FD165606EC01A218A",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\motion.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BC539FB558ABCB591FC9533FA4F5632BD46BB7C7326C971EAF6306A778AF6B6D",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\quick-access-grid.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "6198D6886CAB9EC7BE2DB8F7823BA2A9264958F0742D7CAECC4DA0DA7A0E0FC6",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\recent-activities.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "856CED6F194183E579F98D0DD4DB8E7934224E0E161606E0FCEC0D5797B93FE2",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\section.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "8527EE1CDC7A95AE2EE104DB6A41A065CED773DEDEB333E929354370D0DEF1EC",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\student-distribution-chart.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "74517C0D6AC4AF8DB0D1B29918E823E5190F2AF2EDEA56B4BDB249C4F534E22B",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\components\\upcoming-events.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "234CB8C7EB7B10C91C43CBD9FEFA82C4121D0A439E702443374F9338CF12B6F2",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\admin-dashboard\\data\\mock-dashboard.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "F7B509B38629C22EEB6E2F3689FF54CE1C06957B8E02446E253154239BF39850",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\index.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "DC3D98BE480AF5140D9A976B9F09B380208C405FF963CE5E5E03B71EF40E4C44",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\teacher-dashboard.css"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BFE90A359AED33A307587C54ECB80ED194A849E2BB45CA4ED4C40BBE8E194E3D",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\types.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "822D0C858E1BFFF60290BEAE58DE0B1126C8C8E270C593105759B740E5A993E9",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\motion.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "12414DF4F537470668E6A241F9A7E7B0D3E5D7C9E27BFB272F986E0164EBD1C7",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\section.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "CF0CD05035DC98FE2C544C853BD12E422375B7F982584666CB889E232B51F986",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-announcements.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "E33EC56E785E37E18C218D76B85714397CBAB66377902FCF515743496195CE73",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-attendance.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BB3174060B18A87CE171FFFDAC3216E4A2C53EA3E698F9FA7DAFB016E372160B",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-classes.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "F71588F519FEA7C4F4C42F46CB4BBE966B6068A270C494710C3BBBE3FF2C12E2",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-exams.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "C4F2ACE4E927447618F399072072C15D635A36C468D4A74A7706A62F46BDC1A8",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-homework.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "0DAF762C4615F74AB3E93194159B52D5CF3E94C885FAE3A1B8408393EE52DEF6",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-illustration.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "E124BA50B838542C4E531E6F594F25DBCF3A7CF09F8EB12ACF0474F58DB41CB4",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-performance.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B3F1635EA1D6F4E2A77101FDAF25A51AED93E48847147CA4DE7092A5B0ED5CED",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-quick-access.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B289A94FD6E8214D411B38F32CDCD27011EC10C2F22B0A27D3ED5E7008DEB261",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-stats-grid.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "98FF09374FC518ECAF9545BBD3E79738F7E08D6BA28F13A8BDE4C2437378E051",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-timetable.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BAD65391B4A169E2F9CE89C7878622710AB769AB1FD9B7FC11724F69912005B8",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\components\\teacher-welcome-banner.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "8DC725FE25709163CB16B905C9517C03EF68B86ADA5E803490FFDA4F4368BCF6",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\features\\teacher-dashboard\\data\\mock-dashboard.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "7366743B61B12449F30C04BFFBC35175887AE99A653EFF0B5A18A62893135616",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\globals.css"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "06BDB670E1CC9981F5E486AB4A04BBF7B75E6E483902619F951F5AB1A4661977",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\layout.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "407A90348D663A28706F7206B9D7227750F8C8EC5244864982443CE580A8816F",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "9BA743D7AF08C488A300811F606101429FB0E089BF92F45C8D4E491429788C03",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\admin\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "0F29A86333F75CB927688679680625AF0A236BC357BE69ABFBF0EC88F1F296FD",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\teacher\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "20BEE771E72C4CE88E1FCE7BEA6042FE0B1D28B32EDC8342B95C975567FC0A0E",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\parent\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "455ED28C0C29BC2915A868BAEAF9840C73A40DC9BCD173349606F76798D355E4",
+    "Path": "D:\\O\\Office Projects\\School ERP\\src\\app\\(dashboard)\\accountant\\dashboard\\page.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "44C30CDCFE2326598DA5BAA02C508897124BA53B01C17D53CF1F469554923B0F",
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-1-REPORT.md"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "5141D535372634979CF2739A1BA4243D397E5E5E8ADD16FC3FE428F4F710D9CE",
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-2-REPORT.md"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "FE2B57E1C5435FF9DBEC99B4327D14F4FE87B9728B7F3AF8E4E21FBBDB7DA1EB",
+    "Path": "D:\\O\\Office Projects\\School ERP\\STEP-3-REPORT.md"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "EF2908C5761CB8B12906D8ACD92B005F9C2FBBF416BC6313C83806A78D51C32E",
+    "Path": "D:\\O\\Office Projects\\School ERP\\package.json"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "0167D9C131F4F0ADABEE217279943AE36A7AD1E8680A8F6133C7BFDC2C514522",
+    "Path": "D:\\O\\Office Projects\\School ERP\\package-lock.json"
+  }
+]

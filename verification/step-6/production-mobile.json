@@ -1,0 +1,20 @@
+{
+  "clientWidth": 305,
+  "clippedAmounts": [],
+  "scrollWidth": 305,
+  "tableWidths": [
+    {
+      "client": 235,
+      "scroll": 320
+    },
+    {
+      "client": 235,
+      "scroll": 780
+    },
+    {
+      "client": 235,
+      "scroll": 900
+    }
+  ],
+  "viewport": 320
+}

@@ -1,0 +1,15 @@
+export { PRIMARY_ROLES, isPrimaryRole } from './roles';
+export type { PrimaryRole } from './roles';
+export { PERMISSIONS, isPermissionId, getPermissionCeiling, isSecurityPermission } from './permissions';
+export type { PermissionId, SecurityPermission } from './permissions';
+export { LOGIN_METHODS, loginMethodForRole, loginRequiresMfa, credentialBindingMatches } from './login-methods';
+export { evaluatePermission, evaluateDashboardAccess, evaluateSecurityChange, evaluateParentChildAccess, evaluateRecordMutation } from './authorization';
+export { authorizedDashboardDestinations } from './destinations';
+export type { DashboardPath, AuthorizedDashboardDestination } from './destinations';
+export type * from './types';
+export { normalizeRegistrationNumber, isSixDigitPinFormat, assessFamilyLoginInput } from './input-contracts';
+export type * from './input-contracts';
+export { resolveInitialParent } from './parent-identity';
+export type * from './parent-identity';
+export { evaluateAuthenticationAttempt, LIVE_AUTHENTICATION_ENABLED } from './authentication-flow';
+export type * from './authentication-flow';

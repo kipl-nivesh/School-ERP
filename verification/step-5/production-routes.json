@@ -1,0 +1,62 @@
+[
+  {
+    "Route": "/",
+    "Status": 200,
+    "Main": true,
+    "Admin": false,
+    "Teacher": false,
+    "Student": false,
+    "Parent": false,
+    "DevSwitcher": true
+  },
+  {
+    "Route": "/admin/dashboard",
+    "Status": 200,
+    "Main": true,
+    "Admin": true,
+    "Teacher": false,
+    "Student": false,
+    "Parent": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/teacher/dashboard",
+    "Status": 200,
+    "Main": true,
+    "Admin": false,
+    "Teacher": true,
+    "Student": false,
+    "Parent": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/student/dashboard",
+    "Status": 200,
+    "Main": true,
+    "Admin": false,
+    "Teacher": false,
+    "Student": true,
+    "Parent": false,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/parent/dashboard",
+    "Status": 200,
+    "Main": true,
+    "Admin": false,
+    "Teacher": false,
+    "Student": false,
+    "Parent": true,
+    "DevSwitcher": false
+  },
+  {
+    "Route": "/accountant/dashboard",
+    "Status": 200,
+    "Main": true,
+    "Admin": false,
+    "Teacher": false,
+    "Student": false,
+    "Parent": false,
+    "DevSwitcher": false
+  }
+]

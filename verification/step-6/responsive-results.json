@@ -1,0 +1,122 @@
+[
+  {
+    "bannerOverlap": false,
+    "clientWidth": 305,
+    "clippedAmounts": [],
+    "illustrationWidth": 227.1999969482422,
+    "kpis": 6,
+    "overflow": [],
+    "scrollWidth": 305,
+    "tableWidths": [
+      {
+        "client": 235,
+        "scroll": 320
+      },
+      {
+        "client": 235,
+        "scroll": 780
+      },
+      {
+        "client": 235,
+        "scroll": 900
+      }
+    ],
+    "viewport": 320
+  },
+  {
+    "bannerOverlap": false,
+    "clientWidth": 360,
+    "clippedAmounts": [],
+    "illustrationWidth": 282.3999938964844,
+    "kpis": 6,
+    "overflow": [],
+    "scrollWidth": 360,
+    "tableWidths": [
+      {
+        "client": 290,
+        "scroll": 320
+      },
+      {
+        "client": 290,
+        "scroll": 780
+      },
+      {
+        "client": 290,
+        "scroll": 900
+      }
+    ],
+    "viewport": 375
+  },
+  {
+    "bannerOverlap": false,
+    "clientWidth": 753,
+    "clippedAmounts": [],
+    "illustrationWidth": 284.1875,
+    "kpis": 6,
+    "overflow": [],
+    "scrollWidth": 753,
+    "tableWidths": [
+      {
+        "client": 651,
+        "scroll": 651
+      },
+      {
+        "client": 651,
+        "scroll": 780
+      },
+      {
+        "client": 651,
+        "scroll": 900
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "bannerOverlap": false,
+    "clientWidth": 1009,
+    "clippedAmounts": [],
+    "illustrationWidth": 298.2749938964844,
+    "kpis": 6,
+    "overflow": [],
+    "scrollWidth": 1009,
+    "tableWidths": [
+      {
+        "client": 682,
+        "scroll": 682
+      },
+      {
+        "client": 682,
+        "scroll": 780
+      },
+      {
+        "client": 682,
+        "scroll": 900
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "bannerOverlap": false,
+    "clientWidth": 1425,
+    "clippedAmounts": [],
+    "illustrationWidth": 455.1000061035156,
+    "kpis": 6,
+    "overflow": [],
+    "scrollWidth": 1425,
+    "tableWidths": [
+      {
+        "client": 482,
+        "scroll": 482
+      },
+      {
+        "client": 1037,
+        "scroll": 1037
+      },
+      {
+        "client": 1037,
+        "scroll": 1037
+      }
+    ],
+    "viewport": 1440
+  }
+]
