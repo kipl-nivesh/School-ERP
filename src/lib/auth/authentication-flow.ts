@@ -28,7 +28,8 @@ export interface TrustedFamilyIdentity extends AttemptBinding {
   readonly studentProvider: ProviderSubject;
   readonly accountStatus: 'active' | 'suspended' | 'disabled' | 'invited';
   readonly studentStatus: 'active' | 'withdrawn' | 'inactive';
-  readonly provisionedByTier: 'super_admin';
+  readonly provisionedByTier?: 'super_admin' | 'admin' | string;
+  readonly provisionedByRole?: 'admin';
   readonly provisioningStatus: 'approved' | 'pending' | 'revoked';
   readonly credentialResetRequired: boolean;
   readonly version: number;
@@ -118,7 +119,8 @@ export function evaluateAuthenticationAttempt(e: AuthenticationAttemptEvidence, 
   if (!id || id.source !== 'trusted-school-identity') return deny('missing_identity');
   if (id.attemptId !== e.attemptId || id.role !== input.role || id.registration !== input.registration || !id.profileId ||
     !id.studentId || !id.studentProfileId || !isBoundProviderSubject(id.provider) || !isBoundProviderSubject(id.studentProvider) ||
-    id.accountStatus !== 'active' || id.studentStatus !== 'active' || id.provisionedByTier !== 'super_admin' ||
+    id.accountStatus !== 'active' || id.studentStatus !== 'active' ||
+    (id.provisionedByTier !== 'super_admin' && id.provisionedByTier !== 'admin' && id.provisionedByRole !== 'admin') ||
     id.provisioningStatus !== 'approved' || id.credentialResetRequired !== false || !version(id.version) || id.version !== id.currentVersion ||
     !version(id.credentialVersion) || id.credentialVersion !== id.currentCredentialVersion || !windowValid(id.observedAt, id.expiresAt, now) ||
     !id.credential || !credentialBindingMatches(input.role === 'parent' ? 'parent_registration_pin' : 'student_registration_pin', id.profileId, id.credential)) return deny('invalid_identity');

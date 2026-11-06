@@ -13,7 +13,6 @@ export const PERMISSIONS = Object.freeze([
   'security.accounts.create', 'security.accounts.update', 'security.accounts.suspend',
   'security.credentials.reset', 'security.sessions.revoke', 'security.roles.assign',
   'security.roles.revoke', 'security.permissions.assign', 'security.permissions.revoke',
-  'security.super_admin.grant', 'security.super_admin.revoke',
 ] as const);
 export type PermissionId = (typeof PERMISSIONS)[number];
 export type SecurityPermission = Extract<PermissionId, `security.${string}`>;
@@ -23,7 +22,7 @@ export function isPermissionId(value: unknown): value is PermissionId {
 export const isSecurityPermission = (permission: PermissionId): permission is SecurityPermission => permission.startsWith('security.');
 
 const adminPermissions: readonly PermissionId[] = PERMISSIONS.filter(p =>
-  !p.startsWith('security.') && !p.startsWith('children.') &&
+  !p.startsWith('children.') &&
   (!p.startsWith('dashboard.') || p === 'dashboard.admin.view'));
 const ceilings: Readonly<Record<PrimaryRole, readonly PermissionId[]>> = Object.freeze({
   admin: Object.freeze(adminPermissions),

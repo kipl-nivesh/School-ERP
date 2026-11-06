@@ -22,6 +22,7 @@ export interface VerifiedStaffProvider {
   readonly [providerVerified]: true;
   readonly profileId: string; readonly sessionId: string; readonly expiresAt: number;
   readonly authenticatedAt: number; readonly verifiedAt: number; readonly assurance: 'aal1' | 'aal2';
+  readonly reauthenticatedAt?: number | null;
 }
 export interface StaffSchoolSnapshot {
   readonly profile: { readonly id: string; readonly account_status: string; readonly credential_reset_required: boolean; readonly authorization_version: number } | null;
@@ -59,7 +60,7 @@ export function resolveStaffAuthorization(provider: VerifiedStaffProvider | null
   if (tier?.privilege_status === 'pending') return deny;
   const privileged = tier?.privilege_status === 'active';
   if (privileged && !assignments.some(m => m.role === 'admin' && live(m))) return deny;
-  if (privileged && provider.assurance !== 'aal2') return { kind: 'mfa_required' };
+  if ((role === 'admin' || privileged) && provider.assurance !== 'aal2') return { kind: 'mfa_required' };
   if (provider.assurance !== 'aal1' && provider.assurance !== 'aal2') return deny;
   const c = school.context;
   if (!c) return { kind: 'context_required' };
@@ -70,7 +71,12 @@ export function resolveStaffAuthorization(provider: VerifiedStaffProvider | null
   const context = { source: 'verified-server-session', profileId: p.id, accountStatus: 'active', credentialResetRequired: false,
     authorizationVersion: p.authorization_version, currentAuthorizationVersion: p.authorization_version,
     session: { id: provider.sessionId, profileId: p.id, authenticatedAt: provider.authenticatedAt, verifiedAt: provider.verifiedAt,
-      expiresAt: provider.expiresAt, revoked: false, assurance: provider.assurance, reauthenticatedAt: null },
+      expiresAt: provider.expiresAt, revoked: false, assurance: provider.assurance,
+      reauthenticatedAt: (typeof provider.reauthenticatedAt === 'number' && Number.isSafeInteger(provider.reauthenticatedAt) && provider.reauthenticatedAt <= now && now - provider.reauthenticatedAt <= 10 * 60 * 1000)
+        ? provider.reauthenticatedAt
+        : (provider.reauthenticatedAt === null
+            ? null
+            : ((now - provider.authenticatedAt <= 10 * 60 * 1000) ? provider.authenticatedAt : null)) },
     activeRole: { sessionId: provider.sessionId, profileId: p.id, role, assignmentId: membership.id, version: c.context_version,
       currentVersion: c.context_version, expiresAt: Math.min(provider.expiresAt, Date.parse(c.expires_at)), revoked: false },
     assignments, superAdminPrivilege: privileged ? { tier: 'super_admin', profileId: p.id, status: 'active', validFrom: 0, validUntil: null } : null,

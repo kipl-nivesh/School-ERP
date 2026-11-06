@@ -60,7 +60,7 @@ export interface VerifiedServerContext {
   };
   readonly activeRole: ActiveRoleContext;
   readonly assignments: readonly RoleAssignment[];
-  readonly superAdminPrivilege: SuperAdminPrivilege | null;
+  readonly superAdminPrivilege?: SuperAdminPrivilege | null;
 }
 export interface UntrustedClientClaims {
   readonly source: 'untrusted-client';
@@ -73,7 +73,7 @@ export type DenialReason = 'unverified_identity' | 'invalid_context' | 'inactive
   'reset_required' | 'invalid_session' | 'expired_session' | 'stale_authorization' |
   'unknown_role' | 'inactive_role' | 'unknown_permission' | 'permission_denied' |
   'mfa_required' | 'reauthentication_required' | 'invalid_target' | 'approval_required' |
-  'last_super_admin' | 'relationship_denied' | 'immutable_record' | 'integrity_required';
+  'last_admin' | 'last_super_admin' | 'relationship_denied' | 'immutable_record' | 'integrity_required';
 export type PolicyDecision = { readonly allowed: true } | { readonly allowed: false; readonly reason: DenialReason };
 export type AuthenticationResult =
   | { readonly state: 'unauthenticated' }
@@ -105,11 +105,13 @@ export interface PinCredentialBinding {
 export interface SecurityChangeTarget {
   readonly profileId: string;
   readonly role?: unknown;
-  readonly isSuperAdmin: boolean;
+  readonly isAdmin?: boolean;
+  readonly isSuperAdmin?: boolean;
   /** Live count resolved on the server, ultimately checked under a DB lock. */
-  readonly activeSuperAdminCount: number;
+  readonly activeAdminCount?: number;
+  readonly activeSuperAdminCount?: number;
   /** Independent approval resolved/verified by the server, never a request-body boolean. */
-  readonly independentApproverProfileId: string | null;
+  readonly independentApproverProfileId?: string | null;
 }
 export interface SecurityChangeRequest {
   readonly permission: SecurityPermission;

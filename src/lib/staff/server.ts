@@ -33,7 +33,7 @@ async function verifiedProvider(client: StaffClient): Promise<VerifiedStaffProvi
   if (live.error || live.data !== true) return null;
   // SDK verification, Auth identity and live server-side session are required before this evidence exists.
   return { profileId: user.data.user.id, sessionId: claims.session_id, expiresAt: claims.exp * 1000,
-    authenticatedAt: password.timestamp * 1000, verifiedAt: now, assurance: claims.aal } as VerifiedStaffProvider;
+    authenticatedAt: password.timestamp * 1000, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null } as VerifiedStaffProvider;
 }
 
 export async function loadStaffResolution(client: StaffClient, requestedRole?: StaffRole): Promise<StaffResolution> {

@@ -15,7 +15,7 @@ function baseDecision(context: PolicyContext, now: number): PolicyDecision {
   if (!context || context.source !== 'verified-server-session') return deny('unverified_identity');
   if (!time(now) || !context.profileId || !context.session || !context.activeRole || !Array.isArray(context.assignments)) return deny('invalid_context');
   if (context.assignments.some(a => !a || typeof a.id !== 'string' || !a.id || typeof a.profileId !== 'string') ||
-    new Set(context.assignments.map(a => a.id)).size !== context.assignments.length || context.superAdminPrivilege === undefined) return deny('invalid_context');
+    new Set(context.assignments.map(a => a.id)).size !== context.assignments.length) return deny('invalid_context');
   if (context.accountStatus !== 'active') return deny('inactive_account');
   if (context.credentialResetRequired !== false) return deny('reset_required');
   const session = context.session;
@@ -32,11 +32,11 @@ function baseDecision(context: PolicyContext, now: number): PolicyDecision {
   if (!validVersion(active.version) || active.version !== active.currentVersion) return deny('stale_authorization');
   const assignment = context.assignments.find(a => a.id === active.assignmentId && a.profileId === context.profileId && a.role === active.role);
   if (!assignment || assignment.status !== 'active' || !current(assignment.validFrom, assignment.validUntil, now) || !Array.isArray(assignment.permissions)) return deny('inactive_role');
+  if (active.role === 'admin' && session.assurance !== 'aal2') return deny('mfa_required');
   const privilege = context.superAdminPrivilege;
   if (privilege) {
     if (privilege.tier !== 'super_admin' || privilege.profileId !== context.profileId || privilege.status !== 'active' ||
       !current(privilege.validFrom, privilege.validUntil, now)) return deny('stale_authorization');
-    // Super Admin tier is valid only alongside a live Admin membership, even in another active role.
     if (!context.assignments.some(a => a.profileId === context.profileId && a.role === 'admin' && a.status === 'active' && current(a.validFrom, a.validUntil, now))) return deny('inactive_role');
     if (session.assurance !== 'aal2') return deny('mfa_required');
   }
@@ -49,20 +49,14 @@ export function evaluatePermission(context: PolicyContext, permission: unknown, 
   if (!base.allowed) return base;
   if (!isPermissionId(permission)) return deny('unknown_permission');
   const verified = context as VerifiedServerContext; // narrowed after baseDecision; never a request parser
-  const superAdminActive = verified.activeRole.role === 'admin' && verified.superAdminPrivilege?.status === 'active';
-  if (isSecurityPermission(permission) && !superAdminActive) return deny('permission_denied');
-  if (superAdminActive) {
-    // Known catalog only; tier does not authorize audit edits, raw DB access, or unknown actions.
-    if (isSecurityPermission(permission) || permission === 'reports.export' || permission === 'marks.publish') {
-      const at = verified.session.reauthenticatedAt;
-      if (at === null || !time(at) || at > now || now - at > 10 * 60 * 1000) return deny('reauthentication_required');
-    }
-    return allow;
-  }
   if (!getPermissionCeiling(verified.activeRole.role).includes(permission)) return deny('permission_denied');
   const activeAssignment = verified.assignments.find(a => a.id === verified.activeRole.assignmentId && a.profileId === verified.profileId && a.role === verified.activeRole.role);
   if (!activeAssignment?.permissions.includes(permission)) return deny('permission_denied');
-  if ((permission === 'reports.export' || permission === 'marks.publish') && verified.session.assurance !== 'aal2') return deny('mfa_required');
+  if (isSecurityPermission(permission) || permission === 'reports.export' || permission === 'marks.publish') {
+    if (verified.session.assurance !== 'aal2') return deny('mfa_required');
+    const at = verified.session.reauthenticatedAt;
+    if (at === null || !time(at) || at > now || now - at > 10 * 60 * 1000) return deny('reauthentication_required');
+  }
   return allow;
 }
 
@@ -72,21 +66,21 @@ export function evaluateDashboardAccess(context: PolicyContext, role: unknown, n
 }
 
 export function evaluateSecurityChange(context: PolicyContext, request: SecurityChangeRequest, now: number): PolicyDecision {
-  if (!isPermissionId(request.permission) || !isSecurityPermission(request.permission)) return deny('unknown_permission');
+  if (!request || !isPermissionId(request.permission) || !isSecurityPermission(request.permission)) return deny('unknown_permission');
   const permission = evaluatePermission(context, request.permission, now);
   if (!permission.allowed) return permission;
   const verified = context as VerifiedServerContext, target = request.target;
-  if (!target || !target.profileId || typeof target.isSuperAdmin !== 'boolean' || target.profileId === verified.profileId ||
+  if (!target || !target.profileId || target.profileId === verified.profileId ||
     (target.role !== undefined && !isPrimaryRole(target.role))) return deny('invalid_target');
   if ((request.permission === 'security.roles.assign' || request.permission === 'security.roles.revoke') && !isPrimaryRole(target.role)) return deny('invalid_target');
-  const privilegedChange = request.permission.startsWith('security.super_admin.') || target.isSuperAdmin;
-  if (privilegedChange) {
-    if (target.role !== 'admin') return deny('invalid_target');
-    if (!target.independentApproverProfileId || target.independentApproverProfileId === verified.profileId ||
-      target.independentApproverProfileId === target.profileId) return deny('approval_required');
-    // Also applies to suspension, role revocation and credential recovery of privileged accounts.
-    if (request.permission !== 'security.super_admin.grant' &&
-      (!Number.isSafeInteger(target.activeSuperAdminCount) || target.activeSuperAdminCount <= 1)) return deny('last_super_admin');
+  const isAdminTarget = target.role === 'admin' || target.isAdmin === true || target.isSuperAdmin === true;
+  if (isAdminTarget) {
+    const adminCount = target.activeAdminCount ?? target.activeSuperAdminCount;
+    if (request.permission === 'security.accounts.suspend' || request.permission === 'security.roles.revoke' || request.permission === 'security.credentials.reset') {
+      if (adminCount !== undefined && (!Number.isSafeInteger(adminCount) || adminCount <= 1)) {
+        return deny(target.isSuperAdmin ? 'last_super_admin' : 'last_admin');
+      }
+    }
   }
   return allow;
 }

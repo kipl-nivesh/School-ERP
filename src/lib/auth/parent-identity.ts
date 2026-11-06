@@ -15,7 +15,8 @@ export interface ParentLoginCandidate {
   readonly accountStatus: AccountStatus;
   readonly loginEligible: boolean;
   readonly relationshipStatus: 'verified' | 'pending' | 'revoked';
-  readonly provisionedByTier: 'super_admin';
+  readonly provisionedByTier?: 'super_admin' | 'admin' | string;
+  readonly provisionedByRole?: 'admin';
   readonly provisioningStatus: 'approved' | 'pending' | 'revoked';
   /** Complete current reverse login-eligibility scope from trusted storage, not browser-selected children. */
   readonly loginStudentIds: readonly string[];
@@ -66,7 +67,8 @@ export function resolveInitialParent(snapshot: TrustedParentLookupSnapshot | nul
   if (parent.accountStatus !== 'active') return deny('inactive_parent');
   if (!isBoundProviderSubject(parent.provider) || parent.profileId === student.profileId ||
     (parent.provider.issuer === student.provider.issuer && parent.provider.subject === student.provider.subject)) return deny('missing_binding');
-  if (parent.role !== 'parent' || parent.relationshipStatus !== 'verified' || parent.provisionedByTier !== 'super_admin' ||
+  if (parent.role !== 'parent' || parent.relationshipStatus !== 'verified' ||
+    (parent.provisionedByTier !== 'super_admin' && parent.provisionedByTier !== 'admin' && parent.provisionedByRole !== 'admin') ||
     parent.provisioningStatus !== 'approved' || !Array.isArray(parent.loginStudentIds) || parent.loginStudentIds.length !== 1 ||
     parent.loginStudentIds[0] !== student.studentId) return deny('inconsistent_relationship');
   if (!positive(parent.relationshipVersion) || parent.relationshipVersion !== parent.currentRelationshipVersion) return deny('stale_relationship');

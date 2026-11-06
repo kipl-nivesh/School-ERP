@@ -1,5 +1,6 @@
-import type { AdminPrivilegeTier, LoginMethodId, PinCredentialBinding } from './types';
+import type { LoginMethodId, PinCredentialBinding } from './types';
 import { isPrimaryRole } from './roles';
+import type { PrimaryRole } from './roles';
 export const LOGIN_METHODS = Object.freeze({
   email_password: Object.freeze({ roles: Object.freeze(['admin', 'teacher', 'accountant'] as const) }),
   student_registration_pin: Object.freeze({ roles: Object.freeze(['student'] as const) }),
@@ -10,7 +11,7 @@ export function loginMethodForRole(role: unknown): LoginMethodId | null {
   if (!isPrimaryRole(role)) return null;
   return role === 'student' ? 'student_registration_pin' : role === 'parent' ? 'parent_registration_pin' : 'email_password';
 }
-export const loginRequiresMfa = (tier: AdminPrivilegeTier) => tier === 'super_admin';
+export const loginRequiresMfa = (roleOrTier: PrimaryRole | string) => roleOrTier === 'admin' || roleOrTier === 'super_admin';
 
 /** Post-resolution metadata compatibility ONLY. A true result is NOT PIN authentication. */
 export function credentialBindingMatches(method: LoginMethodId, identityProfileId: string, binding: PinCredentialBinding): boolean {
