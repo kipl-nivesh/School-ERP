@@ -60,6 +60,13 @@ import type {
 export type ServiceMode = 'development-adapter' | 'supabase-live';
 
 export function resolveServiceMode(context: PolicyContext): ServiceMode {
+  if (process.env.NODE_ENV === 'production' || staffRequestsEnabled()) {
+    if (!staffRequestsEnabled() || !getSupabasePublicConfiguration().configured ||
+      context?.source !== 'verified-server-session' || !context.schoolId) {
+      throw new Error('Verified school session required. Development fallback is disabled.');
+    }
+    return 'supabase-live';
+  }
   // Check if live requests are enabled via configuration
   if (!staffRequestsEnabled()) {
     return 'development-adapter';
@@ -385,6 +392,20 @@ export class StudentPortalGateway {
     }
     return Promise.resolve(DevStudentService.getExamResults(context, studentProfileId));
   }
+
+  static async getSubscriptionStatus(context: PolicyContext, studentId: string) {
+    return DevStudentService.getSubscriptionStatus(context, studentId);
+  }
+
+  static async extendSubscription(
+    context: PolicyContext,
+    studentId: string,
+    schoolId: string,
+    planId: import('../subscription/contracts').SubscriptionPlanId,
+    idempotencyKey: string
+  ) {
+    return DevStudentService.extendSubscription(context, studentId, schoolId, planId, idempotencyKey);
+  }
 }
 
 // =============================================================================
@@ -406,5 +427,14 @@ export class ParentPortalGateway {
       return ParentPortalSupabaseService.getChildAcademicReport(context, parentProfileId, studentId);
     }
     return Promise.resolve(DevParentService.getChildAcademicReport(context, parentProfileId, studentId));
+  }
+
+  static async getChildrenSubscriptions(
+    context: PolicyContext,
+    parentProfileId: string,
+    schoolId: string,
+    children: ReadonlyArray<{ studentId: string; studentName: string; registrationNumber: string }>
+  ) {
+    return DevParentService.getChildrenSubscriptions(context, parentProfileId, schoolId, children);
   }
 }

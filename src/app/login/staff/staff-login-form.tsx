@@ -2,7 +2,7 @@
 import { useActionState, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
 import { INITIAL_STAFF_STATE } from '@/lib/staff/contracts';
 import type { StaffRole } from '@/lib/staff/contracts';
 import { staffAction, logoutStaff } from './actions';
@@ -11,6 +11,7 @@ import styles from './staff-login.module.css';
 export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }) {
   const [state, action, pending] = useActionState(staffAction, INITIAL_STAFF_STATE);
   const [role, setRole] = useState<StaffRole>('admin');
+  const [showPassword, setShowPassword] = useState(false);
   return <main className={styles.page}>
     <div className={styles.shell}>
       <section className={styles.story} aria-labelledby="staff-welcome">
@@ -47,7 +48,27 @@ export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }
               <label htmlFor="staff-email">School email</label>
               <input id="staff-email" name="email" type="email" autoComplete="username" maxLength={254} required disabled={pending} />
               <label htmlFor="staff-password">Password</label>
-              <input id="staff-password" name="password" type="password" autoComplete="current-password" maxLength={1024} required disabled={pending} />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  id="staff-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  maxLength={1024}
+                  required
+                  disabled={pending}
+                  style={{ width: '100%', paddingRight: '2.5rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  style={{ position: 'absolute', right: '0.75rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 0 }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <button type="submit" name="intent" value="password" disabled={pending}>{pending ? 'Checking securely…' : 'Continue to workspace'}<ArrowRight size={17} /></button>
             </> : <>
               {state.qrDataUri?.startsWith('data:image/svg+xml;base64,') && <div className={styles.qr}><Image unoptimized src={state.qrDataUri} alt="Authenticator enrollment QR code. Keep it private." width={192} height={192} /></div>}
@@ -60,8 +81,14 @@ export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }
             </>}
             {state.message && <p className={styles.feedback} role={state.phase === 'error' ? 'alert' : 'status'}>{state.message}</p>}
           </form>
-          <p className={styles.support}>Need account or authenticator recovery? Contact the school administrator. Recovery requires identity verification; there is no public signup.</p>
-          <div className={styles.footer}><ShieldCheck size={16} /><span>Super Admin uses Administration with mandatory MFA.</span></div>
+          <p className={styles.support}>
+            Need account or authenticator recovery? Contact the school administrator. Recovery requires identity verification; there is no public signup.
+            <br />
+            <Link href="/register/school" style={{ color: '#0284c7', fontWeight: 600, display: 'inline-block', marginTop: '6px' }}>
+              Looking to onboard a new institution? Register your school &rarr;
+            </Link>
+          </p>
+          <div className={styles.footer}><ShieldCheck size={16} /><span>School Admin requires mandatory MFA.</span></div>
           <form action={logoutStaff}><button className={styles.endSession} type="submit">End staff session</button></form>
         </div>
         <small className={styles.previewNote}>Student and Parent PIN sign-in is not enabled.</small>

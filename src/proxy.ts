@@ -6,6 +6,7 @@ import { getSupabasePublicConfiguration } from './lib/supabase/config';
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   response.headers.set('Cache-Control', 'private, no-store');
+  response.headers.set('Referrer-Policy', 'no-referrer');
   if (process.env.STAFF_AUTH_REQUESTS_ENABLED !== 'true') return response;
   const configuration = getSupabasePublicConfiguration();
   if (!configuration.configured) return response;
@@ -18,10 +19,11 @@ export async function proxy(request: NextRequest) {
         response = NextResponse.next({ request });
         for (const { name, value, options } of updates) response.cookies.set(name, value, options);
         response.headers.set('Cache-Control', 'private, no-store');
+        response.headers.set('Referrer-Policy', 'no-referrer');
       },
     },
   });
   try { await client.auth.getClaims(); } catch { /* No authority granted; page/DAL fails closed. */ }
   return response;
 }
-export const config = { matcher: ['/staff/:path*', '/login/staff'] };
+export const config = { matcher: ['/staff/:path*', '/login/staff/:path*', '/invite'] };

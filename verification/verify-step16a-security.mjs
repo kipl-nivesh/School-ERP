@@ -46,7 +46,7 @@ function createProvider(overrides = {}) {
     expiresAt: NOW + 1800000, // +30m
     authenticatedAt: NOW - 600000, // -10m
     verifiedAt: NOW - 600000,
-    assurance: 'aal1',
+    assurance: 'aal2',
     ...overrides
   };
 }
@@ -154,7 +154,7 @@ runTest('Staff authorization: Future Admin membership fails closed (denied)', ()
 });
 
 // ---------------------------------------------------------------------------
-// 3. Task A: Super Admin AAL2 Enforcement & Ordinary Admin AAL1 Allowance
+// 3. Task A: Super Admin AAL2 Enforcement & Ordinary Admin MFA Enforcement
 // ---------------------------------------------------------------------------
 runTest('Super Admin with active privilege requires AAL2; denies AAL1 with mfa_required', () => {
   const provider = createProvider({ assurance: 'aal1' });
@@ -180,7 +180,7 @@ runTest('Super Admin with active privilege and verified AAL2 authorizes successf
   assert.equal(res.kind, 'authorized');
 });
 
-runTest('Ordinary Admin without Super Admin tier authorizes on password alone (AAL1)', () => {
+runTest('Ordinary Admin requires MFA (AAL1)', () => {
   const provider = createProvider({ assurance: 'aal1' });
   const snapshot = {
     profile: createProfile(),
@@ -189,7 +189,7 @@ runTest('Ordinary Admin without Super Admin tier authorizes on password alone (A
     context: createContext()
   };
   const res = core.resolveStaffAuthorization(provider, snapshot, 'admin', NOW);
-  assert.equal(res.kind, 'authorized');
+  assert.equal(res.kind, 'mfa_required');
 });
 
 // ---------------------------------------------------------------------------
@@ -208,7 +208,7 @@ runTest('Pending Super Admin privilege fails closed immediately (denied)', () =>
 });
 
 runTest('Revoked Super Admin privilege acts as ordinary Admin without elevation', () => {
-  const provider = createProvider({ assurance: 'aal1' });
+  const provider = createProvider({ assurance: 'aal2' });
   // With 'dashboard.admin.view', ordinary Admin can see dashboard
   const snapshot = {
     profile: createProfile(),
@@ -332,7 +332,7 @@ runTest('Ordinary Admin cannot access security provisioning permissions', () => 
   for (const perm of ['security.accounts.create', 'security.roles.assign', 'security.super_admin.grant']) {
     const decision = auth.evaluatePermission(res.context, perm, NOW);
     assert.equal(decision.allowed, false);
-    assert.equal(decision.reason, 'permission_denied');
+    assert.equal(decision.reason, perm === 'security.super_admin.grant' ? 'unknown_permission' : 'permission_denied');
   }
 });
 
@@ -454,8 +454,9 @@ runTest('Migration files SHA-256 hashes match baseline', () => {
     'supabase/migrations/20261105000300_staff_security.sql': '0664187c5d4a3ed6e3d83b4e7f365ed7e58d010b117565ce3e7d65f468307ce9'
   };
   for (const [file, expectedHash] of Object.entries(expectedHashes)) {
-    const actualHash = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-    assert.equal(actualHash, expectedHash, `Hash mismatch on ${file}`);
+    const sql = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+    const checkoutHashes = [sql, sql.replace(/\n/g, '\r\n')].map(content => crypto.createHash('sha256').update(content).digest('hex'));
+    assert.ok(checkoutHashes.includes(expectedHash), `Hash mismatch on ${file}`);
   }
 });
 

@@ -701,14 +701,21 @@ create policy accountant_expenses_all on public.operating_expenses for all to au
 
 -- Student Self-Access Policies
 create policy student_attendance_self on public.attendance_records for select to authenticated
-  using (student_id = auth.uid());
+  using (
+    exists (
+      select 1 from public.students s
+      where s.id = public.attendance_records.student_id
+        and s.profile_id = auth.uid()
+    )
+  );
 
 create policy student_homework_self on public.homework_assignments for select to authenticated
   using (
     status = 'active'
     and exists (
       select 1 from public.enrollments e
-      where e.student_id = auth.uid()
+      join public.students s on s.id = e.student_id
+      where s.profile_id = auth.uid()
         and e.section_id = public.homework_assignments.section_id
     )
   );
@@ -718,14 +725,19 @@ create policy student_marks_sheets_self on public.marks_sheets for select to aut
     is_published = true
     and exists (
       select 1 from public.enrollments e
-      where e.student_id = auth.uid()
+      join public.students s on s.id = e.student_id
+      where s.profile_id = auth.uid()
         and e.section_id = public.marks_sheets.section_id
     )
   );
 
 create policy student_marks_entries_self on public.marks_entries for select to authenticated
   using (
-    student_id = auth.uid()
+    exists (
+      select 1 from public.students s
+      where s.id = public.marks_entries.student_id
+        and s.profile_id = auth.uid()
+    )
     and exists (
       select 1 from public.marks_sheets ms
       where ms.id = public.marks_entries.marks_sheet_id
@@ -737,16 +749,29 @@ create policy student_timetable_self on public.timetable_slots for select to aut
   using (
     exists (
       select 1 from public.enrollments e
-      where e.student_id = auth.uid()
+      join public.students s on s.id = e.student_id
+      where s.profile_id = auth.uid()
         and e.section_id = public.timetable_slots.section_id
     )
   );
 
 create policy student_invoices_self on public.fee_invoices for select to authenticated
-  using (student_id = auth.uid());
+  using (
+    exists (
+      select 1 from public.students s
+      where s.id = public.fee_invoices.student_id
+        and s.profile_id = auth.uid()
+    )
+  );
 
 create policy student_payments_self on public.fee_payments for select to authenticated
-  using (student_id = auth.uid());
+  using (
+    exists (
+      select 1 from public.students s
+      where s.id = public.fee_payments.student_id
+        and s.profile_id = auth.uid()
+    )
+  );
 
 -- Parent Verified-Child Scoped Policies
 create policy parent_attendance_child on public.attendance_records for select to authenticated

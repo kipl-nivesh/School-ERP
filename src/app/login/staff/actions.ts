@@ -8,15 +8,21 @@ import type { StaffActionState } from '@/lib/staff/contracts';
 export async function loginStaff(_previous: StaffActionState, form: FormData): Promise<StaffActionState> {
   const enabled = staffRequestsEnabled();
   let client: Awaited<ReturnType<typeof staffClient>> | undefined;
+  let passwordVerified = false;
   const getClient = async () => client ??= await staffClient(true);
   const result = await performStaffLogin({ email: form.get('email'), password: form.get('password'), role: form.get('role'), next: form.get('next') }, {
     enabled, configured: getSupabasePublicConfiguration().configured,
-    signIn: async (email, password) => { const r = await (await getClient()).auth.signInWithPassword({ email, password }); return !r.error && !!r.data.user; },
+    signIn: async (email, password) => { const r = await (await getClient()).auth.signInWithPassword({ email, password }); passwordVerified = !r.error && !!r.data.user; return passwordVerified; },
     resolve: async role => loadStaffResolution(await getClient(), role),
-    activate: async role => { const r = await (await getClient()).rpc('activate_staff_context', { requested_role: role }); return !r.error && r.data === true; },
+    // Selection is a separate checked transaction; no legacy unscoped context activation.
+    activate: async () => false,
     factor: async () => { const r = await (await getClient()).auth.mfa.listFactors(); if (r.error) throw new Error('Factor lookup failed'); return r.data.totp.find(f => f.status === 'verified')?.id ?? null; },
   });
   if (result.phase === 'authorized') redirect(result.destination);
+  if (result.phase === 'error' && passwordVerified) {
+    const memberships = await (await getClient()).rpc('list_school_memberships');
+    if (!memberships.error && Array.isArray(memberships.data) && memberships.data.length) redirect('/staff/select-school');
+  }
   return result;
 }
 
@@ -55,10 +61,10 @@ export async function verifyStaffMfa(_previous: StaffActionState, form: FormData
     if (factors.error || !factors.data.all.some(f => f.id === factorId && f.factor_type === 'totp')) return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const verification = await client.auth.mfa.challengeAndVerify({ factorId, code });
     if (verification.error) return { phase: 'mfa', message: GENERIC_STAFF_ERROR, factorId };
-    let access = await loadStaffResolution(client, role);
+    const access = await loadStaffResolution(client, role);
     if (access.kind === 'context_required') {
-      const activation = await client.rpc('activate_staff_context', { requested_role: role });
-      if (!activation.error && activation.data === true) access = await loadStaffResolution(client, role);
+      const memberships = await client.rpc('list_school_memberships');
+      if (!memberships.error && Array.isArray(memberships.data) && memberships.data.some(m => m.role_code === role)) destination = '/staff/select-school';
     }
     if (access.kind === 'authorized') destination = safeStaffDestination(form.get('next'), role);
   } catch { /* Generic denial; never expose provider, cookie or database details. */ }
@@ -71,12 +77,14 @@ export async function logoutStaff(): Promise<void> {
   let complete = false;
   try {
     const client = await staffClient(true);
-    const revoked = await client.rpc('revoke_staff_context');
-    if (!revoked.error && revoked.data === true) {
-      const result = await client.auth.signOut({ scope: 'local' });
-      complete = !result.error;
-    }
-  } catch { /* Local context revocation must succeed before claiming logout. */ }
+    let contextRevoked = false;
+    try {
+      const revoked = await client.rpc('revoke_staff_context');
+      contextRevoked = !revoked.error && revoked.data === true;
+    } catch { /* Still attempt native sign-out if the application RPC is unavailable. */ }
+    const result = await client.auth.signOut({ scope: 'local' });
+    complete = contextRevoked && !result.error;
+  } catch { /* Never claim complete revocation after a provider failure. */ }
   redirect(complete ? '/login/staff' : '/login/staff?notice=unavailable');
 }
 

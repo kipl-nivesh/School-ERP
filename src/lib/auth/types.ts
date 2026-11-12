@@ -41,6 +41,8 @@ declare const verifiedServerContext: unique symbol;
  * All timestamps are epoch milliseconds; the caller supplies the trusted current time.
  */
 export interface VerifiedServerContext {
+  /** Populated only by the tenant-aware server adapter; required by live DAL. */
+  readonly schoolId?: string;
   readonly [verifiedServerContext]: true;
   readonly source: 'verified-server-session';
   readonly profileId: string;

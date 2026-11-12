@@ -11,6 +11,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { tenantClient } from './tenant-client';
 import { evaluatePermission, evaluateRecordMutation } from '../auth/authorization';
 import type { PolicyContext } from '../auth/types';
 import { getSupabasePublicConfiguration } from '../supabase/config';
@@ -77,13 +78,14 @@ export function setSupabaseClientFactory(factory: (() => Promise<SupabaseClient>
 
 async function getAuthenticatedClient(context: PolicyContext, writable = false): Promise<SupabaseClient> {
   if (customClientFactory) {
+    if (process.env.NODE_ENV === 'production') throw new Error('Test client injection is disabled in production.');
     return customClientFactory();
   }
   const config = getSupabasePublicConfiguration();
   if (!config.configured) {
     throw new Error('Supabase client is not configured in this environment.');
   }
-  if (!context || context.source !== 'verified-server-session') {
+  if (!context || context.source !== 'verified-server-session' || !context.schoolId) {
     throw new Error('Cannot acquire Supabase client without a verified server session context.');
   }
   const { createServerSupabaseClient } = await import('../supabase/server');
@@ -91,7 +93,9 @@ async function getAuthenticatedClient(context: PolicyContext, writable = false):
     cookieWrites: writable ? 'allowed' : 'read-only',
     httpOnlyCookies: true,
   });
-  return client as unknown as SupabaseClient;
+  const tenant = await client.rpc('current_school_id');
+  if (tenant.error || tenant.data !== context.schoolId) throw new Error('School context is unavailable or has changed.');
+  return tenantClient(client as unknown as SupabaseClient, context.schoolId);
 }
 
 // =============================================================================
@@ -238,69 +242,20 @@ export class SchoolAdminSupabaseService {
   }
 
   static async createStudentAdmission(context: PolicyContext, input: NewStudentAdmissionInput): Promise<OperationResult<StudentRecord>> {
-    if (!checkAuth(context, 'admissions.write')) {
-      return { success: false, error: 'Unauthorized: Admissions write permission required', code: 'PERMISSION_DENIED' };
-    }
-
-    if (!input.fullName?.trim() || !input.classId || !input.sectionId || !input.guardianPhone?.trim()) {
-      return { success: false, error: 'Student full name, class, section, and guardian contact are required', code: 'INVALID_INPUT' };
-    }
-
+    if (!checkAuth(context, 'admissions.write')) return { success: false, error: 'Admission not authorized', code: 'PERMISSION_DENIED' };
     try {
       const client = await getAuthenticatedClient(context, true);
-
-      // Generate admission and roll numbers
-      const regNumber = `BC-2026-${Date.now().toString().slice(-4)}`;
-      const rollNumber = `R-${Date.now().toString().slice(-2)}`;
-
-      const { data: student, error: studentErr } = await client.from('students').insert({
-        registration_number: regNumber,
-        display_name: input.fullName.trim(),
-        roll_number: rollNumber,
-        date_of_birth: input.dateOfBirth,
-        gender: input.gender,
-        enrollment_status: 'active',
-      }).select().single();
-
-      if (studentErr) return { success: false, error: studentErr.message, code: studentErr.code };
-
-      // Create enrollment record
-      await client.from('enrollments').insert({
-        student_id: student.id,
-        section_id: input.sectionId,
-        valid_from: new Date().toISOString().split('T')[0],
-      });
-
-      // Append immutable audit log
-      await client.from('audit_events').insert({
-        actor_profile_id: getContextProfileId(context),
-        target_profile_id: student.id,
-        event_type: 'student_admitted',
-      });
-
-      return {
-        success: true,
-        data: {
-          id: student.id,
-          admissionNumber: regNumber,
-          rollNumber,
-          fullName: input.fullName.trim(),
-          classId: input.classId,
-          className: 'Class (Enrolled)',
-          sectionId: input.sectionId,
-          sectionName: 'Section',
-          gender: input.gender,
-          dateOfBirth: input.dateOfBirth,
-          guardianName: input.guardianName.trim(),
-          guardianPhone: input.guardianPhone.trim(),
-          guardianEmail: input.guardianEmail?.trim() || '',
-          status: 'active',
-          admissionDate: new Date().toISOString().split('T')[0],
-        },
-        message: `Student admission created with Registration Number: ${regNumber}`,
-      };
-    } catch (err) {
-      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+      if (!input.requestId || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.requestId)) {
+        return { success: false, error: 'Admission request identifier required', code: 'INVALID_INPUT' };
+      }
+      const { requestId, ...payload } = input;
+      const { data, error } = await client.rpc('admit_student_idempotent', { p_request_id: requestId, p_input: payload });
+      if (error || !data || typeof data.id !== 'string' || typeof data.admissionNumber !== 'string') {
+        return { success: false, error: 'Admission could not be completed', code: 'ADMISSION_FAILED' };
+      }
+      return { success: true, data: data as StudentRecord, message: 'Admission saved. Portal identity activation is separate.' };
+    } catch {
+      return { success: false, error: 'Admission could not be completed', code: 'ADMISSION_FAILED' };
     }
   }
 
@@ -367,43 +322,12 @@ export class SchoolAdminSupabaseService {
 
   static async createStaffAccount(context: PolicyContext, input: NewStaffInput): Promise<OperationResult<StaffRecord>> {
     if (!checkAuth(context, 'security.accounts.create')) {
-      return { success: false, error: 'Unauthorized: Staff creation permission required (School Admin MFA + fresh auth)', code: 'PERMISSION_DENIED' };
+      return { success: false, error: 'Staff account creation is not authorized', code: 'PERMISSION_DENIED' };
     }
-
-    if (!input.fullName?.trim() || !input.email?.trim() || !input.department?.trim()) {
-      return { success: false, error: 'Full name, email, role, and department are required', code: 'INVALID_INPUT' };
+    if (!input.fullName?.trim() || !input.email?.trim()) {
+      return { success: false, error: 'Name and email are required', code: 'INVALID_INPUT' };
     }
-
-    try {
-      const client = await getAuthenticatedClient(context, true);
-      const empCode = `EMP-2026-${Date.now().toString().slice(-3)}`;
-
-      // Append immutable audit log
-      await client.from('audit_events').insert({
-        actor_profile_id: getContextProfileId(context),
-        event_type: 'staff_account_created',
-      });
-
-      return {
-        success: true,
-        data: {
-          id: `stf-${Date.now()}`,
-          employeeCode: empCode,
-          fullName: input.fullName.trim(),
-          role: input.role,
-          department: input.department.trim(),
-          designation: input.designation?.trim() || (input.role === 'teacher' ? 'Teacher' : input.role === 'accountant' ? 'Accountant' : 'Administrator'),
-          qualification: input.qualification?.trim() || 'Graduate',
-          email: input.email.trim().toLowerCase(),
-          phone: input.phone?.trim() || '+91 98765 43210',
-          joiningDate: new Date().toISOString().split('T')[0],
-          status: 'active',
-        },
-        message: `Staff profile provisioned with Employee Code: ${empCode}`,
-      };
-    } catch (err) {
-      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
-    }
+    return { success: false, error: 'Use the verified staff invitation flow. No account was created.', code: 'INVITATION_REQUIRED' };
   }
 
   static async listClasses(context: PolicyContext): Promise<OperationResult<readonly ClassRecord[]>> {
@@ -1296,7 +1220,10 @@ export class AccountantSupabaseService {
       });
 
       if (error) return { success: false, error: error.message, code: error.code };
-      if (!data?.success) return { success: false, error: data?.error || 'Payment rejected', code: data?.code || 'PAYMENT_FAILED' };
+        if (!data || !['settled', 'idempotent_duplicate'].includes(data.status) ||
+          typeof data.payment_id !== 'string' || typeof data.receipt_number !== 'string') {
+          return { success: false, error: 'Payment result could not be verified', code: 'PAYMENT_FAILED' };
+        }
 
       return {
         success: true,
@@ -1711,51 +1638,7 @@ export class ParentPortalSupabaseService {
     results: readonly StudentExamResultItem[];
     homework: readonly HomeworkRecord[];
   }>> {
-    try {
-      const client = await getAuthenticatedClient(context);
-
-      // Verify guardian linkage
-      const { data: link, error: linkErr } = await client
-        .from('student_guardian_relationships')
-        .select('id, academic_access')
-        .eq('student_id', studentId)
-        .eq('relationship_status', 'verified')
-        .maybeSingle();
-
-      if (linkErr || !link || !link.academic_access) {
-        return { success: false, error: 'Access denied: Verified guardian academic access required', code: 'RELATIONSHIP_DENIED' };
-      }
-
-      const resultsRes = await StudentPortalSupabaseService.getExamResults(context, studentId);
-      const results = resultsRes.success ? resultsRes.data : [];
-
-      return {
-        success: true,
-        data: {
-          student: {
-            id: studentId,
-            admissionNumber: 'BC-2026-001',
-            rollNumber: '10-A-01',
-            fullName: 'Aarav Sharma',
-            classId: 'cls-10',
-            className: 'Class 10',
-            sectionId: 'sec-10a',
-            sectionName: 'A',
-            gender: 'male',
-            dateOfBirth: '2011-05-14',
-            guardianName: 'Rajesh Sharma',
-            guardianPhone: '+91 98765 43210',
-            guardianEmail: 'parent@brightcamp.edu.invalid',
-            status: 'active',
-            admissionDate: '2024-04-01',
-          },
-          attendanceRate: 94.6,
-          results,
-          homework: [],
-        },
-      };
-    } catch (err) {
-      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
-    }
+    void context; void parentProfileId; void studentId;
+    return { success: false, error: 'Academic report integration is unavailable.', code: 'INTEGRATION_UNAVAILABLE' };
   }
 }

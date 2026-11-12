@@ -27,7 +27,7 @@ export interface VerifiedStaffProvider {
 export interface StaffSchoolSnapshot {
   readonly profile: { readonly id: string; readonly account_status: string; readonly credential_reset_required: boolean; readonly authorization_version: number } | null;
   readonly memberships: readonly { readonly id: string; readonly profile_id: string; readonly role_code: string; readonly membership_status: string; readonly valid_from: string; readonly valid_until: string | null; readonly permissions: readonly string[] }[];
-  readonly privilege: { readonly profile_id: string; readonly tier: string; readonly privilege_status: string } | null;
+  readonly privilege?: { readonly profile_id: string; readonly tier: string; readonly privilege_status: string } | null;
   readonly context: { readonly id: string; readonly profile_id: string; readonly role_code: string; readonly assignment_id: string; readonly context_version: number; readonly authorization_version: number; readonly expires_at: string; readonly revoked_at: string | null } | null;
 }
 export type StaffResolution = { readonly kind: 'denied' } | { readonly kind: 'mfa_required' } |

@@ -1,3 +1,4 @@
+import { assertPreviewContext } from './preview-boundary';
 /**
  * Development Service Adapter for School ERP Dashboards.
  * 
@@ -10,6 +11,17 @@
 
 import { evaluatePermission, evaluateRecordMutation } from '../auth/authorization';
 import type { PolicyContext } from '../auth/types';
+import {
+  getStudentSubscription,
+  getParentChildSubscriptionAccess,
+  extendStudentSubscription,
+} from '../subscription/service';
+import type {
+  StudentSubscriptionState,
+  ParentChildSubscriptionSummary,
+  SubscriptionPlanId,
+  SubscriptionExtensionResult,
+} from '../subscription/contracts';
 import type {
   StudentRecord,
   NewStudentAdmissionInput,
@@ -419,6 +431,7 @@ export class SchoolAdminService {
     totalFeeCollectedPaise: number;
     totalFeePendingPaise: number;
   }> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'school.settings.read')) {
       return { success: false, error: 'Unauthorized: School Admin read access required', code: 'PERMISSION_DENIED' };
     }
@@ -443,6 +456,7 @@ export class SchoolAdminService {
   }
 
   static listStudents(context: PolicyContext, params?: PaginationParams): OperationResult<PaginatedResult<StudentRecord>> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'students.read')) {
       return { success: false, error: 'Unauthorized: Student directory access required', code: 'PERMISSION_DENIED' };
     }
@@ -474,6 +488,7 @@ export class SchoolAdminService {
   }
 
   static createStudentAdmission(context: PolicyContext, input: NewStudentAdmissionInput): OperationResult<StudentRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'admissions.write')) {
       return { success: false, error: 'Unauthorized: Admissions write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -537,6 +552,7 @@ export class SchoolAdminService {
   }
 
   static listStaff(context: PolicyContext, params?: PaginationParams): OperationResult<PaginatedResult<StaffRecord>> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'staff.read')) {
       return { success: false, error: 'Unauthorized: Staff directory access required', code: 'PERMISSION_DENIED' };
     }
@@ -568,6 +584,7 @@ export class SchoolAdminService {
   }
 
   static createStaffMember(context: PolicyContext, input: NewStaffInput): OperationResult<StaffRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'security.accounts.create')) {
       return { success: false, error: 'Unauthorized: Staff account creation permission required', code: 'PERMISSION_DENIED' };
     }
@@ -615,6 +632,7 @@ export class SchoolAdminService {
   }
 
   static listClasses(context: PolicyContext): OperationResult<readonly ClassRecord[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'academics.manage')) {
       return { success: false, error: 'Unauthorized: Academic management permission required', code: 'PERMISSION_DENIED' };
     }
@@ -622,6 +640,7 @@ export class SchoolAdminService {
   }
 
   static createClass(context: PolicyContext, name: string, gradeLevel: number, sectionName: string): OperationResult<ClassRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'academics.manage')) {
       return { success: false, error: 'Unauthorized: Academic management permission required', code: 'PERMISSION_DENIED' };
     }
@@ -677,6 +696,7 @@ export class SchoolAdminService {
   }
 
   static listAcademicYears(context: PolicyContext): OperationResult<readonly AcademicYearRecord[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'school.settings.read')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -684,6 +704,7 @@ export class SchoolAdminService {
   }
 
   static listTeacherAssignments(context: PolicyContext): OperationResult<readonly TeacherAssignmentRecord[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'academics.manage')) {
       return { success: false, error: 'Unauthorized: Academics permission required', code: 'PERMISSION_DENIED' };
     }
@@ -691,6 +712,7 @@ export class SchoolAdminService {
   }
 
   static assignTeacher(context: PolicyContext, teacherId: string, classId: string, sectionId: string, subjectName: string, periods: number): OperationResult<TeacherAssignmentRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'academics.manage')) {
       return { success: false, error: 'Unauthorized: Academics permission required', code: 'PERMISSION_DENIED' };
     }
@@ -721,6 +743,7 @@ export class SchoolAdminService {
   }
 
   static getAttendanceSummary(context: PolicyContext, date: string): OperationResult<SchoolAttendanceSummary> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'attendance.read')) {
       return { success: false, error: 'Unauthorized: Attendance read permission required', code: 'PERMISSION_DENIED' };
     }
@@ -773,6 +796,7 @@ export class SchoolAdminService {
   }
 
   static getSchoolSettings(context: PolicyContext): OperationResult<SchoolSettingsRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'school.settings.read')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -780,6 +804,7 @@ export class SchoolAdminService {
   }
 
   static updateSchoolSettings(context: PolicyContext, updates: Partial<SchoolSettingsRecord>): OperationResult<SchoolSettingsRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'school.settings.write')) {
       return { success: false, error: 'Unauthorized: School settings write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -803,6 +828,7 @@ export class SchoolAdminService {
   }
 
   static listAuditTrail(context: PolicyContext, params?: PaginationParams): OperationResult<PaginatedResult<AuditTrailRecord>> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'audit.read')) {
       return { success: false, error: 'Unauthorized: Audit trail read permission required', code: 'PERMISSION_DENIED' };
     }
@@ -837,6 +863,7 @@ export class SchoolAdminService {
 
 export class TeacherService {
   static getAssignedClasses(context: PolicyContext, teacherProfileId: string): OperationResult<readonly TeacherAssignedClass[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'dashboard.teacher.view')) {
       return { success: false, error: 'Unauthorized: Teacher dashboard access required', code: 'PERMISSION_DENIED' };
     }
@@ -862,6 +889,7 @@ export class TeacherService {
   }
 
   static getStudentRoster(context: PolicyContext, classId: string, sectionId: string, teacherProfileId: string): OperationResult<readonly StudentRecord[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'students.read')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -884,6 +912,7 @@ export class TeacherService {
     records: readonly AttendanceEntryItem[],
     teacherProfileId: string
   ): OperationResult<{ savedCount: number; date: string }> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'attendance.write')) {
       return { success: false, error: 'Unauthorized: Attendance write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -919,6 +948,7 @@ export class TeacherService {
     dueDate: string,
     teacherProfileId: string
   ): OperationResult<HomeworkRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'homework.write')) {
       return { success: false, error: 'Unauthorized: Homework write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -953,6 +983,7 @@ export class TeacherService {
   }
 
   static listHomework(context: PolicyContext, classId: string, sectionId: string): OperationResult<readonly HomeworkRecord[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'homework.read')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -970,6 +1001,7 @@ export class TeacherService {
     entries: readonly { studentId: string; marksObtained: number; remarks?: string }[],
     teacherProfileId: string
   ): OperationResult<MarksSheetRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'marks.write')) {
       return { success: false, error: 'Unauthorized: Marks write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -1022,6 +1054,7 @@ export class TeacherService {
   }
 
   static publishMarks(context: PolicyContext, sheetId: string, teacherProfileId: string): OperationResult<MarksSheetRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'marks.write') && !checkAuth(context, 'marks.publish')) {
       return { success: false, error: 'Unauthorized: Marks write or publish permission required', code: 'PERMISSION_DENIED' };
     }
@@ -1049,6 +1082,7 @@ export class TeacherService {
   }
 
   static getTeacherTimetable(context: PolicyContext, teacherProfileId: string): OperationResult<TeacherWeeklyTimetable> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'dashboard.teacher.view')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -1101,6 +1135,7 @@ export class TeacherService {
 
 export class AccountantService {
   static getFinancialSummary(context: PolicyContext): OperationResult<FinancialSummaryReport> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'fees.read') || !checkAuth(context, 'payments.read')) {
       return { success: false, error: 'Unauthorized: Financial read access required', code: 'PERMISSION_DENIED' };
     }
@@ -1133,6 +1168,7 @@ export class AccountantService {
   }
 
   static listFeeStructures(context: PolicyContext): OperationResult<readonly FeeStructureItem[]> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'fees.read')) {
       return { success: false, error: 'Unauthorized', code: 'PERMISSION_DENIED' };
     }
@@ -1140,6 +1176,7 @@ export class AccountantService {
   }
 
   static getStudentLedger(context: PolicyContext, studentId: string): OperationResult<StudentFeeLedger> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'fees.read')) {
       return { success: false, error: 'Unauthorized: Fee ledger access required', code: 'PERMISSION_DENIED' };
     }
@@ -1177,6 +1214,7 @@ export class AccountantService {
   }
 
   static collectPayment(context: PolicyContext, input: CollectPaymentInput): OperationResult<PaymentReceiptRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'payments.record')) {
       return { success: false, error: 'Unauthorized: Payment recording permission required', code: 'PERMISSION_DENIED' };
     }
@@ -1253,6 +1291,7 @@ export class AccountantService {
   }
 
   static listReceipts(context: PolicyContext, params?: PaginationParams): OperationResult<PaginatedResult<PaymentReceiptRecord>> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'receipts.read')) {
       return { success: false, error: 'Unauthorized: Receipt read permission required', code: 'PERMISSION_DENIED' };
     }
@@ -1288,6 +1327,7 @@ export class AccountantService {
     paymentMethod: ExpenseRecord['paymentMethod'],
     description: string
   ): OperationResult<ExpenseRecord> {
+    assertPreviewContext(context);
     if (!checkAuth(context, 'expenses.write')) {
       return { success: false, error: 'Unauthorized: Expense recording permission required', code: 'PERMISSION_DENIED' };
     }
@@ -1320,6 +1360,7 @@ export class AccountantService {
 
 export class StudentPortalService {
   static getProfileOverview(context: PolicyContext, studentProfileId: string): OperationResult<StudentProfileOverview> {
+    assertPreviewContext(context);
     // Identity Scoping: A student can ONLY view their own record
     if (context && getContextRole(context) === 'student' && getContextProfileId(context) !== studentProfileId) {
       return { success: false, error: 'Access denied: Cannot query other student identities', code: 'UNAUTHORIZED_SCOPE' };
@@ -1348,6 +1389,7 @@ export class StudentPortalService {
   }
 
   static getAttendanceHistory(context: PolicyContext, studentProfileId: string): OperationResult<readonly StudentAttendanceDay[]> {
+    assertPreviewContext(context);
     if (context && getContextRole(context) === 'student' && getContextProfileId(context) !== studentProfileId) {
       return { success: false, error: 'Access denied', code: 'UNAUTHORIZED_SCOPE' };
     }
@@ -1363,6 +1405,7 @@ export class StudentPortalService {
   }
 
   static getExamResults(context: PolicyContext, studentProfileId: string): OperationResult<readonly StudentExamResultItem[]> {
+    assertPreviewContext(context);
     if (context && getContextRole(context) === 'student' && getContextProfileId(context) !== studentProfileId) {
       return { success: false, error: 'Access denied', code: 'UNAUTHORIZED_SCOPE' };
     }
@@ -1392,6 +1435,30 @@ export class StudentPortalService {
 
     return { success: true, data: results };
   }
+
+  static async getSubscriptionStatus(context: PolicyContext, studentId: string): Promise<OperationResult<StudentSubscriptionState>> {
+    assertPreviewContext(context);
+    const sub = await getStudentSubscription(studentId);
+    if (!sub) {
+      return { success: false, error: 'Subscription record not found', code: 'NOT_FOUND' };
+    }
+    return { success: true, data: sub };
+  }
+
+  static async extendSubscription(
+    context: PolicyContext,
+    studentId: string,
+    schoolId: string,
+    planId: SubscriptionPlanId,
+    idempotencyKey: string
+  ): Promise<OperationResult<SubscriptionExtensionResult>> {
+    assertPreviewContext(context);
+    const res = await extendStudentSubscription(studentId, schoolId, planId, idempotencyKey);
+    if (!res.success) {
+      return { success: false, error: res.error || 'Failed to extend subscription', code: 'EXTENSION_FAILED' };
+    }
+    return { success: true, data: res };
+  }
 }
 
 // =============================================================================
@@ -1400,6 +1467,7 @@ export class StudentPortalService {
 
 export class ParentPortalService {
   static getLinkedChildren(context: PolicyContext, parentProfileId: string): OperationResult<readonly ParentLinkedChild[]> {
+    assertPreviewContext(context);
     if (!context || !parentProfileId) {
       return { success: false, error: 'Context and parent profile ID required', code: 'UNAUTHORIZED_SCOPE' };
     }
@@ -1440,6 +1508,7 @@ export class ParentPortalService {
     results: readonly StudentExamResultItem[];
     homework: readonly HomeworkRecord[];
   }> {
+    assertPreviewContext(context);
     const student = devStore.students.find(s => s.id === studentId);
     if (!student) {
       return { success: false, error: 'Student not found', code: 'NOT_FOUND' };
@@ -1464,5 +1533,19 @@ export class ParentPortalService {
         homework,
       },
     };
+  }
+
+  static async getChildrenSubscriptions(
+    context: PolicyContext,
+    parentProfileId: string,
+    schoolId: string,
+    children: ReadonlyArray<{ studentId: string; studentName: string; registrationNumber: string }>
+  ): Promise<OperationResult<ParentChildSubscriptionSummary>> {
+    assertPreviewContext(context);
+    if (!context || !parentProfileId) {
+      return { success: false, error: 'Context and parent profile ID required', code: 'UNAUTHORIZED_SCOPE' };
+    }
+    const summary = await getParentChildSubscriptionAccess(parentProfileId, schoolId, children);
+    return { success: true, data: summary };
   }
 }

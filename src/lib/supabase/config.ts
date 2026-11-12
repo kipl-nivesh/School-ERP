@@ -2,7 +2,7 @@ export interface SupabasePublicEnvironment {
   readonly url?: string;
   readonly publishableKey?: string;
 }
-export type SupabaseConfigurationIssue = 'missing_url' | 'invalid_url' | 'missing_publishable_key' | 'invalid_publishable_key';
+export type SupabaseConfigurationIssue = 'preview_disabled' | 'missing_url' | 'invalid_url' | 'missing_publishable_key' | 'invalid_publishable_key';
 export type SupabasePublicConfiguration =
   | { readonly configured: true; readonly url: string; readonly publishableKey: string }
   | { readonly configured: false; readonly issues: readonly SupabaseConfigurationIssue[] };
@@ -27,6 +27,9 @@ export function validateSupabasePublicEnvironment(environment: SupabasePublicEnv
 
 /** Static env references are required for Next.js browser configuration replacement. No top-level client. */
 export function getSupabasePublicConfiguration(): SupabasePublicConfiguration {
+  if (process.env.NEXT_PUBLIC_BRIGHTCAMP_PREVIEW_LOCK === 'true' || process.env.VERCEL_ENV === 'preview') {
+    return { configured: false, issues: ['preview_disabled'] };
+  }
   return validateSupabasePublicEnvironment({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
     publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,

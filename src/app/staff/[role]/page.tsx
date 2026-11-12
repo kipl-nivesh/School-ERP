@@ -2,9 +2,7 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { getStaffAccess } from '@/lib/staff/server';
 import { isStaffRole } from '@/lib/staff/contracts';
-import { SchoolAdminWorkspace } from '@/components/workspaces/admin-workspace';
-import { TeacherWorkspace } from '@/components/workspaces/teacher-workspace';
-import { AccountantWorkspace } from '@/components/workspaces/accountant-workspace';
+import { LiveStaffWorkspace } from '@/components/workspaces/live-staff-workspace';
 import { logoutStaff } from '@/app/login/staff/actions';
 
 export const dynamic = 'force-dynamic';
@@ -43,9 +41,7 @@ export default async function StaffRoleWorkspace({ params }: { params: Promise<{
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {role === 'admin' && <SchoolAdminWorkspace context={access.context} />}
-        {role === 'teacher' && <TeacherWorkspace context={access.context} />}
-        {role === 'accountant' && <AccountantWorkspace context={access.context} />}
+        <LiveStaffWorkspace role={role} />
       </main>
     </div>
   );

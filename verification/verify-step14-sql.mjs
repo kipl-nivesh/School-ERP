@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const paths = fs.readdirSync('supabase/migrations').filter(p => p.endsWith('.sql')).sort();
-const files = paths.map(p => fs.readFileSync('supabase/migrations/' + p, 'utf8'));
+import { paths, verifyMigrationInventory } from './migration-inventory.mjs';
+verifyMigrationInventory();
+const files = paths.slice(0, 3).map(p => fs.readFileSync('supabase/migrations/' + p, 'utf8'));
 const sql = files.join('\n');
 let checks = 0;
 const test = (name, run) => { run(); checks++; console.log('STATIC PASS: ' + name); };
-test('Original then two incremental migrations ordered', () => assert.deepEqual(paths, ['20261105000100_identity_foundation.sql', '20261105000200_school_domain.sql', '20261105000300_staff_security.sql']));
 const tables = [...sql.matchAll(/create table public\.(\w+)/g)].map(m => m[1]);
 test('Eighteen unique application tables; no duplicate identity definitions', () => { assert.equal(tables.length, 18); assert.equal(new Set(tables).size, 18); });
 for (const table of tables) test('RLS/FORCE and ordinary-grant revocation: ' + table, () => {
@@ -52,7 +52,7 @@ test('Audit update/delete/truncate and grant/tier invalidation prepared', () => 
 test('Permission catalog exactly matches existing TypeScript', () => {
   const src = fs.readFileSync('src/lib/auth/permissions.ts', 'utf8').split('Object.freeze([')[1].split('] as const')[0];
   const permissions = [...src.matchAll(/'([^']+)'/g)].map(m => m[1]);
-  const check = files[2].match(/permissions <@ array\[([^\]]+)\]/)[1];
+  const check = fs.readFileSync("supabase/migrations/" + paths[3], "utf8").match(/permissions <@ array\[([^\]]+)\]/)[1];
   assert.deepEqual([...check.matchAll(/'([^']+)'/g)].map(m => m[1]), permissions);
 });
 test('No domain seeds, users, passwords or Storage policy operations', () => {

@@ -5,7 +5,10 @@ import { evaluateDashboardAccess } from '../auth/authorization';
 import { isStaffRole, resolveStaffAuthorization } from './contracts';
 import type { StaffRole, StaffResolution, StaffSchoolSnapshot, VerifiedStaffProvider } from './contracts';
 
-export function staffRequestsEnabled(): boolean { return process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true'; }
+export function staffRequestsEnabled(): boolean {
+  return process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true' &&
+    process.env.NEXT_PUBLIC_BRIGHTCAMP_PREVIEW_LOCK !== 'true' && process.env.VERCEL_ENV !== 'preview';
+}
 export async function staffClient(writable = false) {
   if (!staffRequestsEnabled()) throw new Error('Staff provider requests are disabled during local review.');
   return createServerSupabaseClient({ cookieWrites: writable ? 'allowed' : 'read-only', httpOnlyCookies: true });
@@ -40,18 +43,31 @@ export async function loadStaffResolution(client: StaffClient, requestedRole?: S
   try {
     const provider = await verifiedProvider(client);
     if (!provider) return { kind: 'denied' };
-    const [p, memberships, privilege, context] = await Promise.all([
+    const tenant = await client.rpc('current_school_id');
+    if (tenant.error) return { kind: 'denied' };
+    if (typeof tenant.data !== 'string' || !tenant.data) {
+      if (!requestedRole) return { kind: 'denied' };
+      const memberships = await client.rpc('list_school_memberships');
+      if (memberships.error || !Array.isArray(memberships.data) || !memberships.data.some(m => m.role_code === requestedRole)) return { kind: 'denied' };
+      return requestedRole === 'admin' && provider.assurance !== 'aal2' ? { kind: 'mfa_required' } : { kind: 'context_required' };
+    }
+    const school = await client.from('schools').select('id,status').eq('id', tenant.data).maybeSingle();
+    if (school.error || school.data?.status !== 'active') return { kind: 'denied' };
+    const [p, memberships, context] = await Promise.all([
       client.from('profiles').select('id,account_status,credential_reset_required,authorization_version').eq('id', provider.profileId).maybeSingle(),
-      client.from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions').eq('profile_id', provider.profileId),
-      client.from('admin_privileges').select('profile_id,tier,privilege_status').eq('profile_id', provider.profileId).maybeSingle(),
-      client.from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at').eq('id', provider.sessionId).eq('profile_id', provider.profileId).maybeSingle(),
+      client.from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions').eq('profile_id', provider.profileId).eq('school_id', tenant.data),
+      client.from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at').eq('id', provider.sessionId).eq('profile_id', provider.profileId).eq('school_id', tenant.data).maybeSingle(),
     ]);
-    if (p.error || memberships.error || privilege.error || context.error || !p.data || !memberships.data) return { kind: 'denied' };
+    if (p.error || memberships.error || context.error || !p.data || !memberships.data) return { kind: 'denied' };
     const role = requestedRole ?? context.data?.role_code;
     if (!isStaffRole(role)) return { kind: 'denied' };
     // These are protected self-scope DB rows, not form input or user_metadata.
-    const snapshot: StaffSchoolSnapshot = { profile: p.data, memberships: memberships.data, privilege: privilege.data, context: context.data };
-    return resolveStaffAuthorization(provider, snapshot, role, Date.now());
+    // Super Admin permanently removed; privilege is null in School Admin architecture.
+    const snapshot: StaffSchoolSnapshot = { profile: p.data, memberships: memberships.data, privilege: null, context: context.data };
+    const resolution = resolveStaffAuthorization(provider, snapshot, role, Date.now());
+    return resolution.kind === 'authorized'
+      ? { ...resolution, context: { ...resolution.context, schoolId: tenant.data } }
+      : resolution;
   } catch { return { kind: 'denied' }; }
 }
 

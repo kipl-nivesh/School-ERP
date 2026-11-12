@@ -6,4 +6,5 @@ out/
 *.tsbuildinfo
 *.log
 .vercel/
+/verification/step-24a/pg-*/
 

@@ -5,15 +5,11 @@ import crypto from 'node:crypto';
 // Step 15: Comprehensive Static SQL Migration, RLS, and Schema Audit Suite
 // OFFLINE ONLY — NO SQL EXECUTION, NO DATABASE CONNECTION
 
-const paths = fs.readdirSync('supabase/migrations').filter(p => p.endsWith('.sql')).sort();
-assert.deepEqual(paths, [
-  '20261105000100_identity_foundation.sql',
-  '20261105000200_school_domain.sql',
-  '20261105000300_staff_security.sql'
-]);
+import { paths, verifyMigrationInventory } from './migration-inventory.mjs';
+verifyMigrationInventory();
 
-const fileContents = paths.map(p => fs.readFileSync('supabase/migrations/' + p, 'utf8'));
-const [, m2, m3] = fileContents;
+const fileContents = paths.slice(0, 3).map(p => fs.readFileSync('supabase/migrations/' + p, 'utf8'));
+const [, m2] = fileContents;
 const fullSql = fileContents.join('\n');
 
 let checkCount = 0;
@@ -25,7 +21,7 @@ const test = (name, fn) => {
 
 // 1. Transaction Boundaries and Migration Sequence
 test('Migration sequence and explicit transaction boundaries', () => {
-  for (let i = 0; i < paths.length; i++) {
+  for (let i = 0; i < fileContents.length; i++) {
     const content = fileContents[i].trim();
     assert.ok(content.startsWith('--') || content.startsWith('begin;'), `${paths[i]} must start with comment or begin;`);
     assert.ok(content.includes('begin;'), `${paths[i]} must declare begin;`);
@@ -213,11 +209,11 @@ test('Staff context activation and revocation semantics', () => {
 test('SQL permission check constraint exactly matches TypeScript permission catalog', () => {
   const permTs = fs.readFileSync('src/lib/auth/permissions.ts', 'utf8');
   const tsCatalog = [...permTs.split('Object.freeze([')[1].split('] as const')[0].matchAll(/'([^']+)'/g)].map(m => m[1]);
-  const sqlMatch = m3.match(/permissions <@ array\[([^\]]+)\]/);
+  const sqlMatch = fs.readFileSync("supabase/migrations/" + paths[3], "utf8").match(/permissions <@ array\[([^\]]+)\]/);
   assert.ok(sqlMatch, 'user_roles permissions check constraint must exist');
   const sqlCatalog = [...sqlMatch[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
-  assert.equal(tsCatalog.length, 45);
-  assert.equal(sqlCatalog.length, 45);
+  assert.equal(tsCatalog.length, 43);
+  assert.equal(sqlCatalog.length, 43);
   assert.deepEqual(sqlCatalog, tsCatalog);
 });
 
@@ -228,8 +224,8 @@ test('TypeScript staff server DAL column selections match SQL tables', () => {
   assert.ok(dal.includes(".from('profiles').select('id,account_status,credential_reset_required,authorization_version')"));
   // user_roles select
   assert.ok(dal.includes(".from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions')"));
-  // admin_privileges select
-  assert.ok(dal.includes(".from('admin_privileges').select('profile_id,tier,privilege_status')"));
+  // The live adapter uses school memberships and must not query the retired tier.
+  assert.ok(!dal.includes(".from('admin_privileges')"));
   // role_contexts select
   assert.ok(dal.includes(".from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at')"));
   // RPC calls
@@ -262,8 +258,9 @@ test('Migration baseline SHA-256 hashes recorded', () => {
   };
 
   for (const [file, hash] of Object.entries(expectedHashes)) {
-    const currentHash = crypto.createHash('sha256').update(fs.readFileSync('supabase/migrations/' + file)).digest('hex');
-    assert.equal(currentHash, hash, `Hash mismatch for ${file}`);
+    const sql = fs.readFileSync('supabase/migrations/' + file, 'utf8').replace(/\r\n/g, '\n');
+    const checkoutHashes = [sql, sql.replace(/\n/g, '\r\n')].map(content => crypto.createHash('sha256').update(content).digest('hex'));
+    assert.ok(checkoutHashes.includes(hash), `Hash mismatch for ${file}`);
   }
 });
 

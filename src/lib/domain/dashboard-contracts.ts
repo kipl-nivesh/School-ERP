@@ -49,6 +49,8 @@ export interface StudentRecord {
 }
 
 export interface NewStudentAdmissionInput {
+  /** Required by live admission; previews may omit it. Reuse for retries only. */
+  readonly requestId?: string;
   readonly fullName: string;
   readonly dateOfBirth: string;
   readonly gender: 'male' | 'female' | 'other';
