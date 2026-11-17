@@ -4,7 +4,7 @@ import { homework, homeworkTotals, getTeacherClass, teacherProfile, formatTeache
 import { TeacherSection } from './section';
 import { HomeworkProgress } from './motion';
 export function TeacherHomework() {
-  return <TeacherSection title="A little practice. A lot of progress." description="Homework overview · sample assignments" badge={homeworkTotals.pending + ' awaiting review'}><div className="td-homework-list">{homework.map(assignment => {
+  return <TeacherSection id="teacher-homework" title="A little practice. A lot of progress." description="Homework overview · sample assignments" badge={homeworkTotals.pending + ' awaiting review'}><div className="td-homework-list">{homework.map(assignment => {
     const group = getTeacherClass(assignment.classId);
     const pending = assignment.submitted - assignment.reviewed;
     const overdue = assignment.dueDate < teacherProfile.referenceDate && assignment.submitted < group.students;

@@ -45,7 +45,7 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
             <span className={styles.icon}><GraduationCap size={26} /></span>
             <span className={styles.kicker}>STUDENT PORTAL</span>
             <h2 id="login-title">Student sign-in</h2>
-            <p className={styles.subtitle}>Enter your Student ID and secret six-digit PIN.</p>
+            <p className={styles.subtitle}>Enter your School Code, Student ID and 15-digit PIN.</p>
 
             {!liveAuthEnabled && (
               <div className={styles.notice} role="status">
@@ -54,16 +54,17 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
               </div>
             )}
 
-            <form action={action} className={styles.form} aria-busy={pending}>
-              <label htmlFor="school-code">School Code <span style={{ fontWeight: 400, opacity: 0.7 }}>(Optional)</span></label>
+            <form action={liveAuthEnabled ? action : undefined} className={styles.form} aria-busy={pending}>
+              <label htmlFor="school-code">School Code</label>
               <input
                 id="school-code"
                 name="schoolCode"
                 type="text"
                 autoComplete="organization"
                 maxLength={30}
+                required
                 placeholder="e.g. BRIGHTCAMP"
-                disabled={pending}
+                disabled={!liveAuthEnabled || pending}
               />
 
               <label htmlFor="student-id">Student ID</label>
@@ -75,30 +76,30 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
                 maxLength={64}
                 placeholder="e.g. STU2026001"
                 required
-                disabled={pending}
+                disabled={!liveAuthEnabled || pending}
               />
               <small className={styles.hint}>Issued on your school admission card.</small>
 
-              <label htmlFor="student-pin">Six-digit Student PIN</label>
+              <label htmlFor="student-pin">15-digit Student PIN</label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   id="student-pin"
                   name="pin"
                   type={showPin ? 'text' : 'password'}
                   inputMode="numeric"
-                  pattern="[0-9]{6}"
-                  minLength={6}
-                  maxLength={6}
+                  pattern="[0-9]{15}"
+                  minLength={15}
+                  maxLength={15}
                   autoComplete="current-password"
-                  placeholder="••••••"
+                  placeholder="•••••••••••••••"
                   required
-                  disabled={pending}
+                  disabled={!liveAuthEnabled || pending}
                   style={{ width: '100%', paddingRight: '2.5rem', letterSpacing: showPin ? 'normal' : '0.25em' }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(prev => !prev)}
-                  tabIndex={-1}
+                  disabled={!liveAuthEnabled || pending}
                   aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
                   style={{ position: 'absolute', right: '0.75rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 0 }}
                 >
@@ -107,7 +108,7 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
               </div>
               <small className={styles.hint}>Never share your Student PIN with other students.</small>
 
-              <button type="submit" disabled={pending}>
+              <button type="submit" disabled={!liveAuthEnabled || pending}>
                 {pending ? 'Verifying securely…' : 'Open Student Portal'}
                 <ArrowRight size={17} />
               </button>
@@ -120,7 +121,7 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
             </form>
 
             <p className={styles.support}>
-              Forgot your PIN? Speak to your class teacher or the school office for a secure PIN reset.
+              Forgot your PIN? Contact the school office with your parent or guardian for help. Online PIN recovery is unavailable.
             </p>
 
             <div className={styles.footer}>

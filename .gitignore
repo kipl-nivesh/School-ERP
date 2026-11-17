@@ -1,5 +1,6 @@
 node_modules/
 .next/
+.next-isolated/
 out/
 .env*
 !.env.example

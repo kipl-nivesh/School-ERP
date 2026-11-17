@@ -1,16 +1,17 @@
-import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
-
-export default function nextConfig(phase) {
-  const live = phase === PHASE_DEVELOPMENT_SERVER ||
-    (process.env.VERCEL_ENV === 'production' && process.env.BRIGHTCAMP_ENABLE_LIVE_BUILD === 'true');
-  if (live) return {};
-
-  // Explicit empty replacements keep inherited public credentials out of the bundle.
-  return {
+// This release candidate is a fictional demo in every build environment.
+// Explicit empty replacements keep inherited public credentials out of its bundle.
+export default {
+    distDir: process.env.NEXT_DIST_DIR || '.next',
+    experimental: {
+      cpus: 1,
+    },
+    webpack: (config) => {
+      config.cache = false;
+      return config;
+    },
     env: {
       NEXT_PUBLIC_BRIGHTCAMP_PREVIEW_LOCK: 'true',
       NEXT_PUBLIC_SUPABASE_URL: '',
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: '',
     },
-  };
-}
+};

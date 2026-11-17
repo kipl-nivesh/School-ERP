@@ -5,9 +5,14 @@ import { LiveAcademicForm } from './live-academic-form';
 import { LiveManagementForm } from './live-management-form';
 import { isManagementKind } from '@/lib/services/management-contracts';
 import { LiveInvitationForm } from './live-invitation-form';
+import { readReportsWorkspace } from '@/lib/services/report-workspace';
+import { ReportManagement } from './report-management';
 
 export async function LiveStaffWorkspace({ role }: { role: StaffRole }) {
   const { records: modules, canAdmit, canCollect, admissionRequestId, canAttend, canAssignHomework, homeworkRequestId, canManageAcademics, managementIds } = await readLiveWorkspace(role);
+  const financeFilter = new FormData();
+  financeFilter.set('category', 'finance');
+  const reports = role === 'admin' ? await readReportsWorkspace(financeFilter) : null;
   return <div className="space-y-6">
     <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-indigo-950">
       <h1 className="text-xl font-bold">School records</h1>
@@ -17,6 +22,7 @@ export async function LiveStaffWorkspace({ role }: { role: StaffRole }) {
     {canAdmit && <LiveAdmissionForm initialRequestId={admissionRequestId} />}
     {role === 'admin' && <LiveInvitationForm />}
     {canCollect && <LiveCollectionForm />}
+    {reports && reports.kind !== 'denied' && <ReportManagement initial={reports} />}
     {canAttend && <LiveAcademicForm kind="attendance" requestId={homeworkRequestId} />}
     {canAssignHomework && <LiveAcademicForm kind="homework" requestId={homeworkRequestId} />}
     {managementIds.map(item => isManagementKind(item.kind) && (item.kind === 'homework' ? canAssignHomework : canManageAcademics) && <LiveManagementForm key={item.kind} kind={item.kind} requestId={item.requestId} recordId={item.recordId} />)}

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { LIVE_AUTHENTICATION_ENABLED } from '@/lib/auth/authentication-flow';
 import { StudentLoginForm } from './student-login-form';
 
 export const metadata: Metadata = {
@@ -10,5 +9,5 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default function StudentLoginPage() {
-  return <StudentLoginForm liveAuthEnabled={LIVE_AUTHENTICATION_ENABLED} />;
+  return <StudentLoginForm liveAuthEnabled={false} />;
 }
