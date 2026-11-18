@@ -10,6 +10,7 @@
  *  - Never imports or executes service-role privileged keys.
  */
 
+import { staffWorkspaceWritesEnabled } from './staff-workspace-policy';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { tenantClient } from './tenant-client';
 import { evaluatePermission, evaluateRecordMutation } from '../auth/authorization';
@@ -866,6 +867,7 @@ export class TeacherSupabaseService {
     entries: readonly { studentId: string; marksObtained: number; remarks?: string }[],
     teacherProfileId: string
   ): Promise<OperationResult<MarksSheetRecord>> {
+    if (!staffWorkspaceWritesEnabled()) return { success: false, error: "Marks writes are unavailable during read-only recovery.", code: "LIVE_MARKS_WRITE_UNAVAILABLE" };
     if (!checkAuth(context, 'marks.write')) {
       return { success: false, error: 'Unauthorized: Marks write permission required', code: 'PERMISSION_DENIED' };
     }
@@ -923,6 +925,7 @@ export class TeacherSupabaseService {
   }
 
   static async publishMarks(context: PolicyContext, sheetId: string, teacherProfileId: string): Promise<OperationResult<MarksSheetRecord>> {
+    if (!staffWorkspaceWritesEnabled()) return { success: false, error: "Marks writes are unavailable during read-only recovery.", code: "LIVE_MARKS_WRITE_UNAVAILABLE" };
     if (!checkAuth(context, 'marks.write') && !checkAuth(context, 'marks.publish')) {
       return { success: false, error: 'Unauthorized: Marks write or publish permission required', code: 'PERMISSION_DENIED' };
     }

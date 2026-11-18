@@ -1,0 +1,11 @@
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 1rem; }
+.card { min-width: 0; display: grid; align-content: start; gap: .65rem; overflow-wrap: anywhere; }
+.card h2 { display: flex; align-items: center; gap: .6rem; }
+.card h2 svg { width: 1.15rem; height: 1.15rem; color: #1264a5; flex: none; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.fields div { background: #eef5fc; padding: .65rem; border-radius: .55rem; min-width: 0; }
+.fields dt, .rows span { color: #405875; font-size: .85rem; }
+.fields dd { font-weight: 700; margin: 0; }
+.rows { display: grid; gap: .6rem; padding: 0; margin: 0; list-style: none; }
+.rows li { display: grid; gap: .15rem; padding: .55rem .7rem; border-left: 3px solid #1182b4; background: #f4f8fc; min-width: 0; }
+.rows span { white-space: pre-wrap; }

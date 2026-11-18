@@ -1,0 +1,526 @@
+.wrapper {
+  min-width: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 2px solid #d2deed;
+  padding-bottom: 0.5rem;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid #d0dfed;
+  background: #fff;
+  color: #102440;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabBtn:hover {
+  background: #edf6ff;
+  border-color: #3b86cd;
+}
+
+.tabBtnActive {
+  background: #08152b;
+  color: #6be4ff;
+  border-color: #08152b;
+}
+
+.tabBtnActive:hover {
+  background: #142e55;
+  border-color: #142e55;
+}
+
+/* Overview Summary Cards */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.85rem;
+}
+
+.metricCard {
+  background: #fff;
+  border: 1px solid #d2deed;
+  border-radius: 0.85rem;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.metricCardLabel {
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #526581;
+}
+
+.metricCardValue {
+  font-size: 1.55rem;
+  font-weight: 850;
+  color: #08152b;
+  letter-spacing: -0.02em;
+}
+
+.metricCardCollected .metricCardValue {
+  color: #059669;
+}
+
+.metricCardOutstanding .metricCardValue {
+  color: #d97706;
+}
+
+.metricCardOverdue .metricCardValue {
+  color: #dc2626;
+}
+
+.metricCardHint {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Main Section Card */
+.card {
+  min-width: 0;
+  padding: clamp(0.9rem, 2.5vw, 1.4rem);
+  display: grid;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #ccddf0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cardTitle {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #08152b;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.84rem;
+  color: #526581;
+  margin: 0.2rem 0 0;
+}
+
+/* Controls & Filter Bar */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.65rem;
+  min-width: 0;
+  background: #f8fbff;
+  border: 1px solid #dce7f3;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.controls label {
+  flex: 1 1 11rem;
+  min-width: 0;
+  color: #183c59;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.controls :is(input:not([type=hidden]), select) {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  background: #fff;
+  border: 1px solid #b8cde3;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.88rem;
+  color: #102440;
+}
+
+.controls button,
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.55rem;
+  background: #08152b;
+  color: #6be4ff;
+  font-weight: 750;
+  font-size: 0.86rem;
+  border: 1px solid #08152b;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.controls button:hover,
+.actionBtn:hover {
+  background: #142e55;
+  border-color: #142e55;
+}
+
+.controls button:disabled,
+.actionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary Button */
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.55rem;
+  background: #f3f7fc;
+  color: #102440;
+  font-weight: 700;
+  font-size: 0.84rem;
+  border: 1px solid #bdcfe5;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background: #e0efff;
+}
+
+/* Tables */
+.tableWrapper {
+  overflow-x: auto;
+  min-width: 0;
+  border: 1px solid #dce7f3;
+  border-radius: 0.65rem;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.table th,
+.table td {
+  padding: 0.7rem;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #e0e9f3;
+  vertical-align: middle;
+}
+
+.table thead th {
+  background: #ebf4ff;
+  color: #183c59;
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9fbff;
+}
+
+.table tbody tr:hover {
+  background: #f0f7ff;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 750;
+  text-transform: capitalize;
+  line-height: 1.2;
+}
+
+.badgePaid,
+.badgeSettled {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.badgePartial {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badgeUnpaid {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.badgeOverdue {
+  background: #fce7f3;
+  color: #9d174d;
+  border: 1px solid #fbcfe8;
+}
+
+/* Pagination */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.4rem 0;
+}
+
+.pager button {
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  background: #f3f7fc;
+  border: 1px solid #bdcfe5;
+  color: #102440;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pager span {
+  font-size: 0.86rem;
+  color: #526581;
+  font-weight: 700;
+}
+
+/* Notice & Alerts */
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: 0.55rem;
+  background: #eef6ff;
+  border: 1px solid #bddbff;
+  color: #15457a;
+  font-size: 0.86rem;
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  border-radius: 0.55rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 0.86rem;
+}
+
+.success {
+  padding: 0.75rem 1rem;
+  border-radius: 0.55rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 0.86rem;
+}
+
+/* Student Ledger Drill-down */
+.ledgerContainer {
+  background: #f8fbff;
+  border: 1px solid #bddbff;
+  border-radius: 0.85rem;
+  padding: 1.1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.ledgerHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ledgerStudentName {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #08152b;
+}
+
+.ledgerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.86rem;
+  color: #475569;
+}
+
+.ledgerMeta strong {
+  color: #08152b;
+}
+
+/* Receipt Modal / Card */
+.receiptCard {
+  background: #fff;
+  border: 2px solid #08152b;
+  border-radius: 0.9rem;
+  padding: 1.35rem;
+  display: grid;
+  gap: 0.85rem;
+  max-width: 38rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.receiptTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px dashed #cbd5e1;
+  padding-bottom: 0.85rem;
+}
+
+.receiptTitle {
+  font-size: 1.25rem;
+  font-weight: 850;
+  color: #08152b;
+}
+
+.receiptNumber {
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 750;
+  color: #0284c7;
+}
+
+.receiptGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+  font-size: 0.86rem;
+}
+
+.receiptField dt {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 750;
+}
+
+.receiptField dd {
+  font-weight: 800;
+  color: #08152b;
+  margin: 0.15rem 0 0;
+}
+
+.receiptAmount {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #059669;
+}
+
+.receiptStamp {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border: 2px solid #059669;
+  color: #059669;
+  font-weight: 900;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0.35rem;
+  transform: rotate(-3deg);
+}
+
+/* Collection Form */
+.collectionForm {
+  background: #fff;
+  border: 1px solid #d0dfed;
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.85rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #102440;
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  min-height: 40px;
+  border: 1px solid #b8cde3;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.88rem;
+  background: #fdfefe;
+}
+
+.formField textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.helpText {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+@media print {
+  .tabs,
+  .controls,
+  .pager,
+  .actionBtn,
+  .tabBtn {
+    display: none !important;
+  }
+  .receiptCard {
+    border: 1px solid #000;
+    box-shadow: none;
+    max-width: 100%;
+  }
+}

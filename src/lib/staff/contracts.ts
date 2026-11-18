@@ -6,6 +6,8 @@ export type StaffRole = (typeof STAFF_ROLES)[number];
 export const GENERIC_STAFF_ERROR = 'Unable to complete staff sign-in. Check your details or contact the school administrator.';
 export const STAFF_PENDING_MESSAGE = 'Staff sign-in is not available in this local review. No authentication request was sent.';
 export const isStaffRole = (v: unknown): v is StaffRole => STAFF_ROLES.some(r => r === v);
+export const isStaffUuid = (value: unknown): value is string =>
+  typeof value === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
 export function validateStaffInput(email: unknown, password: unknown, role: unknown): boolean {
   return typeof email === 'string' && email.length <= 254 && email === email.trim() && !/[\x00-\x20\x7f]/.test(email) &&
     /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && typeof password === 'string' && password.length > 0 && password.length <= 1024 &&
@@ -31,7 +33,7 @@ export interface StaffSchoolSnapshot {
   readonly context: { readonly id: string; readonly profile_id: string; readonly role_code: string; readonly assignment_id: string; readonly context_version: number; readonly authorization_version: number; readonly expires_at: string; readonly revoked_at: string | null } | null;
 }
 export type StaffResolution = { readonly kind: 'denied' } | { readonly kind: 'mfa_required' } |
-  { readonly kind: 'context_required' } | { readonly kind: 'authorized'; readonly context: VerifiedServerContext; readonly role: StaffRole };
+  { readonly kind: 'context_required' } | { readonly kind: 'authorized'; readonly context: VerifiedServerContext; readonly role: StaffRole; readonly schoolName?: string };
 
 /** Pure mapping over assumed trusted SDK + DB evidence, never request JSON. Server adapter owns provenance. */
 export function resolveStaffAuthorization(provider: VerifiedStaffProvider | null, school: StaffSchoolSnapshot | null, role: StaffRole, now: number): StaffResolution {

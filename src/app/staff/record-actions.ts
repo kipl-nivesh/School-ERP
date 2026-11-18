@@ -1,4 +1,5 @@
 'use server';
+import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
 import { revalidatePath } from 'next/cache';
 import { getStaffAccess } from '@/lib/staff/server';
 import { AccountantSupabaseService, SchoolAdminSupabaseService } from '@/lib/services/supabase-dal';
@@ -9,6 +10,7 @@ const failed: RecordActionState = { ok: false, message: 'The record could not be
 const value = (form: FormData, key: string) => typeof form.get(key) === 'string' ? String(form.get(key)).trim() : '';
 
 export async function saveAdmission(_state: RecordActionState, form: FormData): Promise<RecordActionState> {
+  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Record writes are unavailable during read-only recovery." };
   const access = await getStaffAccess('admin');
   if (!access) return failed;
   const input = Object.fromEntries(['requestId','fullName','dateOfBirth','gender','classId','sectionId','guardianName','guardianPhone','guardianEmail']
@@ -22,6 +24,7 @@ export async function saveAdmission(_state: RecordActionState, form: FormData): 
 }
 
 export async function saveCollection(_state: RecordActionState, form: FormData): Promise<RecordActionState> {
+  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Record writes are unavailable during read-only recovery." };
   const access = await getStaffAccess();
   if (!access || !['admin','accountant'].includes(access.role)) return failed;
   const amount = value(form,'amountPaise');

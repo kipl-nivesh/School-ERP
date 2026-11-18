@@ -1,0 +1,34 @@
+.directory { min-width: 0; display: grid; gap: 1rem; }
+.filters { display: grid; grid-template-columns: minmax(13rem, 1.5fr) repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: .75rem; }
+.filters, .detail, .tableRegion { background: #fff; border: 1px solid #cdddf0; border-radius: .85rem; }
+.filters, .detail { padding: 1rem; }
+.filters label { min-width: 0; font-size: .82rem; font-weight: 750; }
+.filters :is(input, select) { display: block; width: 100%; margin-top: .3rem; padding: .45rem .55rem; border: 1px solid #9eb7d3; border-radius: .5rem; background: #f8fbff; min-height: 42px; }
+.filters button, .pagination button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 42px; padding: .45rem .75rem; border-radius: .5rem; background: #15569d; color: #fff; font-weight: 750; }
+.directory button:disabled { opacity: .65; cursor: default; }
+.tableRegion { min-width: 0; overflow: auto; }
+.tableRegion table { border-collapse: collapse; width: 100%; text-align: left; font-size: .88rem; }
+.tableRegion :is(th, td) { padding: .75rem; vertical-align: top; border-bottom: 1px solid #e1eaf5; overflow-wrap: anywhere; }
+.tableRegion thead { background: #eaf3ff; }
+.tableRegion tbody tr:nth-child(even) { background: #f7faff; }
+.student { color: #124e8c; font-weight: 800; text-decoration: underline; text-underline-offset: .2em; text-align: left; overflow-wrap: anywhere; }
+.secondary { display: block; font-weight: 500; color: #4f627e; margin-top: .15rem; }
+.status { display: inline-block; padding: .15rem .45rem; border-radius: .4rem; background: #e7eef7; color: #324c66; font-size: .77rem; font-weight: 750; }
+.status[data-status="active"] { color: #12543d; background: #daf5e9; }
+.status[data-status="withdrawn"] { color: #783932; background: #fceae7; }
+.detail dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: .65rem; margin-top: .65rem; }
+.detail { scroll-margin-top: 6rem; }
+.detailHeader { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: baseline; gap: .5rem; overflow-wrap: anywhere; }
+.detail dt { font-size: .8rem; font-weight: 750; color: #4f627e; }
+.detail dd { overflow-wrap: anywhere; }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; }
+.notice, .problem { padding: .7rem .85rem; border-radius: .55rem; background: #e8f0fa; color: #365169; }
+.problem { background: #fff1ec; color: #8b3729; }
+@media (max-width: 1200px) {
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters button { justify-self: start; }
+}
+@media (max-width: 480px) {
+  .filters { grid-template-columns: minmax(0, 1fr); }
+  .tableRegion :is(th, td) { padding: .55rem .4rem; }
+}

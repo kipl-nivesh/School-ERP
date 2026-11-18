@@ -1,0 +1,9 @@
+.detail { display: grid; gap: .55rem; padding-block: .55rem; overflow-wrap: anywhere; }
+.detail p { white-space: pre-wrap; font-weight: 400; }
+.detail dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .25rem .55rem; font-size: .78rem; }
+.detail dd { font-weight: 400; }
+.detail button { justify-self: start; }
+.status { display: inline-block; border-radius: .45rem; padding: .2rem .4rem; color: #3d526c; background: #e7eef6; font-weight: 750; }
+.status[data-state="active"] { color: #15543d; background: #daf4e9; }
+.instructions { flex-basis: 100% !important; }
+.textarea { display: block; width: 100%; margin-top: .25rem; padding: .55rem; border: 1px solid #aebfd5; border-radius: .45rem; background: #f8fbff; resize: vertical; }

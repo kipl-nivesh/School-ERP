@@ -9,6 +9,7 @@
  *  - Security Invariant: NEVER silently fall back to mock data during live authenticated operations.
  */
 
+import { staffWorkspaceWritesEnabled } from './staff-workspace-policy';
 import { getSupabasePublicConfiguration } from '../supabase/config';
 const staffRequestsEnabled = () => process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true';
 import type { PolicyContext } from '../auth/types';
@@ -56,6 +57,8 @@ import type {
   StudentExamResultItem,
   ParentLinkedChild,
 } from '../domain/dashboard-contracts';
+
+const liveWriteUnavailable = { success: false, code: 'LIVE_STAFF_WRITE_UNAVAILABLE', error: 'Staff writes are unavailable during read-only recovery.' } as const;
 
 export type ServiceMode = 'development-adapter' | 'supabase-live';
 
@@ -109,6 +112,7 @@ export class SchoolAdminGateway {
   static async createStudentAdmission(context: PolicyContext, input: NewStudentAdmissionInput): Promise<OperationResult<StudentRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return SchoolAdminSupabaseService.createStudentAdmission(context, input);
     }
     return Promise.resolve(DevAdminService.createStudentAdmission(context, input));
@@ -125,6 +129,7 @@ export class SchoolAdminGateway {
   static async createStaffAccount(context: PolicyContext, input: NewStaffInput): Promise<OperationResult<StaffRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return SchoolAdminSupabaseService.createStaffAccount(context, input);
     }
     return Promise.resolve(DevAdminService.createStaffMember(context, input));
@@ -194,6 +199,7 @@ export class SchoolAdminGateway {
   static async updateSchoolSettings(context: PolicyContext, updates: Partial<SchoolSettingsRecord>): Promise<OperationResult<SchoolSettingsRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return SchoolAdminSupabaseService.updateSchoolSettings(context, updates);
     }
     return Promise.resolve(DevAdminService.updateSchoolSettings(context, updates));
@@ -239,6 +245,7 @@ export class TeacherGateway {
   ): Promise<OperationResult<{ savedCount: number; date: string }>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return TeacherSupabaseService.recordAttendance(context, classId, sectionId, date, entries, teacherProfileId);
     }
     return Promise.resolve(DevTeacherService.recordAttendance(context, classId, sectionId, date, entries, teacherProfileId));
@@ -256,6 +263,7 @@ export class TeacherGateway {
   ): Promise<OperationResult<HomeworkRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return TeacherSupabaseService.createHomework(context, classId, sectionId, subject, title, description, dueDate, teacherProfileId);
     }
     return Promise.resolve(DevTeacherService.createHomework(context, classId, sectionId, subject, title, description, dueDate, teacherProfileId));
@@ -281,6 +289,7 @@ export class TeacherGateway {
   ): Promise<OperationResult<MarksSheetRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return TeacherSupabaseService.recordMarksDraft(context, classId, sectionId, examName, subject, maxMarks, entries, teacherProfileId);
     }
     return Promise.resolve(DevTeacherService.recordMarksDraft(context, classId, sectionId, examName, subject, maxMarks, entries, teacherProfileId));
@@ -289,6 +298,7 @@ export class TeacherGateway {
   static async publishMarks(context: PolicyContext, sheetId: string, teacherProfileId: string): Promise<OperationResult<MarksSheetRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return TeacherSupabaseService.publishMarks(context, sheetId, teacherProfileId);
     }
     return Promise.resolve(DevTeacherService.publishMarks(context, sheetId, teacherProfileId));
@@ -335,6 +345,7 @@ export class AccountantGateway {
   static async collectPayment(context: PolicyContext, input: CollectPaymentInput): Promise<OperationResult<PaymentReceiptRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return AccountantSupabaseService.collectPayment(context, input);
     }
     return Promise.resolve(DevAccountantService.collectPayment(context, input));
@@ -358,6 +369,7 @@ export class AccountantGateway {
   ): Promise<OperationResult<ExpenseRecord>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
       return AccountantSupabaseService.recordExpense(context, category, payee, amountPaise, paymentMethod, description);
     }
     return Promise.resolve(DevAccountantService.recordExpense(context, category, payee, amountPaise, paymentMethod, description));

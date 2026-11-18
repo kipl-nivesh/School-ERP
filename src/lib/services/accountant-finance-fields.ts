@@ -26,17 +26,21 @@ export function invoiceBalance(row: InvoiceAmount) {
   return { amount, paid, outstanding: amount - paid };
 }
 
-export function invoiceTotals(rows: InvoiceAmount[], today: string) {
-  let assigned = BigInt(0), outstanding = BigInt(0), overdue = BigInt(0);
+export function invoiceTotals(rows: InvoiceAmount[], schoolDate: string | null) {
+  let assigned = BigInt(0), outstanding = BigInt(0);
+  let overdue = schoolDate === null ? null : BigInt(0);
   for (const row of rows) {
     const balance = invoiceBalance(row);
     assigned += balance.amount;
     outstanding += balance.outstanding;
-    if (row.due_date < today) overdue += balance.outstanding;
+    if (schoolDate !== null && overdue !== null && row.due_date < schoolDate) overdue += balance.outstanding;
   }
   return { assigned, outstanding, overdue };
 }
 
 export function settledTotal(rows: (ScopedAmount & { status: string })[]) {
-  return rows.reduce((sum, row) => sum + (row.status === 'settled' ? parsePaise(row.amount_paise) : BigInt(0)), BigInt(0));
+  return rows.reduce((sum, row) => {
+    if (row.status !== 'settled') throw new Error('Unexpected payment status');
+    return sum + parsePaise(row.amount_paise);
+  }, BigInt(0));
 }

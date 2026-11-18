@@ -1,7 +1,9 @@
 'use server';
+import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
 import { staffClient } from '@/lib/staff/server';
 import { validateStaffInput } from '@/lib/staff/contracts';
 export async function acceptInvitation(_state: { message: string }, form: FormData) {
+  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Invitation acceptance is unavailable during read-only recovery." };
   try {
     const token = form.get('token');
     if (typeof token !== 'string' || !/^[0-9a-f]{64}$/.test(token)) throw new Error('Invalid token');

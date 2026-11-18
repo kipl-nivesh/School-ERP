@@ -1,10 +1,12 @@
 'use server';
+import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
 import { revalidatePath } from 'next/cache';
 import { getStaffAccess, staffClient } from '@/lib/staff/server';
 import { evaluatePermission } from '@/lib/auth/authorization';
 import { isManagementKind, isRecordId, managementPayload } from '@/lib/services/management-contracts';
 
 export async function manageAcademicRecord(_state: { ok: boolean; message: string }, form: FormData) {
+  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Academic changes are unavailable during read-only recovery." };
   const fail = { ok: false, message: 'Save failed. Check your permissions, record IDs, current revision and values. No success was confirmed.' };
   const kind = form.get('kind'), id = form.get('recordId'), requestId = form.get('requestId');
   if (typeof kind !== 'string' || !isManagementKind(kind) || typeof id !== 'string' || !isRecordId(id) || typeof requestId !== 'string' || !isRecordId(requestId)) return fail;

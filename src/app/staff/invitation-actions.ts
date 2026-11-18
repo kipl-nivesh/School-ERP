@@ -1,4 +1,5 @@
 'use server';
+import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
 import { createHash, randomBytes } from 'node:crypto';
 import { getStaffAccess, staffClient } from '@/lib/staff/server';
 import { recoveryOrigin } from '@/lib/staff/recovery';
@@ -6,6 +7,7 @@ import { recoveryOrigin } from '@/lib/staff/recovery';
 type InvitationState = { message: string; link?: string; id?: string };
 
 export async function manageInvitation(_state: InvitationState, form: FormData): Promise<InvitationState> {
+  if (!staffWorkspaceWritesEnabled()) return { message: "Invitation changes are unavailable during read-only recovery." };
   const failed = { message: 'Invitation could not be changed. Check your access and the invitation details.' };
   try {
     const access = await getStaffAccess('admin');

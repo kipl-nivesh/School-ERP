@@ -1,0 +1,9 @@
+.children { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 0; }
+.children li { min-width: 0; max-width: 100%; }
+.children a {
+  display: block; padding: .55rem .8rem; border: 1px solid #9fbfd7; border-radius: .6rem;
+  color: #174366; background: #f4f8fc; text-decoration: none; font-weight: 650;
+}
+.children a:hover { border-color: #1477a7; }
+.children a[aria-current] { color: #103c63; border-color: #1574a8; background: #dbf3ff; }
+.children a:focus-visible { outline: 3px solid #126493; outline-offset: 2px; }

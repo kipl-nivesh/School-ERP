@@ -1,0 +1,20 @@
+.card { min-width: 0; padding: clamp(.8rem, 2vw, 1.4rem); display: grid; gap: .75rem; background: #fff; border: 1px solid #ccddf0; border-radius: 1rem; }
+.card summary { cursor: pointer; color: #153e67; font-weight: 800; }
+.card[open] summary { margin-bottom: .75rem; }
+.card > form, .fallback { margin-top: .55rem; }
+.card > form > p { margin-top: .55rem; }
+.controls, .pager, .fallback { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; }
+.controls { min-width: 0; margin-bottom: .7rem; }
+.controls label { flex: 1 1 12rem; min-width: 0; color: #183c59; font-weight: 700; font-size: .87rem; }
+.controls :is(input:not([type=hidden]), select) { display: block; width: 100%; min-height: 42px; margin-top: .25rem; background: #f8fbff; }
+.controls [aria-invalid=true] { border: 2px solid #a03b31; }
+.pager { align-items: center; justify-content: space-between; }
+.fallback { margin-bottom: .65rem; }
+.table { overflow: auto; min-width: 0; border: 1px solid #dce7f3; border-radius: .65rem; }
+.table table { border-collapse: collapse; width: 100%; text-align: left; font-size: .84rem; }
+.table :is(th, td) { padding: .65rem; overflow-wrap: anywhere; border-bottom: 1px solid #dce7f3; }
+.table thead { background: #ebf4ff; }
+.table tbody tr:nth-child(even) { background: #f7faff; }
+.notice, .error { display: block; padding: .45rem .6rem; border-radius: .45rem; background: #e8f4fc; color: #1b5276; }
+.error { background: #fff0ec; color: #8b3329; }
+.help { color: #49647e; font-size: .84rem; }

@@ -1,0 +1,11 @@
+.panel { display: grid; gap: 1rem; padding: clamp(.85rem, 2vw, 1.4rem); background: #fff; border: 1px solid #c9daee; border-radius: 1rem; min-width: 0; }
+.panel p { color: #425d78; }
+.panel h3 { color: #173c65; font-weight: 750; margin-bottom: .5rem; }
+.fields { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; }
+.fields label { flex: 1 1 10rem; min-width: 0; font-weight: 650; }
+.fields :is(input:not([type="hidden"]), select) { display: block; margin-top: .25rem; width: 100%; }
+.table { overflow-x: auto; border: 1px solid #d5e4f3; border-radius: .65rem; }
+.table table { width: 100%; border-collapse: collapse; text-align: left; font-size: .86rem; }
+.table :is(th, td) { padding: .5rem; overflow-wrap: anywhere; border-bottom: 1px solid #e1ecf5; }
+.table thead { background: #eaf3ff; }
+.status { text-transform: capitalize; font-weight: 700; }

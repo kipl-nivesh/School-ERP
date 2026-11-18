@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { staffRequestsEnabled } from './lib/staff/request-policy';
 import { getSupabasePublicConfiguration } from './lib/supabase/config';
 
 /** Cookie refresh only for separate staff routes. The server DAL independently verifies authorization. */
@@ -7,7 +8,7 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   response.headers.set('Cache-Control', 'private, no-store');
   response.headers.set('Referrer-Policy', 'no-referrer');
-  if (process.env.STAFF_AUTH_REQUESTS_ENABLED !== 'true') return response;
+  if (!staffRequestsEnabled()) return response;
   const configuration = getSupabasePublicConfiguration();
   if (!configuration.configured) return response;
   const client = createServerClient(configuration.url, configuration.publishableKey, {

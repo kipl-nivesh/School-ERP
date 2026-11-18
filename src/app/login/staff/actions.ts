@@ -8,21 +8,22 @@ import type { StaffActionState } from '@/lib/staff/contracts';
 export async function loginStaff(_previous: StaffActionState, form: FormData): Promise<StaffActionState> {
   const enabled = staffRequestsEnabled();
   let client: Awaited<ReturnType<typeof staffClient>> | undefined;
-  let passwordVerified = false;
+  let needsContext = false;
   const getClient = async () => client ??= await staffClient(true);
   const result = await performStaffLogin({ email: form.get('email'), password: form.get('password'), role: form.get('role'), next: form.get('next') }, {
     enabled, configured: getSupabasePublicConfiguration().configured,
-    signIn: async (email, password) => { const r = await (await getClient()).auth.signInWithPassword({ email, password }); passwordVerified = !r.error && !!r.data.user; return passwordVerified; },
-    resolve: async role => loadStaffResolution(await getClient(), role),
+    signIn: async (email, password) => { const r = await (await getClient()).auth.signInWithPassword({ email, password }); return !r.error && !!r.data.user; },
+    resolve: async role => {
+      const resolution = await loadStaffResolution(await getClient(), role);
+      needsContext = resolution.kind === 'context_required';
+      return resolution;
+    },
     // Selection is a separate checked transaction; no legacy unscoped context activation.
     activate: async () => false,
     factor: async () => { const r = await (await getClient()).auth.mfa.listFactors(); if (r.error) throw new Error('Factor lookup failed'); return r.data.totp.find(f => f.status === 'verified')?.id ?? null; },
   });
   if (result.phase === 'authorized') redirect(result.destination);
-  if (result.phase === 'error' && passwordVerified) {
-    const memberships = await (await getClient()).rpc('list_school_memberships');
-    if (!memberships.error && Array.isArray(memberships.data) && memberships.data.length) redirect('/staff/select-school');
-  }
+  if (needsContext) redirect('/staff/select-school');
   return result;
 }
 
@@ -62,10 +63,7 @@ export async function verifyStaffMfa(_previous: StaffActionState, form: FormData
     const verification = await client.auth.mfa.challengeAndVerify({ factorId, code });
     if (verification.error) return { phase: 'mfa', message: GENERIC_STAFF_ERROR, factorId };
     const access = await loadStaffResolution(client, role);
-    if (access.kind === 'context_required') {
-      const memberships = await client.rpc('list_school_memberships');
-      if (!memberships.error && Array.isArray(memberships.data) && memberships.data.some(m => m.role_code === role)) destination = '/staff/select-school';
-    }
+    if (access.kind === 'context_required') destination = '/staff/select-school';
     if (access.kind === 'authorized') destination = safeStaffDestination(form.get('next'), role);
   } catch { /* Generic denial; never expose provider, cookie or database details. */ }
   if (destination) redirect(destination);
