@@ -29,8 +29,14 @@ export function LiveParentDashboard({ result }: { result: ParentDashboardResult 
 
   const ready = result.kind === 'ready';
   const data = ready ? result.data : null;
-  return <div className={styles.shell}>
-    <aside className={styles.sidebar}><Brand /><ParentNavigation ready={ready} /></aside>
+  return <div className={styles.shell} data-role="parent">
+    <aside className={styles.sidebar}>
+      <Brand />
+      <div className={styles.sidebarRoleBadge}>
+        <span>Parent workspace</span>
+      </div>
+      <ParentNavigation ready={ready} />
+    </aside>
     <div className={styles.workspace}>
       <header className={styles.header}><div className={styles.identity}>
         <UsersRound aria-hidden="true" /><div><strong>Parent workspace</strong><span>Linked student records</span></div>

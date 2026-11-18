@@ -130,8 +130,14 @@ export async function LiveTeacherDashboard({ access, query }: { access: Access; 
   const canOpenClasses = inModule
     ? evaluatePermission(access.context, 'students.read', access.context.session.verifiedAt).allowed
     : data?.kind === 'ready';
-  return <div className={styles.shell}>
-    <aside className={styles.sidebar}><Brand /><Navigation permitted={canOpenClasses} attendance={attendance} homework={homework} timetable={timetable} exams={exams} /></aside>
+  return <div className={styles.shell} data-role="teacher">
+    <aside className={styles.sidebar}>
+      <Brand />
+      <div className={styles.sidebarRoleBadge}>
+        <span>Teacher workspace</span>
+      </div>
+      <Navigation permitted={canOpenClasses} attendance={attendance} homework={homework} timetable={timetable} exams={exams} />
+    </aside>
     <div className={styles.workspace}>
       <header className={styles.header}>
         <div className={styles.identity}><Users aria-hidden="true" size={20} />

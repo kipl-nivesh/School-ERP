@@ -233,6 +233,9 @@ export function AdminDashboardView({ data }: { data: Awaited<ReturnType<typeof r
   return <AdminModuleNavigation panels={panels}
     sidebar={<aside className={styles.sidebar}>
       <Link href="/staff" aria-label="Brightcamp Staff Workspace"><Brand /></Link>
+      <div className={styles.sidebarRoleBadge}>
+        <span>Admin workspace</span>
+      </div>
       <nav aria-label="Admin workspace">{navigation}</nav>
     </aside>}
     header={<header className={styles.header}>

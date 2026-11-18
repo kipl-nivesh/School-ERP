@@ -112,8 +112,14 @@ export function LiveStudentDashboard({ result }: { result: StudentDashboardResul
     <h1>Student dashboard</h1><p role="status" className={styles.empty}>Student dashboard information is unavailable.</p>
   </main>;
   const data = result.data;
-  return <div className={styles.shell}>
-    <aside className={styles.sidebar}><Brand /><StudentNavigation /></aside>
+  return <div className={styles.shell} data-role="student">
+    <aside className={styles.sidebar}>
+      <Brand />
+      <div className={styles.sidebarRoleBadge}>
+        <span>Student workspace</span>
+      </div>
+      <StudentNavigation />
+    </aside>
     <div className={styles.workspace}>
       <header className={styles.header}><div className={styles.identity}>
         <GraduationCap aria-hidden="true" /><div><strong>{data.profile.schoolName}</strong><span>Student workspace</span></div>

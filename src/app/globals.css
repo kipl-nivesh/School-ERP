@@ -119,18 +119,46 @@ svg {
   margin-top:2px}
 .dashboard-shell {
   --sidebar-width:254px;
+  --role-accent:#6be4ff;
+  --role-tint:#183864;
   display:flex;
   min-height:100vh}
 .dashboard-shell.is-collapsed {
   --sidebar-width:88px}
+.dashboard-shell[data-role="admin"] {
+  --role-accent:#b4a0ff;
+  --role-tint:#2a2050}
+.dashboard-shell[data-role="teacher"] {
+  --role-accent:#58d8ff;
+  --role-tint:#14355a}
+.dashboard-shell[data-role="student"] {
+  --role-accent:#ffcc74;
+  --role-tint:#423010}
+.dashboard-shell[data-role="parent"] {
+  --role-accent:#ff9ab9;
+  --role-tint:#441c28}
+.dashboard-shell[data-role="accountant"] {
+  --role-accent:#68e4b5;
+  --role-tint:#133a2e}
 .desktop-sidebar {
   width:var(--sidebar-width);
   position:fixed;
   inset:0 auto 0 0;
-  border-right:1px solid var(--border);
-  background:var(--card);
+  border-right:1px solid #1a3050;
+  background:radial-gradient(ellipse at 15% 0, #183864, transparent 52%), #08152b;
+  color:#e6f1ff;
   transition:width .2s;
   z-index:20}
+.desktop-sidebar .brand,
+.mobile-drawer .brand {
+  color:#ffffff}
+.desktop-sidebar .brand-sub,
+.mobile-drawer .brand-sub {
+  color:#a8c7e4}
+.desktop-sidebar .brand-mark,
+.mobile-drawer .brand-mark {
+  background:linear-gradient(145deg, #315bec, #087995);
+  color:#ffffff}
 .sidebar-inner {
   height:100%;
   display:flex;
@@ -143,7 +171,7 @@ svg {
   font-size:9px;
   font-weight:750;
   letter-spacing:1.7px;
-  color:var(--muted-foreground);
+  color:#a9c4e2;
   margin:44px 10px 16px;
   white-space:nowrap}
 .nav-item {
@@ -153,53 +181,66 @@ svg {
   width:100%;
   border:0;
   background:transparent;
-  color:var(--muted-foreground);
+  color:#c4d7ec;
   padding:13px 12px;
   border-radius:10px;
   margin-bottom:7px;
   text-align:left;
   font-size:12px;
   white-space:nowrap;
-  min-height:45px}
+  min-height:45px;
+  transition:all .15s}
+.nav-item:hover {
+  background:#183962;
+  color:#ffffff}
 .nav-item.active {
-  background:var(--indigo-soft);
-  color:var(--primary);
-  font-weight:750}
+  background:linear-gradient(105deg, #214477, #13355a);
+  color:#f4fbff;
+  font-weight:750;
+  box-shadow:inset 3px 0 var(--role-accent, #6be4ff)}
+.nav-item svg {
+  color:var(--role-accent, #6be4ff)}
 .nav-item:disabled {
   opacity:.7}
 .active-dot,.soon-dot {
   height:6px;
   width:6px;
   border-radius:50%;
-  background:var(--primary);
+  background:var(--role-accent, #6be4ff);
   margin-left:auto}
 .soon-dot {
-  background:var(--border)}
+  background:#264a77}
 .sidebar-bottom {
   margin-top:auto;
   padding-top:48px}
 .sidebar-note {
   padding:21px 17px;
-  background:linear-gradient(140deg,var(--indigo-soft),var(--sky-soft));
+  background:linear-gradient(140deg, #142e55, #0d223f);
+  border:1px solid #264a77;
   border-radius:14px;
+  color:#d8e8f8;
   margin-bottom:24px}
 .sidebar-note svg {
-  color:var(--primary);
+  color:var(--role-accent, #6be4ff);
   margin-bottom:15px}
 .sidebar-note strong {
   display:block;
+  color:#ffffff;
   font-size:15px}
 .sidebar-note p {
   font-size:11px;
+  color:#a8c4e0;
   margin-top:5px}
 .sidebar-note>span {
   display:block;
   font-size:9px;
-  color:var(--primary);
+  color:var(--role-accent, #6be4ff);
   margin-top:16px}
 .sidebar-bottom>button:last-child {
   font-size:11px;
-  color:var(--muted-foreground)}
+  color:#a8c4e0}
+.sidebar-bottom>button:last-child:hover {
+  color:#ffffff}
 .is-collapsed .sidebar-inner {
   padding-inline:17px}
 .is-collapsed .nav-item {
@@ -634,14 +675,19 @@ svg {
   position:fixed;
   inset:0 auto 0 0;
   width:min(300px,90vw);
-  background:var(--card);
+  background:radial-gradient(ellipse at 15% 0, #183864, transparent 52%), #08152b;
+  color:#e6f1ff;
+  border-right:1px solid #1a3050;
   z-index:50;
   animation:slide-in .22s ease;
   outline:none}
 .drawer-close {
   position:absolute;
   right:8px;
-  top:8px}
+  top:8px;
+  color:#c4d7ec}
+.drawer-close:hover {
+  color:#ffffff}
 .mobile-drawer .sidebar-inner {
   padding-top:50px}
 .loading-skeleton {

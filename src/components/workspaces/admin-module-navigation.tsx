@@ -64,7 +64,7 @@ export function AdminModuleNavigation({ sidebar, mobile, header, panels }: {
       event.preventDefault();
       document.getElementById('admin-content')?.focus();
     }}>Skip to workspace</a>
-    <div className={styles.shell}>
+    <div className={styles.shell} data-role="admin">
       {sidebar}
       <div className={styles.workspace}>
         {header}

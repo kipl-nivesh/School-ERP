@@ -14,6 +14,7 @@ function load(file) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const localRequire = name => {
+    if (name === 'server-only') return {};
     if (!name.startsWith('.')) throw new Error('Unexpected dependency: '+name);
     return load(path.resolve(path.dirname(file),name+'.ts'));
   };
@@ -21,7 +22,7 @@ function load(file) {
   return loaded.exports;
 }
 const { assertPreviewContext } = load('src/lib/services/preview-boundary.ts');
-const { SchoolAdminSupabaseService: admin, AccountantSupabaseService: accountant, setSupabaseClientFactory } = load('src/lib/services/supabase-dal.ts');
+const { SchoolAdminSupabaseService: admin, AccountantSupabaseService: accountant, TeacherSupabaseService: teacher, setSupabaseClientFactory } = load('src/lib/services/supabase-dal.ts');
 const now=Date.now();
 const context = {
   source:'verified-server-session',schoolId:'school-fixture',profileId:'actor',accountStatus:'active',credentialResetRequired:false,
@@ -131,10 +132,10 @@ test('management rejects inherited kinds and excludes client-supplied authority 
   form.set('name','');assert.equal(management.managementPayload('class',form),null);
 });
 const managementActionJs=ts.transpileModule(fs.readFileSync('src/app/staff/management-actions.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText.replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
-const makeManagementAction=new Function('getStaffAccess','staffClient','evaluatePermission','isManagementKind','isRecordId','managementPayload','revalidatePath',managementActionJs+';return manageAcademicRecord;');
-for(const allow of [false,true]) test(`management server action ${allow?'persists through RPC':'denies before database access'}`,async()=>{
+const makeManagementAction=new Function('staffWorkspaceWritesEnabled','getStaffAccess','staffClient','evaluatePermission','isManagementKind','isRecordId','managementPayload','revalidatePath',managementActionJs+';return manageAcademicRecord;');
+for(const allow of [false,true]) test(`dormant management action with mocked write gate ${allow?'persists through RPC':'denies before database access'}`,async()=>{
   let calls=0;
-  const action=makeManagementAction(async()=>({role:'admin',context}),async()=>({rpc:async(name,args)=>{
+  const action=makeManagementAction(()=>true,async()=>({role:'admin',context}),async()=>({rpc:async(name,args)=>{
     calls++;assert.equal(name,'manage_academics');assert.equal('school_id' in args,false);return {data:{id:args.p_id},error:null};
   }}),()=>({allowed:allow}),management.isManagementKind,management.isRecordId,management.managementPayload,()=>{});
   const form=new FormData();form.set('kind','class');form.set('name','Synthetic class');form.set('recordId','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');form.set('requestId','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
@@ -178,3 +179,11 @@ for(const input of [attendance,homework]) {
     assert.equal(await executeAcademic({...input,section:'invalid'},{context:async()=>{throw Error('Unexpected lookup');},execute:async()=>{throw Error('Unexpected command');}}),false);
   });
 }
+
+test('live marks draft and publication fail closed before acquiring a client', async () => {
+  setSupabaseClientFactory(() => assert.fail('Unexpected marks client creation'));
+  for (const result of [await teacher.recordMarksDraft(context, {}), await teacher.publishMarks(context, id, id)]) {
+    assert.equal(result.success, false);
+    assert.equal(result.code, 'LIVE_MARKS_WRITE_UNAVAILABLE');
+  }
+});

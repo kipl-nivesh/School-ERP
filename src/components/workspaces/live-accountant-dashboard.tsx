@@ -66,12 +66,18 @@ export function AccountantDashboardView({ data, records = [] }: { data: FinanceR
     const value = data.invoiceTotals.kind === 'ready' ? data.invoiceTotals.data[key] : null;
     return value === null ? 'Unavailable' : formatPaise(value);
   };
-  return <div className={shell.shell}>
-    <aside className={shell.sidebar}><Brand /><Navigation data={data} records={records} /></aside>
+  return <div className={shell.shell} data-role="accountant">
+    <aside className={shell.sidebar}>
+      <Brand />
+      <div className={shell.sidebarRoleBadge}>
+        <span>Accountant workspace</span>
+      </div>
+      <Navigation data={data} records={records} />
+    </aside>
     <div className={shell.workspace}>
       <header className={shell.header}><div className={shell.identity}>
         <Wallet aria-hidden="true" /><div><strong>{data.schoolName ?? 'Active school'}</strong><span>Accountant</span></div>
-      </div><form action={logoutStaff}><button type="submit">Sign out</button></form></header>
+      </div><form action={logoutStaff}><button className={shell.signOut} type="submit">Sign out</button></form></header>
       <details className={shell.mobile}><summary><Menu aria-hidden="true" /> Finance navigation</summary><Navigation data={data} records={records} /></details>
       <main className={shell.main + ' ' + styles.layout}>
         <div id="overview" className={shell.hero}><p>Finance</p><h1>Accountant dashboard</h1></div>

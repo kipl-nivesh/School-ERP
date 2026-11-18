@@ -46,15 +46,54 @@ await test('Synthetic authorized transition only redirects to allowlist',async()
 await test('PIN authentication and original role count unchanged',()=>{assert.equal(auth.LIVE_AUTHENTICATION_ENABLED,false);assert.equal(auth.PRIMARY_ROLES.length,5);assert.equal(auth.PRIMARY_ROLES.includes('super_admin'),false);});
 // Load actual SDK adapter code with only mocked module boundaries; no SDK imports or requests.
 const serverJs=ts.transpileModule(fs.readFileSync('src/lib/staff/server.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2020}}).outputText.replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
-const serverSource='export function makeServer(createServerSupabaseClient,getSupabasePublicConfiguration,evaluateDashboardAccess,isStaffRole,resolveStaffAuthorization){'+serverJs+';return {loadStaffResolution,getStaffAccess};}';
+const requestPolicy=await import(moduleURL('src/lib/staff/request-policy.ts'));
+const serverSource='export function makeServer(createServerSupabaseClient,getSupabasePublicConfiguration,evaluateDashboardAccess,isStaffRole,isStaffUuid,resolveStaffAuthorization,staffRequestsEnabled){'+serverJs+';return {loadStaffResolution,getStaffAccess,listStaffSchoolChoices};}';
 const {makeServer}=await import('data:text/javascript;base64,'+Buffer.from(serverSource).toString('base64'));
 const issuer='https://'+'a'.repeat(20)+'.supabase.co';
 const realClock=Date.now();
-function adapterFixture(){const s=snapshot();const shift=realClock-NOW;for(const m of s.school.memberships)m.valid_from=new Date(realClock-1000).toISOString();s.school.context.expires_at=new Date(realClock+30000).toISOString();s.school.context.id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';return {school:s.school,claims:{sub:s.provider.profileId,iss:issuer+'/auth/v1',role:'authenticated',aud:'authenticated',session_id:s.school.context.id,exp:Math.floor((realClock+60000)/1000),aal:'aal1',amr:[{method:'password',timestamp:Math.floor((NOW+shift-1000)/1000)}]},user:{id:s.provider.profileId,email_confirmed_at:new Date(realClock-1000).toISOString()},dbError:false};}
-function mockClient(f){return {rpc:async(name)=>({data:name==='staff_session_is_live'?f.sessionLive!==false:name==='current_school_id'?(f.missingSchool?null:'fixture-school'):name==='list_school_memberships'?[]:null,error:f.dbError?{}:null}),auth:{getClaims:async()=>({data:{claims:f.claims},error:null}),getUser:async()=>({data:{user:f.user},error:null})},from(table){const data=table==='schools'?{id:'fixture-school',status:'active'}:table==='profiles'?f.school.profile:table==='user_roles'?f.school.memberships:table==='admin_privileges'?f.school.privilege:f.school.context;const q={select(){return q;},eq(){return q;},maybeSingle(){return Promise.resolve({data,error:f.dbError?{}:null});},then(resolve,reject){return Promise.resolve({data,error:f.dbError?{}:null}).then(resolve,reject);}};return q;}};}
-const adapter=makeServer(async()=>{throw Error('No real client allowed');},()=>({configured:true,url:issuer}),auth.evaluateDashboardAccess,core.isStaffRole,core.resolveStaffAuthorization);
+const schoolId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const profileId='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+function adapterFixture(role='teacher'){const s=snapshot(role);s.provider.profileId=profileId;s.school.profile.id=profileId;s.school.context.profile_id=profileId;s.school.context.school_id=schoolId;for(const row of s.school.memberships){row.profile_id=profileId;row.school_id=schoolId;}const shift=realClock-NOW;for(const m of s.school.memberships)m.valid_from=new Date(realClock-1000).toISOString();s.school.context.expires_at=new Date(realClock+30000).toISOString();s.school.context.id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';return {school:s.school,claims:{sub:s.provider.profileId,iss:issuer+'/auth/v1',role:'authenticated',aud:'authenticated',session_id:s.school.context.id,exp:Math.floor((realClock+60000)/1000),aal:s.provider.assurance,amr:[{method:'password',timestamp:Math.floor((NOW+shift-1000)/1000)}]},user:{id:s.provider.profileId,email_confirmed_at:new Date(realClock-1000).toISOString()},dbError:false};}
+function mockClient(f){return {rpc:async(name)=>({data:name==='staff_session_is_live'?f.sessionLive!==false:name==='current_school_id'?(f.missingSchool?null:schoolId):name==='list_school_memberships'?(f.choices??[]):name==='current_active_role'?(f.activeRole??f.school.context.role_code):null,error:f.dbError?{}:null}),auth:{getClaims:async()=>({data:{claims:f.claims},error:null}),getUser:async()=>({data:{user:f.user},error:null})},from(table){const data=table==='schools'?{id:schoolId,status:'active'}:table==='profiles'?f.school.profile:table==='user_roles'?f.school.memberships:table==='admin_privileges'?f.school.privilege:f.school.context;const q={select(){return q;},eq(){return q;},maybeSingle(){return Promise.resolve({data,error:f.dbError?{}:null});},then(resolve,reject){return Promise.resolve({data,error:f.dbError?{}:null}).then(resolve,reject);}};return q;}};}
+const adapter=makeServer(async()=>{throw Error('No real client allowed');},()=>({configured:true,url:issuer}),auth.evaluateDashboardAccess,core.isStaffRole,core.isStaffUuid,core.resolveStaffAuthorization,requestPolicy.staffRequestsEnabled);
 await test('SDK adapter only constructs context after matching mock claims/user/live rows',async()=>assert.equal((await adapter.loadStaffResolution(mockClient(adapterFixture()),'teacher')).kind,'authorized'));
 for(const [name,mutate] of [['wrong issuer',f=>f.claims.iss='https://wrong.invalid'],['unverified email',f=>f.user.email_confirmed_at=null],['subject substitution',f=>f.user.id='other'],['wrong audience',f=>f.claims.aud='other'],['unverified assurance',f=>f.claims.aal='fake'],['password method missing',f=>f.claims.amr=[]],['missing tables/RLS denial',f=>f.dbError=true],['provider session revoked',f=>f.sessionLive=false],['missing selected school',f=>f.missingSchool=true]])await test('SDK adapter denies '+name,async()=>{const f=adapterFixture();mutate(f);assert.equal((await adapter.loadStaffResolution(mockClient(f),'teacher')).kind,'denied');});
+for (const [name, change] of [
+  ['expired signed token', f => f.claims.exp = 1],
+  ['expired context', f => f.school.context.expires_at = new Date(realClock - 1).toISOString()],
+  ['revoked membership', f => f.school.memberships[0].membership_status = 'revoked'],
+  ['foreign membership', f => f.school.memberships[0].school_id = profileId],
+  ['foreign context', f => f.school.context.school_id = profileId],
+  ['database role mismatch', f => f.activeRole = 'accountant'],
+  ['OTP-only recovery session', f => f.claims.amr = [{ method: 'otp', timestamp: 1 }]],
+  ['recovery marker beside password AMR', f => f.claims.amr.push({ method: 'recovery', timestamp: 1 })],
+]) await test('Staff adapter denies ' + name, async () => {
+  const fixture = adapterFixture();
+  change(fixture);
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'teacher')).kind, 'denied');
+});
+await test('Expired context can require reselection when the server lists a live membership', async () => {
+  const fixture = adapterFixture();
+  fixture.missingSchool = true;
+  fixture.choices = [{ school_id: schoolId, school_name: 'Fixture school', role_code: 'teacher' }];
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'teacher')).kind, 'context_required');
+  fixture.sessionLive = false;
+  assert.deepEqual(await adapter.listStaffSchoolChoices(mockClient(fixture)), []);
+});
+await test('Admin needs signed AAL2/TOTP and a currently verified factor', async () => {
+  const fixture = adapterFixture('admin');
+  fixture.choices = [{ school_id: schoolId, school_name: 'Fixture school', role_code: 'admin' }];
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'admin')).kind, 'mfa_required');
+  assert.deepEqual(await adapter.listStaffSchoolChoices(mockClient(fixture)), []);
+  fixture.user.factors = [{ status: 'verified', factor_type: 'totp' }];
+  fixture.claims.amr.push({ method: 'totp', timestamp: Math.floor((realClock - 500) / 1000) });
+  fixture.claims.aal = 'aal1';
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'admin')).kind, 'mfa_required');
+  fixture.claims.aal = 'aal2';
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'admin')).kind, 'authorized');
+  fixture.user.factors[0].status = 'unverified';
+  assert.equal((await adapter.loadStaffResolution(mockClient(fixture), 'admin')).kind, 'mfa_required');
+});
 await test('Actual protected route boundary denies while feature flag off',async()=>{const old=process.env.STAFF_AUTH_REQUESTS_ENABLED;process.env.STAFF_AUTH_REQUESTS_ENABLED='false';try{assert.equal(await adapter.getStaffAccess(),null);}finally{if(old===undefined)delete process.env.STAFF_AUTH_REQUESTS_ENABLED;else process.env.STAFF_AUTH_REQUESTS_ENABLED=old;}});
 // Execute actual Server Action bodies with mocked SDK, configuration, role resolution and redirects.
 const actionJs=ts.transpileModule(fs.readFileSync('src/app/login/staff/actions.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2020}}).outputText.replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
