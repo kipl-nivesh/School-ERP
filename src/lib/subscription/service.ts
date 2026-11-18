@@ -13,7 +13,16 @@ import {
   type SubscriptionAccessDecision,
   type SubscriptionExtensionResult,
   type ParentChildSubscriptionSummary,
+  CONSOLIDATED_BILLING_RULES,
+  calculateSchoolConsolidatedInvoice,
+  type SchoolConsolidatedBillingInvoice,
 } from './contracts';
+
+export {
+  CONSOLIDATED_BILLING_RULES,
+  calculateSchoolConsolidatedInvoice,
+  type SchoolConsolidatedBillingInvoice,
+};
 
 // In-memory persistent state backing isolated tests and development DAL
 const subscriptionStore = new Map<string, {
