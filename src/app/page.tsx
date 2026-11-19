@@ -12,6 +12,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { HeroBackground } from '@/components/home/hero-background';
+import { Hero3dScene } from '@/components/home/hero-3d-scene';
 import styles from './home.module.css';
 
 interface WorkspaceCardData {
@@ -75,24 +76,29 @@ export default function Home() {
           {/* Brand Logo & Platform Title */}
           <div className={styles.brandGroup}>
             <div className={styles.brandMark} aria-hidden="true">
-              <GraduationCap size={22} />
+              <GraduationCap size={20} />
             </div>
             <div className={styles.brandText}>
-              <span className={styles.brandName}>brightcamp</span>
-              <span className={styles.brandTagline}>SCHOOL WORKSPACE</span>
+              <span className={styles.brandName}>
+                <span className={styles.brandBright}>BRIGHT</span>
+                <span className={styles.brandCamp}>CAMP</span>
+              </span>
+              <span className={styles.brandTagline}>SCHOOL ERP PLATFORM</span>
             </div>
             <span className={styles.brandDivider} aria-hidden="true" />
-            <span className={styles.platformLabel}>School ERP Platform</span>
+            <span className={styles.platformLabel}>All-in-One School Management</span>
           </div>
 
           {/* Right Header Navigation & Demo Indicator */}
           <div className={styles.headerRight}>
             <a href="#workspaces" className={styles.navDemoLink}>
-              Demo workspaces
+              Demo Workspaces
             </a>
             <div className={styles.demoBadge}>
               <span className={styles.demoDot} aria-hidden="true" />
-              <span>DEMO · Fictional data</span>
+              <span className={styles.demoBadgeText}>
+                <strong className={styles.demoHighlight}>DEMO</strong> · Fictional data
+              </span>
             </div>
           </div>
         </div>
@@ -102,52 +108,61 @@ export default function Home() {
       {/* 2. MAIN SINGLE-SCREEN HERO & WORKSPACES                        */}
       {/* ============================================================== */}
       <main className={styles.main} id="main-content">
-        {/* Vector-accurate background illustration (schoolhouse & ribbons) */}
+        {/* Full-bleed vector decorative background */}
         <HeroBackground />
 
         <div className={styles.mainContainer}>
-          {/* Centered Hero Typography & Actions */}
+          {/* Hero Row: Left Typography & Right 3D Pixar Campus Visual */}
           <section className={styles.heroSection} aria-labelledby="hero-title">
-            {/* Eyebrow with decorative horizontal lines */}
-            <div className={styles.eyebrowContainer}>
-              <span className={styles.eyebrowLine} aria-hidden="true" />
-              <p className={styles.eyebrow}>ONE SCHOOL. ONE SMART PLATFORM.</p>
-              <span className={styles.eyebrowLine} aria-hidden="true" />
+            {/* Left Column: Hero Content */}
+            <div className={styles.heroContent}>
+              {/* Eyebrow with horizontal accent rule */}
+              <div className={styles.eyebrowContainer}>
+                <p className={styles.eyebrow}>ONE SCHOOL. ONE SMART PLATFORM.</p>
+                <span className={styles.eyebrowLine} aria-hidden="true" />
+              </div>
+
+              {/* Main Headline */}
+              <h1 id="hero-title" className={styles.heroTitle}>
+                <span className={styles.heroTitleLine1}>Your School.</span>
+                <span className={styles.heroTitleGradient}>
+                  Beautifully<br className={styles.mobileBreak} /> Connected.
+                </span>
+              </h1>
+
+              {/* Supporting Value Proposition */}
+              <p className={styles.heroDescription}>
+                Manage learning, people and school operations in one powerful, easy-to-use School ERP.
+              </p>
+
+              {/* Three Feature Highlights */}
+              <div className={styles.featuresRow}>
+                <div className={styles.featurePill}>
+                  <ShieldCheck size={14} className={styles.featureIcon} aria-hidden="true" />
+                  <span>Secure &amp; Role-Based</span>
+                </div>
+                <div className={styles.featurePill}>
+                  <Layers size={14} className={styles.featureIcon} aria-hidden="true" />
+                  <span>All-in-One Platform</span>
+                </div>
+                <div className={styles.featurePill}>
+                  <Zap size={14} className={styles.featureIcon} aria-hidden="true" />
+                  <span>Built for Schools</span>
+                </div>
+              </div>
+
+              {/* Primary Call-to-Action */}
+              <div className={styles.ctaWrapper}>
+                <a href="#workspaces" className={styles.primaryCta}>
+                  <span>Explore Workspaces</span>
+                  <ArrowRight size={16} className={styles.ctaArrow} aria-hidden="true" />
+                </a>
+              </div>
             </div>
 
-            {/* Main Title */}
-            <h1 id="hero-title" className={styles.heroTitle}>
-              Your School.{' '}
-              <span className={styles.heroTitleGradient}>Beautifully Connected.</span>
-            </h1>
-
-            {/* Supporting Description */}
-            <p className={styles.heroDescription}>
-              Manage learning, people and school operations in one powerful, easy-to-use School ERP.
-            </p>
-
-            {/* Three Feature Highlights */}
-            <div className={styles.featuresRow}>
-              <div className={styles.featurePill}>
-                <ShieldCheck size={14} className={styles.featureIcon} aria-hidden="true" />
-                <span>Secure &amp; Role-Based</span>
-              </div>
-              <div className={styles.featurePill}>
-                <Layers size={14} className={styles.featureIcon} aria-hidden="true" />
-                <span>All-in-One Platform</span>
-              </div>
-              <div className={styles.featurePill}>
-                <Zap size={14} className={styles.featureIcon} aria-hidden="true" />
-                <span>Built for Schools</span>
-              </div>
-            </div>
-
-            {/* Primary CTA */}
-            <div className={styles.ctaWrapper}>
-              <a href="#workspaces" className={styles.primaryCta}>
-                <span>Explore Workspaces</span>
-                <ArrowRight size={16} className={styles.ctaArrow} aria-hidden="true" />
-              </a>
+            {/* Right Column: 3D Pixar School Campus Artwork */}
+            <div className={styles.heroVisual}>
+              <Hero3dScene />
             </div>
           </section>
 
@@ -168,16 +183,48 @@ export default function Home() {
                   data-role={role}
                   aria-label={`${title} Workspace: ${description}`}
                 >
-                  <div className={styles.cardIconBox} aria-hidden="true">
-                    <Icon size={22} strokeWidth={2.1} />
+                  {/* Luminous fluid glass waves at the bottom */}
+                  <div className={styles.cardWaveContainer} aria-hidden="true">
+                    <svg
+                      className={styles.cardWaveSvg}
+                      viewBox="0 0 190 70"
+                      fill="none"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 0 48 C 30 36, 65 54, 105 38 C 135 26, 165 18, 190 10 L 190 70 L 0 70 Z"
+                        fill="currentColor"
+                        className={styles.waveBase}
+                      />
+                      <path
+                        d="M 0 58 C 40 52, 90 44, 135 25 L 190 10 L 190 70 L 0 70 Z"
+                        fill="currentColor"
+                        className={styles.waveCrest}
+                      />
+                      <path
+                        d="M 0 58 C 40 52, 90 44, 135 25 L 190 10"
+                        stroke="rgba(255, 255, 255, 0.7)"
+                        strokeWidth="1.2"
+                        fill="none"
+                        className={styles.waveHighlight}
+                      />
+                    </svg>
+                  </div>
+
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardIconBox} aria-hidden="true">
+                      <Icon size={22} strokeWidth={2.3} />
+                    </div>
                   </div>
                   <div className={styles.cardBody}>
                     <h2 className={styles.cardTitle}>{title}</h2>
                     <p className={styles.cardDesc}>{description}</p>
                   </div>
                   <div className={styles.cardActionCircle} aria-hidden="true">
-                    <ArrowRight size={14} strokeWidth={2.4} />
+                    <ArrowRight size={15} strokeWidth={2.6} />
                   </div>
+                  {/* Radiant specular glare along the bottom edge */}
+                  <span className={styles.cardBottomGlow} aria-hidden="true" />
                 </Link>
               ))}
             </div>
