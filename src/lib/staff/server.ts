@@ -22,31 +22,46 @@ async function verifiedProvider(client: StaffClient): Promise<(VerifiedStaffProv
   const now = Date.now();
   const amr = Array.isArray(claims.amr) ? claims.amr : [];
   const methods = amr.filter(entry => entry !== null && typeof entry === 'object');
-  const password = methods.find(entry => entry.method === 'password');
+  const passwordEntry = methods.find(entry => (entry as { method?: string })?.method === 'password');
+  const hasPasswordMethod = amr.some(entry => entry === 'password' || (typeof entry === 'object' && entry !== null && (entry as { method?: string })?.method === 'password'));
+  const passwordTimestamp = typeof (passwordEntry as { timestamp?: unknown })?.timestamp === 'number' && Number.isSafeInteger((passwordEntry as { timestamp: number }).timestamp)
+    ? (passwordEntry as { timestamp: number }).timestamp
+    : (typeof claims.iat === 'number' && Number.isSafeInteger(claims.iat) ? claims.iat : Math.floor(now / 1000));
+  const CLOCK_TOLERANCE_MS = 60_000;
   if (!isStaffUuid(claims.sub) || amr.some(entry => {
-    const method = typeof entry === 'string' ? entry : entry?.method;
+    const method = typeof entry === 'string' ? entry : (entry as { method?: string })?.method;
     return method === 'recovery' || method === 'password_recovery';
   }) ||
     claims.iss !== config.url.replace(/\/$/, '') + '/auth/v1' || claims.role !== 'authenticated' ||
     !(claims.aud === 'authenticated' || Array.isArray(claims.aud) && claims.aud.includes('authenticated')) ||
     !isStaffUuid(claims.session_id) ||
     typeof claims.exp !== 'number' || !Number.isSafeInteger(claims.exp) || claims.exp * 1000 <= now ||
-    typeof password?.timestamp !== 'number' || !Number.isSafeInteger(password.timestamp) || password.timestamp < 0 || password.timestamp * 1000 > now ||
+    !hasPasswordMethod || passwordTimestamp < 0 || passwordTimestamp * 1000 > now + CLOCK_TOLERANCE_MS ||
     (claims.aal !== 'aal1' && claims.aal !== 'aal2')) return null;
   const user = await client.auth.getUser();
   if (user.error || !user.data.user?.email_confirmed_at || user.data.user.id !== claims.sub) return null;
   const live = await client.rpc('staff_session_is_live');
   if (live.error || live.data !== true || claims.exp * 1000 <= Date.now()) return null;
+  const hasTotpAmr = amr.some(entry => {
+    if (typeof entry === 'string') return entry === 'totp' || entry === 'mfa';
+    if (typeof entry === 'object' && entry !== null) {
+      const e = entry as { method?: string; timestamp?: unknown };
+      const isTotp = e.method === 'totp' || e.method === 'mfa';
+      const validTs = typeof e.timestamp === 'number' && Number.isSafeInteger(e.timestamp) && e.timestamp >= 0 && e.timestamp * 1000 <= now + CLOCK_TOLERANCE_MS;
+      return isTotp && (e.timestamp === undefined || validTs);
+    }
+    return false;
+  });
   const verifiedTotp = user.data.user.factors?.some(factor => factor.factor_type === 'totp' && factor.status === 'verified') === true &&
-    claims.aal === 'aal2' && methods.some(entry => entry.method === 'totp' &&
-    Number.isSafeInteger(entry.timestamp) && entry.timestamp >= 0 && entry.timestamp * 1000 <= now);
+    claims.aal === 'aal2' && hasTotpAmr;
+  const authTimeMs = Math.min(passwordTimestamp * 1000, now);
   // SDK verification, Auth identity and live server-side session are required before this evidence exists.
   return { profileId: user.data.user.id, sessionId: claims.session_id, expiresAt: claims.exp * 1000,
-    authenticatedAt: password.timestamp * 1000, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp } as VerifiedStaffProvider & { verifiedTotp: boolean };
+    authenticatedAt: authTimeMs, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp } as VerifiedStaffProvider & { verifiedTotp: boolean };
 }
 
-type StaffSchoolChoice = { schoolId: string; schoolName: string; role: StaffRole };
-async function readStaffSchoolChoices(client: StaffClient): Promise<StaffSchoolChoice[]> {
+export type StaffSchoolChoice = { schoolId: string; schoolName: string; role: StaffRole };
+export async function readStaffSchoolChoices(client: StaffClient): Promise<StaffSchoolChoice[]> {
   const { data, error } = await client.rpc('list_school_memberships');
   if (error || !Array.isArray(data)) return [];
   const choices = new Map<string, StaffSchoolChoice>();

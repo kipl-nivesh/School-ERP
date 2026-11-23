@@ -1,7 +1,7 @@
 'use server';
 import { redirect } from 'next/navigation';
 import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
-import { staffClient, staffRequestsEnabled, loadStaffResolution } from '@/lib/staff/server';
+import { staffClient, staffRequestsEnabled, loadStaffResolution, readStaffSchoolChoices } from '@/lib/staff/server';
 import { GENERIC_STAFF_ERROR, STAFF_PENDING_MESSAGE, isStaffRole, performStaffLogin, safeStaffDestination } from '@/lib/staff/contracts';
 import type { StaffActionState } from '@/lib/staff/contracts';
 
@@ -18,8 +18,17 @@ export async function loginStaff(_previous: StaffActionState, form: FormData): P
       needsContext = resolution.kind === 'context_required';
       return resolution;
     },
-    // Selection is a separate checked transaction; no legacy unscoped context activation.
-    activate: async () => false,
+    activate: async role => {
+      try {
+        const c = await getClient();
+        const choices = (await readStaffSchoolChoices(c)).filter(choice => choice.role === role);
+        if (choices.length === 1) {
+          const { data, error } = await c.rpc('select_school_context', { p_school: choices[0].schoolId, p_role: role });
+          return !error && data === true;
+        }
+      } catch { /* context selection failed */ }
+      return false;
+    },
     factor: async () => { const r = await (await getClient()).auth.mfa.listFactors(); if (r.error) throw new Error('Factor lookup failed'); return r.data.totp.find(f => f.status === 'verified')?.id ?? null; },
   });
   if (result.phase === 'authorized') redirect(result.destination);
@@ -88,9 +97,21 @@ export async function verifyStaffMfa(_previous: StaffActionState, form: FormData
         secret: secret || undefined,
       };
     }
-    const access = await loadStaffResolution(client, role);
-    if (access.kind === 'context_required') destination = '/staff/select-school';
-    if (access.kind === 'authorized') destination = safeStaffDestination(form.get('next'), role);
+    let access = await loadStaffResolution(client, role);
+    if (access.kind === 'context_required') {
+      const choices = (await readStaffSchoolChoices(client)).filter(choice => choice.role === role);
+      if (choices.length === 1) {
+        const { data, error } = await client.rpc('select_school_context', { p_school: choices[0].schoolId, p_role: role });
+        if (!error && data === true) {
+          access = await loadStaffResolution(client, role);
+        }
+      }
+    }
+    if (access.kind === 'authorized') {
+      destination = safeStaffDestination(form.get('next'), role);
+    } else if (access.kind === 'context_required') {
+      destination = '/staff/select-school';
+    }
   } catch { /* Generic denial; never expose provider, cookie or database details. */ }
   if (destination) redirect(destination);
   return { phase: 'error', message: GENERIC_STAFF_ERROR };
