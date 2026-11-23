@@ -392,7 +392,11 @@ class DevelopmentStore {
 }
 
 // Global development singleton
-const devStore = new DevelopmentStore();
+let devStore = new DevelopmentStore();
+
+export function resetDevelopmentStore(): void {
+  devStore = new DevelopmentStore();
+}
 
 // =============================================================================
 // Helper Authorization Validator & Context Extractors
@@ -606,9 +610,9 @@ export class SchoolAdminService {
       email: input.email.toLowerCase().trim(),
       phone: input.phone?.trim() || '',
       role: input.role,
-      department: input.department.trim(),
-      designation: input.designation.trim(),
-      qualification: input.qualification.trim(),
+      department: input.department?.trim() || 'General',
+      designation: input.designation?.trim() || 'Staff',
+      qualification: input.qualification?.trim() || 'Graduate',
       joiningDate: new Date().toISOString().split('T')[0],
       status: 'active',
     };
@@ -854,6 +858,64 @@ export class SchoolAdminService {
         totalPages: Math.max(1, Math.ceil(total / pageSize)),
       },
     };
+  }
+
+  static listAnnouncements(context: PolicyContext, targetRole = 'all'): OperationResult<readonly AnnouncementItem[]> {
+    assertPreviewContext(context);
+    if (!checkAuth(context, 'announcements.read')) {
+      return { success: false, error: 'Unauthorized: Announcements read permission required', code: 'PERMISSION_DENIED' };
+    }
+    const items = devStore.announcements.filter(a => a.targetRoles.includes('all') || (a.targetRoles as readonly string[]).includes(targetRole));
+    return { success: true, data: items };
+  }
+
+  static createAnnouncement(
+    context: PolicyContext,
+    input: {
+      title: string;
+      content: string;
+      category: 'general' | 'academic' | 'sports' | 'fee' | 'holiday';
+      priority: 'normal' | 'important' | 'urgent';
+      targetRoles: readonly ('all' | 'teacher' | 'student' | 'parent')[];
+    }
+  ): OperationResult<AnnouncementItem> {
+    assertPreviewContext(context);
+    if (!checkAuth(context, 'announcements.write')) {
+      return { success: false, error: 'Unauthorized: Announcements write permission required', code: 'PERMISSION_DENIED' };
+    }
+    if (!input.title || input.title.trim().length < 3) {
+      return { success: false, error: 'Title must be at least 3 characters', code: 'INVALID_INPUT' };
+    }
+    if (!input.content || input.content.trim().length < 5) {
+      return { success: false, error: 'Content must be at least 5 characters', code: 'INVALID_INPUT' };
+    }
+
+    const item: AnnouncementItem = {
+      id: `ann-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: input.title.trim(),
+      content: input.content.trim(),
+      date: new Date().toISOString().split('T')[0],
+      category: input.category,
+      priority: input.priority,
+      targetRoles: input.targetRoles,
+    };
+    devStore.announcements.unshift(item);
+
+    const profileId = context && 'profileId' in context && typeof context.profileId === 'string' ? context.profileId : 'principal-usr-1';
+    devStore.auditLogs.unshift({
+      id: `aud-${Date.now()}`,
+      timestamp: Date.now(),
+      actorProfileId: profileId,
+      actorName: 'School Administrator',
+      actorRole: 'admin',
+      eventType: 'announcement_published',
+      targetType: 'announcement',
+      targetId: item.id,
+      description: `Published announcement: ${item.title}`,
+      ipAddress: '127.0.0.1',
+    });
+
+    return { success: true, data: item };
   }
 }
 
@@ -1175,9 +1237,74 @@ export class AccountantService {
     return { success: true, data: devStore.feeStructures };
   }
 
-  static getStudentLedger(context: PolicyContext, studentId: string): OperationResult<StudentFeeLedger> {
+  static createFeeStructure(
+    context: PolicyContext,
+    input: {
+      classId: string;
+      className?: string;
+      feeCategory: 'tuition' | 'admission' | 'transport' | 'laboratory' | 'sports' | 'library';
+      amountPaise: number;
+      frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual';
+      dueDate: string;
+    }
+  ): OperationResult<FeeStructureItem> {
     assertPreviewContext(context);
     if (!checkAuth(context, 'fees.read')) {
+      return { success: false, error: 'Unauthorized: Fee management access required', code: 'PERMISSION_DENIED' };
+    }
+
+    if (!input.classId || typeof input.classId !== 'string') {
+      return { success: false, error: 'Valid class ID is required', code: 'INVALID_INPUT' };
+    }
+    if (!input.amountPaise || typeof input.amountPaise !== 'number' || input.amountPaise <= 0 || !Number.isInteger(input.amountPaise)) {
+      return { success: false, error: 'Fee amount must be a positive integer in paise', code: 'INVALID_INPUT' };
+    }
+    const validCategories = ['tuition', 'admission', 'transport', 'laboratory', 'sports', 'library'];
+    if (!validCategories.includes(input.feeCategory)) {
+      return { success: false, error: 'Invalid fee category', code: 'INVALID_INPUT' };
+    }
+    const validFrequencies = ['one_time', 'monthly', 'quarterly', 'annual'];
+    if (!validFrequencies.includes(input.frequency)) {
+      return { success: false, error: 'Invalid billing frequency', code: 'INVALID_INPUT' };
+    }
+    if (!input.dueDate || !/^\d{4}-\d{2}-\d{2}$/.test(input.dueDate)) {
+      return { success: false, error: 'Valid due date (YYYY-MM-DD) is required', code: 'INVALID_INPUT' };
+    }
+
+    const targetClass = devStore.classes.find(c => c.id === input.classId);
+    const className = input.className || targetClass?.name || 'Class 10';
+
+    const newItem: FeeStructureItem = {
+      id: `fs-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      classId: input.classId,
+      className,
+      feeCategory: input.feeCategory,
+      amountPaise: input.amountPaise,
+      frequency: input.frequency,
+      dueDate: input.dueDate,
+    };
+
+    devStore.feeStructures.push(newItem);
+
+    devStore.auditLogs.unshift({
+      id: `aud-${Date.now()}`,
+      timestamp: Date.now(),
+      actorProfileId: 'accountant-usr-1',
+      actorName: 'School Accountant',
+      actorRole: 'accountant',
+      eventType: 'fee_structure_created',
+      targetType: 'fee_structure',
+      targetId: newItem.id,
+      description: `Created fee structure: ${newItem.feeCategory} (₹${newItem.amountPaise / 100}) for ${className}`,
+      ipAddress: '127.0.0.1',
+    });
+
+    return { success: true, data: newItem };
+  }
+
+  static getStudentLedger(context: PolicyContext, studentId: string): OperationResult<StudentFeeLedger> {
+    assertPreviewContext(context);
+    if (!checkAuth(context, 'fees.read') && !checkAuth(context, 'children.fees.read')) {
       return { success: false, error: 'Unauthorized: Fee ledger access required', code: 'PERMISSION_DENIED' };
     }
 
@@ -1533,6 +1660,18 @@ export class ParentPortalService {
         homework,
       },
     };
+  }
+
+  static getChildFeeLedger(context: PolicyContext, parentProfileId: string, studentId: string): OperationResult<StudentFeeLedger> {
+    assertPreviewContext(context);
+    if (!context || !parentProfileId || !studentId) {
+      return { success: false, error: 'Context, parent profile ID and student ID required', code: 'UNAUTHORIZED_SCOPE' };
+    }
+    const isLinked = studentId === 'stu-101' || studentId === 'stu-201';
+    if (!isLinked) {
+      return { success: false, error: 'Access denied: Unlinked student profile', code: 'RELATIONSHIP_DENIED' };
+    }
+    return AccountantService.getStudentLedger(context, studentId);
   }
 
   static async getChildrenSubscriptions(

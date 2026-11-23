@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default function StudentLoginPage() {
-  return <StudentLoginForm liveAuthEnabled={false} />;
+  return <StudentLoginForm liveAuthEnabled={true} />;
 }

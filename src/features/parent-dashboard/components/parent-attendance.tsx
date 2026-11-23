@@ -5,11 +5,112 @@ import { months } from '../data/mock-dashboard';
 import { attendanceSummary } from '../lib/calculations';
 import { ParentSection } from './section';
 import { ParentProgress } from './motion';
-export function ParentAttendance({child}:{child:Child}) {
-  const [period,setPeriod]=useState('all');
-  const records=child.attendance.filter(r=>period==='all'||r.date.startsWith(period));
-  const summary=attendanceSummary(records);
-  const shown=months.filter(m=>period==='all'||m.id===period).map(m=>({...m,...attendanceSummary(child.attendance.filter(r=>r.date.startsWith(m.id)))}));
-  return <ParentSection id="parent-attendance" title="Every day, a new possibility" description={'Attendance · '+child.firstName+' · July–4 November'} badge="School days"><div className="pd-control"><label htmlFor="parent-attendance-period">Attendance period</label><select id="parent-attendance-period" value={period} onChange={e=>setPeriod(e.target.value)}><option value="all">All school months</option>{months.map(m=><option key={m.id} value={m.id}>{m.label} 2026{m.id==='2026-11'?' · through 4 Nov':''}</option>)}</select></div><div className="pd-attendance-overview"><div><strong className="pd-big-number">{summary.percentage.toFixed(1)}<small>%</small></strong><span>Present / all scheduled days</span></div><div className="pd-counts"><span><CalendarCheck size={15}/><b>{summary.present}</b> present</span><span><CalendarX size={15}/><b>{summary.absent}</b> absent</span><span><CalendarHeart size={15}/><b>{summary.leave}</b> leave</span></div></div><p className="pd-view-summary" role="status">{child.firstName}: {summary.present} present, {summary.absent} absent, {summary.leave} leave · {summary.total} scheduled days.</p><figure className="pd-attendance-chart"><figcaption>Monthly attendance <span>Present / scheduled days</span></figcaption>{shown.map(m=><div className="pd-attendance-row" key={m.id}><span>{m.label}</span><div className="pd-progress pd-tone-emerald" role="img" aria-label={`${m.label}: ${m.present} present, ${m.absent} absent, ${m.leave} leave out of ${m.total} days`}><ParentProgress value={m.percentage}/></div><strong>{m.present}/{m.total}</strong></div>)}<div className="pd-chart-scale" aria-hidden="true"><span>0%</span><span>50%</span><span>100%</span></div><p>November is partial through 4 Nov. Leave counts in the attendance denominator.</p></figure><details className="pd-details"><summary>View exact attendance counts</summary><table><caption>{child.name} · fictional instructional days</caption><thead><tr><th scope="col">Month</th><th scope="col">Present</th><th scope="col">Absent</th><th scope="col">Leave</th></tr></thead><tbody>{shown.map(m=><tr key={m.id}><th scope="row">{m.label}</th><td>{m.present}</td><td>{m.absent}</td><td>{m.leave}</td></tr>)}</tbody><tfoot><tr><th scope="row">Total</th><td>{summary.present}</td><td>{summary.absent}</td><td>{summary.leave}</td></tr></tfoot></table></details><p className="pd-panel-note">Demo calendar includes two sample school Saturdays. Every child’s rhythm is their own.</p></ParentSection>;
-}
 
+export function ParentAttendance({ child }: { child: Child }) {
+  const isLive = child.id === 'student_a1';
+  const [period, setPeriod] = useState('all');
+  const records = child.attendance.filter(r => period === 'all' || r.date.startsWith(period));
+  const summary = attendanceSummary(records);
+
+  if (isLive && child.attendance.length === 0) {
+    return (
+      <ParentSection
+        id="parent-attendance"
+        title="Daily Attendance Register"
+        description={'Attendance record · ' + child.firstName + ' (' + child.className + ')'}
+        badge="Official Record"
+      >
+        <div className="pd-attendance-overview">
+          <div>
+            <strong className="pd-big-number">0.0<small>%</small></strong>
+            <span>Present / scheduled days</span>
+          </div>
+          <div className="pd-counts">
+            <span><CalendarCheck size={15} /><b>0</b> present</span>
+            <span><CalendarX size={15} /><b>0</b> absent</span>
+            <span><CalendarHeart size={15} /><b>0</b> leave</span>
+          </div>
+        </div>
+        <div className="pd-empty" style={{ padding: '32px 20px', textAlign: 'center' }}>
+          <CalendarCheck size={36} style={{ margin: '0 auto 12px', color: 'var(--muted-foreground)' }} />
+          <h3 style={{ fontSize: '16px', fontWeight: 600 }}>No attendance records recorded yet</h3>
+          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
+            Daily classroom attendance for {child.firstName} ({child.className}) will appear here once marked by the class teacher.
+          </p>
+        </div>
+        <p className="pd-panel-note">Official attendance logs are maintained by school faculty under Row Level Security.</p>
+      </ParentSection>
+    );
+  }
+
+  const shown = months.filter(m => period === 'all' || m.id === period).map(m => ({
+    ...m,
+    ...attendanceSummary(child.attendance.filter(r => r.date.startsWith(m.id)))
+  }));
+
+  return (
+    <ParentSection
+      id="parent-attendance"
+      title="Every day, a new possibility"
+      description={'Attendance · ' + child.firstName + ' · July–4 November'}
+      badge={isLive ? 'Official Record' : 'School days'}
+    >
+      <div className="pd-control">
+        <label htmlFor="parent-attendance-period">Attendance period</label>
+        <select id="parent-attendance-period" value={period} onChange={e => setPeriod(e.target.value)}>
+          <option value="all">All school months</option>
+          {months.map(m => (
+            <option key={m.id} value={m.id}>{m.label} 2026{m.id === '2026-11' ? ' · through 4 Nov' : ''}</option>
+          ))}
+        </select>
+      </div>
+      <div className="pd-attendance-overview">
+        <div>
+          <strong className="pd-big-number">{summary.percentage.toFixed(1)}<small>%</small></strong>
+          <span>Present / all scheduled days</span>
+        </div>
+        <div className="pd-counts">
+          <span><CalendarCheck size={15} /><b>{summary.present}</b> present</span>
+          <span><CalendarX size={15} /><b>{summary.absent}</b> absent</span>
+          <span><CalendarHeart size={15} /><b>{summary.leave}</b> leave</span>
+        </div>
+      </div>
+      <p className="pd-view-summary" role="status">
+        {child.firstName}: {summary.present} present, {summary.absent} absent, {summary.leave} leave · {summary.total} scheduled days.
+      </p>
+      <figure className="pd-attendance-chart">
+        <figcaption>Monthly attendance <span>Present / scheduled days</span></figcaption>
+        {shown.map(m => (
+          <div className="pd-attendance-row" key={m.id}>
+            <span>{m.label}</span>
+            <div className="pd-progress pd-tone-emerald" role="img" aria-label={`${m.label}: ${m.present} present, ${m.absent} absent, ${m.leave} leave out of ${m.total} days`}>
+              <ParentProgress value={m.percentage} />
+            </div>
+            <strong>{m.present}/{m.total}</strong>
+          </div>
+        ))}
+        <div className="pd-chart-scale" aria-hidden="true"><span>0%</span><span>50%</span><span>100%</span></div>
+        <p>November is partial through 4 Nov. Leave counts in the attendance denominator.</p>
+      </figure>
+      <details className="pd-details">
+        <summary>View exact attendance counts</summary>
+        <table>
+          <caption>{child.name} · {isLive ? 'Instructional days' : 'fictional instructional days'}</caption>
+          <thead><tr><th scope="col">Month</th><th scope="col">Present</th><th scope="col">Absent</th><th scope="col">Leave</th></tr></thead>
+          <tbody>
+            {shown.map(m => (
+              <tr key={m.id}>
+                <th scope="row">{m.label}</th>
+                <td>{m.present}</td>
+                <td>{m.absent}</td>
+                <td>{m.leave}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot><tr><th scope="row">Total</th><td>{summary.present}</td><td>{summary.absent}</td><td>{summary.leave}</td></tr></tfoot>
+        </table>
+      </details>
+      {!isLive && <p className="pd-panel-note">Demo calendar includes two sample school Saturdays. Every child’s rhythm is their own.</p>}
+    </ParentSection>
+  );
+}

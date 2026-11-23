@@ -1,4 +1,5 @@
 import 'server-only';
+import { staffWorkspaceWritesEnabled } from './staff-workspace-policy';
 import { evaluatePermission } from '../auth/authorization';
 import { getStaffAccess, staffClient } from '../staff/server';
 import { isRecordId } from './management-contracts';
@@ -244,5 +245,51 @@ export async function readAnnouncements(form = new FormData()): Promise<Announce
     };
   } catch {
     return { kind: 'error', message: 'Announcements workspace could not be loaded.' };
+  }
+}
+
+export async function publishAnnouncement(form: FormData): Promise<{ ok: boolean; message: string }> {
+  if (!staffWorkspaceWritesEnabled()) {
+    return { ok: false, message: 'Announcement publishing is unavailable during read-only recovery.' };
+  }
+  const access = await getStaffAccess('admin');
+  const school = access?.context.schoolId;
+  if (!access || !school) return { ok: false, message: 'Access denied: Admin access required.' };
+
+  const allowed = (permission: string) => evaluatePermission(access.context, permission, Date.now()).allowed;
+  if (!allowed('announcements.write')) {
+    return { ok: false, message: 'Unauthorized: announcements.write permission required.' };
+  }
+
+  const field = (name: string) => {
+    const val = form.get(name);
+    return typeof val === 'string' ? val.trim() : '';
+  };
+
+  const title = field('title');
+  const content = field('content');
+  const category = field('category') || 'general';
+  const isUrgent = field('isUrgent') === 'true';
+  const targetAudience = field('targetAudience') || 'all';
+
+  if (!title || title.length < 3) return { ok: false, message: 'Title must be at least 3 characters.' };
+  if (!content || content.length < 5) return { ok: false, message: 'Content must be at least 5 characters.' };
+
+  try {
+    const client = await staffClient(true);
+    const { error } = await client.from('announcements').insert({
+      school_id: school,
+      title,
+      content,
+      category,
+      is_urgent: isUrgent,
+      target_audience: targetAudience,
+      author_profile_id: access.context.profileId,
+      published_at: new Date().toISOString(),
+    });
+    if (error) return { ok: false, message: error.message };
+    return { ok: true, message: 'Announcement published successfully.' };
+  } catch (err) {
+    return { ok: false, message: (err as Error).message };
   }
 }

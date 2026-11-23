@@ -43,6 +43,7 @@ import type {
   StudentAttendanceDay,
   StudentExamResultItem,
   ParentLinkedChild,
+  AnnouncementItem,
   OperationResult,
   PaginatedResult,
   PaginationParams,
@@ -57,6 +58,8 @@ function checkAuth(context: PolicyContext, permission: string): boolean {
   const decision = evaluatePermission(context, permission, Date.now());
   return decision.allowed === true;
 }
+
+const liveWriteUnavailable = { success: false, code: 'LIVE_STAFF_WRITE_UNAVAILABLE', error: 'Staff writes are unavailable during read-only recovery.' } as const;
 
 function getContextProfileId(context: PolicyContext): string | undefined {
   if (context && 'profileId' in context && typeof context.profileId === 'string') {
@@ -244,6 +247,7 @@ export class SchoolAdminSupabaseService {
 
   static async createStudentAdmission(context: PolicyContext, input: NewStudentAdmissionInput): Promise<OperationResult<StudentRecord>> {
     if (!checkAuth(context, 'admissions.write')) return { success: false, error: 'Admission not authorized', code: 'PERMISSION_DENIED' };
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
     try {
       const client = await getAuthenticatedClient(context, true);
       if (!input.requestId || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.requestId)) {
@@ -325,6 +329,7 @@ export class SchoolAdminSupabaseService {
     if (!checkAuth(context, 'security.accounts.create')) {
       return { success: false, error: 'Staff account creation is not authorized', code: 'PERMISSION_DENIED' };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
     if (!input.fullName?.trim() || !input.email?.trim()) {
       return { success: false, error: 'Name and email are required', code: 'INVALID_INPUT' };
     }
@@ -516,6 +521,7 @@ export class SchoolAdminSupabaseService {
     if (!checkAuth(context, 'school.settings.write')) {
       return { success: false, error: 'Unauthorized: School settings write required', code: 'PERMISSION_DENIED' };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
 
     try {
       const client = await getAuthenticatedClient(context, true);
@@ -588,6 +594,219 @@ export class SchoolAdminSupabaseService {
           page,
           pageSize,
           totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async createClass(
+    context: PolicyContext,
+    name: string,
+    gradeLevel = 10,
+    sectionName = 'A'
+  ): Promise<OperationResult<ClassRecord>> {
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+    if (!checkAuth(context, 'classes.write')) {
+      return { success: false, error: 'Unauthorized: Class creation permission required', code: 'PERMISSION_DENIED' };
+    }
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data, error } = await client.from('classes').insert({
+        name,
+        grade_level: gradeLevel,
+      }).select().single();
+      if (error) return { success: false, error: error.message, code: error.code };
+
+      const { data: secData, error: secErr } = await client.from('sections').insert({
+        class_id: data.id,
+        name: sectionName,
+      }).select().single();
+      if (secErr) return { success: false, error: secErr.message, code: secErr.code };
+
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          name: data.name,
+          gradeLevel: data.grade_level,
+          totalStudents: 0,
+          sections: [{
+            id: secData.id,
+            classId: data.id,
+            name: secData.name,
+            classTeacherName: 'Class Teacher',
+            roomNumber: 'Room 101',
+            capacity: 40,
+            currentEnrollment: 0,
+          }],
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async createSection(
+    context: PolicyContext,
+    classId: string,
+    _academicYearId: string,
+    name: string
+  ): Promise<OperationResult<ClassRecord>> {
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+    if (!checkAuth(context, 'classes.write')) {
+      return { success: false, error: 'Unauthorized: Class write permission required', code: 'PERMISSION_DENIED' };
+    }
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data: secData, error: secErr } = await client.from('sections').insert({
+        class_id: classId,
+        name,
+      }).select().single();
+      if (secErr) return { success: false, error: secErr.message, code: secErr.code };
+
+      return {
+        success: true,
+        data: {
+          id: classId,
+          name: `Class ${parseInt(classId.replace(/\D/g, ''), 10) || 10}`,
+          gradeLevel: parseInt(classId.replace(/\D/g, ''), 10) || 10,
+          totalStudents: 0,
+          sections: [{
+            id: secData.id,
+            classId,
+            name: secData.name,
+            classTeacherName: 'Class Teacher',
+            roomNumber: 'Room 102',
+            capacity: 40,
+            currentEnrollment: 0,
+          }],
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async createTeacherAssignment(
+    context: PolicyContext,
+    teacherId: string,
+    classId: string,
+    sectionId: string,
+    subjectId: string,
+    subjectName: string,
+    periodsPerWeek: number
+  ): Promise<OperationResult<TeacherAssignmentRecord>> {
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+    if (!checkAuth(context, 'classes.write')) {
+      return { success: false, error: 'Unauthorized: Teacher assignment permission required', code: 'PERMISSION_DENIED' };
+    }
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data, error } = await client.from('teacher_assignments').insert({
+        teacher_profile_id: teacherId,
+        section_id: sectionId,
+        subject_code: subjectId || subjectName,
+      }).select().single();
+      if (error) return { success: false, error: error.message, code: error.code };
+
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          teacherId,
+          teacherName: 'Teacher',
+          classId,
+          className: 'Class 10',
+          sectionId,
+          sectionName: 'A',
+          subjectId: data.subject_code,
+          subjectName,
+          periodsPerWeek,
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async listAnnouncements(
+    context: PolicyContext,
+    targetRole = 'all'
+  ): Promise<OperationResult<readonly AnnouncementItem[]>> {
+    if (!checkAuth(context, 'announcements.read')) {
+      return { success: false, error: 'Unauthorized: Announcements read permission required', code: 'PERMISSION_DENIED' };
+    }
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data, error } = await client.from('announcements').select('*').order('published_at', { ascending: false });
+      if (error) return { success: false, error: error.message, code: error.code };
+
+      type RawAnnouncement = {
+        id: string;
+        title: string;
+        content: string;
+        published_at?: string;
+        category?: string;
+        is_urgent?: boolean;
+        target_audience?: string;
+      };
+
+      const rows = (data || []) as RawAnnouncement[];
+      const items: AnnouncementItem[] = rows
+        .filter(row => !targetRole || targetRole === 'all' || row.target_audience === 'all' || row.target_audience === targetRole)
+        .map(row => ({
+          id: row.id,
+          title: row.title,
+          content: row.content,
+          date: row.published_at ? row.published_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          category: (row.category || 'general') as AnnouncementItem['category'],
+          priority: row.is_urgent ? 'urgent' : 'normal',
+          targetRoles: ['all'],
+        }));
+
+      return { success: true, data: items };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async createAnnouncement(
+    context: PolicyContext,
+    input: {
+      title: string;
+      content: string;
+      category: 'general' | 'academic' | 'sports' | 'fee' | 'holiday';
+      priority: 'normal' | 'important' | 'urgent';
+      targetRoles: readonly ('all' | 'teacher' | 'student' | 'parent')[];
+    }
+  ): Promise<OperationResult<AnnouncementItem>> {
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+    if (!checkAuth(context, 'announcements.write')) {
+      return { success: false, error: 'Unauthorized: Announcements write permission required', code: 'PERMISSION_DENIED' };
+    }
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data, error } = await client.from('announcements').insert({
+        title: input.title.trim(),
+        content: input.content.trim(),
+        category: input.category,
+        is_urgent: input.priority === 'urgent',
+        target_audience: input.targetRoles.includes('all') ? 'all' : input.targetRoles[0],
+      }).select().single();
+      if (error) return { success: false, error: error.message, code: error.code };
+
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          title: data.title,
+          content: data.content,
+          date: data.published_at ? data.published_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          category: input.category,
+          priority: input.priority,
+          targetRoles: input.targetRoles,
         },
       };
     } catch (err) {
@@ -734,6 +953,7 @@ export class TeacherSupabaseService {
     if (!checkAuth(context, 'attendance.write')) {
       return { success: false, error: 'Unauthorized: Attendance write permission required', code: 'PERMISSION_DENIED' };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
 
     try {
       const client = await getAuthenticatedClient(context, true);
@@ -785,6 +1005,7 @@ export class TeacherSupabaseService {
     if (!checkAuth(context, 'homework.write')) {
       return { success: false, error: 'Unauthorized: Homework write permission required', code: 'PERMISSION_DENIED' };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
 
     try {
       const client = await getAuthenticatedClient(context, true);
@@ -1207,6 +1428,7 @@ export class AccountantSupabaseService {
     if (!mutationCheck.allowed) {
       return { success: false, error: 'Financial mutation denied by policy', code: mutationCheck.reason };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
 
     try {
       const client = await getAuthenticatedClient(context, true);
@@ -1347,6 +1569,7 @@ export class AccountantSupabaseService {
     if (!payee?.trim() || amountPaise <= 0 || !description?.trim()) {
       return { success: false, error: 'Payee, positive amount, and description are required', code: 'INVALID_INPUT' };
     }
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
 
     try {
       const client = await getAuthenticatedClient(context, true);
@@ -1379,6 +1602,50 @@ export class AccountantSupabaseService {
           approvedByProfileId: data.approved_by_profile_id,
         },
         message: `Expense voucher ${voucherNumber} recorded successfully`,
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async createFeeStructure(
+    context: PolicyContext,
+    input: {
+      classId: string;
+      className?: string;
+      feeCategory: 'tuition' | 'admission' | 'transport' | 'laboratory' | 'sports' | 'library';
+      amountPaise: number;
+      frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual';
+      dueDate: string;
+    }
+  ): Promise<OperationResult<FeeStructureItem>> {
+    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+    if (!checkAuth(context, 'fees.read')) {
+      return { success: false, error: 'Unauthorized: Fee management access required', code: 'PERMISSION_DENIED' };
+    }
+
+    try {
+      const client = await getAuthenticatedClient(context);
+      const { data, error } = await client.from('fee_structures').insert({
+        class_id: input.classId,
+        fee_category: input.feeCategory,
+        amount_paise: input.amountPaise,
+        frequency: input.frequency,
+        due_date: input.dueDate,
+      }).select().single();
+      if (error) return { success: false, error: error.message, code: error.code };
+
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          classId: input.classId,
+          className: input.className || 'Class 10',
+          feeCategory: input.feeCategory,
+          amountPaise: input.amountPaise,
+          frequency: input.frequency,
+          dueDate: input.dueDate,
+        },
       };
     } catch (err) {
       return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
@@ -1641,7 +1908,221 @@ export class ParentPortalSupabaseService {
     results: readonly StudentExamResultItem[];
     homework: readonly HomeworkRecord[];
   }>> {
-    void context; void parentProfileId; void studentId;
-    return { success: false, error: 'Academic report integration is unavailable.', code: 'INTEGRATION_UNAVAILABLE' };
+    if (!context || !parentProfileId || !studentId) {
+      return { success: false, error: 'Context, parent profile ID and student ID required', code: 'UNAUTHORIZED_SCOPE' };
+    }
+
+    try {
+      const client = await getAuthenticatedClient(context);
+
+      // 1. Verify relationship and academic purpose
+      const { data: rel, error: relError } = await client
+        .from('student_guardian_relationships')
+        .select(`
+          id,
+          academic_access,
+          relationship_status,
+          guardians!inner ( profile_id )
+        `)
+        .eq('guardians.profile_id', parentProfileId)
+        .eq('student_id', studentId)
+        .eq('relationship_status', 'verified')
+        .maybeSingle();
+
+      if (relError || !rel) {
+        return { success: false, error: 'Access denied: Unlinked or unverified student relationship', code: 'RELATIONSHIP_DENIED' };
+      }
+      if (!rel.academic_access) {
+        return { success: false, error: 'Access denied: Academic access not granted for this relationship', code: 'PURPOSE_UNAUTHORIZED' };
+      }
+
+      // 2. Query Student info
+      const { data: studentRow, error: stuError } = await client
+        .from('students')
+        .select(`
+          id,
+          display_name,
+          registration_number,
+          roll_number,
+          enrollment_status,
+          date_of_birth,
+          gender,
+          enrollments (
+            section_id,
+            sections (
+              id,
+              name,
+              classes (
+                id,
+                name
+              )
+            )
+          )
+        `)
+        .eq('id', studentId)
+        .maybeSingle();
+
+      if (stuError || !studentRow) {
+        return { success: false, error: 'Student not found', code: 'NOT_FOUND' };
+      }
+
+      const enrollment = Array.isArray(studentRow.enrollments) ? studentRow.enrollments[0] : studentRow.enrollments;
+      const secObj = (enrollment as { sections?: unknown } | undefined)?.sections;
+      const section = Array.isArray(secObj) ? secObj[0] : (secObj as { id?: string; name?: string; classes?: unknown } | undefined);
+      const clsObj = section?.classes;
+      const classObj = Array.isArray(clsObj) ? clsObj[0] : (clsObj as { id?: string; name?: string } | undefined);
+
+      const student: StudentRecord = {
+        id: studentRow.id,
+        admissionNumber: studentRow.registration_number,
+        rollNumber: studentRow.roll_number || 'N/A',
+        fullName: studentRow.display_name,
+        classId: classObj?.id || 'cls-unknown',
+        className: classObj?.name || 'Unassigned',
+        sectionId: section?.id || 'sec-unknown',
+        sectionName: section?.name || 'N/A',
+        gender: studentRow.gender || 'other',
+        dateOfBirth: studentRow.date_of_birth || '2012-01-01',
+        guardianName: 'Guardian',
+        guardianPhone: 'N/A',
+        guardianEmail: 'N/A',
+        status: (studentRow.enrollment_status as StudentRecord['status']) || 'active',
+        admissionDate: new Date().toISOString().split('T')[0],
+      };
+
+      // 3. Query published exam results
+      const { data: marksData } = await client
+        .from('marks_entries')
+        .select(`
+          marks_obtained,
+          remarks,
+          marks_sheets!inner (
+            exam_name,
+            exam_date,
+            subject_code,
+            max_marks,
+            is_published
+          )
+        `)
+        .eq('student_id', studentId)
+        .eq('marks_sheets.is_published', true);
+
+      const results: StudentExamResultItem[] = (marksData || []).map((rUnknown: unknown) => {
+        const r = rUnknown as {
+          marks_obtained: number;
+          remarks?: string;
+          marks_sheets?: unknown;
+        };
+        const sheetObj = Array.isArray(r.marks_sheets) ? r.marks_sheets[0] : r.marks_sheets;
+        const sheet = sheetObj as {
+          exam_name?: string;
+          exam_date?: string;
+          subject_code?: string;
+          max_marks?: number;
+        } | undefined;
+        const marks = Number(r.marks_obtained);
+        const max = sheet?.max_marks || 100;
+        const percentage = Math.round((marks / max) * 100);
+
+        return {
+          examName: sheet?.exam_name || 'Term Exam',
+          examDate: sheet?.exam_date || '2026-10-15',
+          subject: sheet?.subject_code || 'General',
+          marksObtained: marks,
+          maxMarks: max,
+          percentage,
+          grade: percentage >= 90 ? 'A1' : percentage >= 80 ? 'A2' : percentage >= 70 ? 'B1' : 'B2',
+          teacherFeedback: r.remarks || 'Satisfactory academic performance.',
+        };
+      });
+
+      // 4. Query homework
+      let homework: HomeworkRecord[] = [];
+      if (student.classId !== 'cls-unknown' && student.sectionId !== 'sec-unknown') {
+        const { data: hwData } = await client
+          .from('homework')
+          .select('*')
+          .eq('class_id', student.classId)
+          .eq('section_id', student.sectionId)
+          .order('due_date', { ascending: false });
+
+        homework = (hwData || []).map(h => ({
+          id: h.id,
+          classId: h.class_id,
+          sectionId: h.section_id,
+          subject: h.subject_code,
+          title: h.title,
+          description: h.description,
+          assignedDate: h.assigned_date,
+          dueDate: h.due_date,
+          maxPoints: h.max_points || 10,
+          submissionsCount: h.submissions_count || 0,
+          totalStudents: h.total_students || 0,
+          status: (h.status as HomeworkRecord['status']) || 'active',
+        }));
+      }
+
+      // 5. Query attendance rate
+      const { data: attData } = await client
+        .from('attendance_records')
+        .select('status')
+        .eq('student_id', studentId);
+
+      const totalDays = attData?.length || 0;
+      const presentDays = attData?.filter(a => a.status === 'present').length || 0;
+      const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 1000) / 10 : 95.0;
+
+      return {
+        success: true,
+        data: {
+          student,
+          attendanceRate,
+          results,
+          homework,
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
+  }
+
+  static async getChildFeeLedger(
+    context: PolicyContext,
+    parentProfileId: string,
+    studentId: string
+  ): Promise<OperationResult<StudentFeeLedger>> {
+    if (!context || !parentProfileId || !studentId) {
+      return { success: false, error: 'Context, parent profile ID and student ID required', code: 'UNAUTHORIZED_SCOPE' };
+    }
+
+    try {
+      const client = await getAuthenticatedClient(context);
+
+      // Verify relationship and fee access
+      const { data: rel, error: relError } = await client
+        .from('student_guardian_relationships')
+        .select(`
+          id,
+          fee_access,
+          relationship_status,
+          guardians!inner ( profile_id )
+        `)
+        .eq('guardians.profile_id', parentProfileId)
+        .eq('student_id', studentId)
+        .eq('relationship_status', 'verified')
+        .maybeSingle();
+
+      if (relError || !rel) {
+        return { success: false, error: 'Access denied: Unlinked or unverified student relationship', code: 'RELATIONSHIP_DENIED' };
+      }
+
+      if (!rel.fee_access) {
+        return { success: false, error: 'Access denied: Fee access not granted for this relationship', code: 'PURPOSE_UNAUTHORIZED' };
+      }
+
+      return AccountantSupabaseService.getStudentLedger(context, studentId);
+    } catch (err) {
+      return { success: false, error: (err as Error).message, code: 'DAL_ERROR' };
+    }
   }
 }

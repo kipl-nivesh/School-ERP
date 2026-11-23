@@ -1,4 +1,4 @@
-export type ChildId = 'aarav' | 'ananya';
+export type ChildId = string;
 export type Tone = 'indigo' | 'sky' | 'emerald' | 'violet' | 'amber' | 'rose';
 export interface ChildRecord { childId: ChildId }
 export interface Attendance extends ChildRecord { date: string; status: 'Present' | 'Absent' | 'Leave' }
@@ -17,4 +17,21 @@ export interface Child {
   teacher: string; tone: Tone; attendance: Attendance[]; marks: Mark[]; homework: Homework[];
   installments: Installment[]; payments: Payment[]; timetable: Period[]; exams: Exam[];
   notices: ChildNotice[]; reading: Reading[]; readingTarget: number;
+}
+
+export interface ParentSessionData {
+  readonly userId: string;
+  readonly email?: string;
+  readonly displayName: string;
+  readonly isLive: boolean;
+  readonly schoolName: string;
+  readonly student: {
+    readonly id: string;
+    readonly name: string;
+    readonly fullName: string;
+    readonly registrationNumber: string;
+    readonly className: string;
+    readonly academicAccess: boolean;
+    readonly feeAccess: boolean;
+  };
 }

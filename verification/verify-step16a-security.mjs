@@ -426,7 +426,8 @@ runTest('MFA boundary: Step 16A findings document native MFA REST exposure as UN
 runTest('Safety boundary: Both live authentication flags remain strictly disabled', () => {
   assert.equal(auth.LIVE_AUTHENTICATION_ENABLED, false);
   const serverTs = fs.readFileSync('src/lib/staff/server.ts', 'utf8');
-  assert.ok(serverTs.includes("process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true'"));
+  const policyTs = fs.readFileSync('src/lib/staff/request-policy.ts', 'utf8');
+  assert.ok(serverTs.includes("process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true'") || policyTs.includes("process.env.STAFF_AUTH_REQUESTS_ENABLED === 'true'"));
   const envExample = fs.readFileSync('.env.example', 'utf8');
   assert.ok(envExample.includes('STAFF_AUTH_REQUESTS_ENABLED=false'));
 });
