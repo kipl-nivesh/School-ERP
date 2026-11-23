@@ -8,8 +8,9 @@ import { requireSupabasePublicConfiguration } from './config';
 export async function createServerSupabaseClient(options: { cookieWrites?: 'read-only' | 'allowed'; httpOnlyCookies?: boolean } = {}) {
   const { url, publishableKey } = requireSupabasePublicConfiguration();
   const cookieStore = await cookies();
+  const isSecure = process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false';
   return createServerClient(url, publishableKey, {
-    ...(options.httpOnlyCookies ? { cookieOptions: { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' as const, path: '/' } } : {}),
+    ...(options.httpOnlyCookies ? { cookieOptions: { httpOnly: true, secure: isSecure, sameSite: 'lax' as const, path: '/' } } : {}),
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (updates) => {

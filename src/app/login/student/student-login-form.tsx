@@ -3,10 +3,15 @@
 import { useActionState, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck } from 'lucide-react';
-import { loginStudent, INITIAL_STUDENT_STATE } from './actions';
+import { loginStudent, type StudentActionState } from './actions';
 import styles from './student-login.module.css';
 
-export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean }) {
+const INITIAL_STUDENT_STATE: StudentActionState = {
+  phase: 'idle',
+  message: '',
+};
+
+export function StudentLoginForm({ liveAuthEnabled = true }: { liveAuthEnabled?: boolean }) {
   const [state, action, pending] = useActionState(loginStudent, INITIAL_STUDENT_STATE);
   const [showPin, setShowPin] = useState(false);
 
@@ -45,7 +50,7 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
             <span className={styles.icon}><GraduationCap size={26} /></span>
             <span className={styles.kicker}>STUDENT PORTAL</span>
             <h2 id="login-title">Student sign-in</h2>
-            <p className={styles.subtitle}>Enter your School Code, Student ID and 15-digit PIN.</p>
+            <p className={styles.subtitle}>Enter your School Code, Student ID and 6-digit PIN.</p>
 
             {!liveAuthEnabled && (
               <div className={styles.notice} role="status">
@@ -63,7 +68,7 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
                 autoComplete="organization"
                 maxLength={30}
                 required
-                placeholder="e.g. BRIGHTCAMP"
+                placeholder="e.g. BC-STEP4B-A"
                 disabled={!liveAuthEnabled || pending}
               />
 
@@ -74,24 +79,24 @@ export function StudentLoginForm({ liveAuthEnabled }: { liveAuthEnabled: boolean
                 type="text"
                 autoComplete="username"
                 maxLength={64}
-                placeholder="e.g. STU2026001"
+                placeholder="e.g. STU-2026-0001"
                 required
                 disabled={!liveAuthEnabled || pending}
               />
               <small className={styles.hint}>Issued on your school admission card.</small>
 
-              <label htmlFor="student-pin">15-digit Student PIN</label>
+              <label htmlFor="student-pin">6-digit Student PIN</label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   id="student-pin"
                   name="pin"
                   type={showPin ? 'text' : 'password'}
                   inputMode="numeric"
-                  pattern="[0-9]{15}"
-                  minLength={15}
-                  maxLength={15}
+                  pattern="[0-9]{6}"
+                  minLength={6}
+                  maxLength={6}
                   autoComplete="current-password"
-                  placeholder="•••••••••••••••"
+                  placeholder="••••••"
                   required
                   disabled={!liveAuthEnabled || pending}
                   style={{ width: '100%', paddingRight: '2.5rem', letterSpacing: showPin ? 'normal' : '0.25em' }}

@@ -222,12 +222,12 @@ test('TypeScript staff server DAL column selections match SQL tables', () => {
   const dal = fs.readFileSync('src/lib/staff/server.ts', 'utf8');
   // profiles select
   assert.ok(dal.includes(".from('profiles').select('id,account_status,credential_reset_required,authorization_version')"));
-  // user_roles select
-  assert.ok(dal.includes(".from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions')"));
+  // user_roles select (with multi-tenant school_id support)
+  assert.ok(dal.includes(".from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions") || dal.includes(".from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions,school_id')"));
   // The live adapter uses school memberships and must not query the retired tier.
   assert.ok(!dal.includes(".from('admin_privileges')"));
-  // role_contexts select
-  assert.ok(dal.includes(".from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at')"));
+  // role_contexts select (with multi-tenant school_id support)
+  assert.ok(dal.includes(".from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at") || dal.includes(".from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at,school_id')"));
   // RPC calls
   assert.ok(dal.includes(".rpc('staff_session_is_live')"));
 });

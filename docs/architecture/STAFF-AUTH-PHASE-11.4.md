@@ -1,0 +1,26 @@
+# Phase 11.4 Staff authentication integration
+
+The recovery branch keeps the production demo locked. The Staff application uses native Supabase password authentication and trusted session checks. Admin additionally requires signed AAL2 and TOTP evidence, a currently verified TOTP factor, and an active role confirmed by the database. School switching requires an eligible school and role pair before the context RPC. The protected route is reached only after resolving the selected context again. A denial before the RPC leaves the active context untouched. A failed readback after a successful RPC has an uncertain outcome and the application does not report success or attempt an automatic rollback.
+
+## Database compatibility preflight
+
+1. Obtain separate approval for a disposable catalog inspection. Pin the project and database identity and use TLS with certificate and hostname validation. Capture exact ledger versions, owners, function definitions, effective grants, security modes, search paths and RLS policies. Review current hosted state without assuming that the previous disposable reports describe it.
+2. For a migration 1–26 baseline, compare the project-specific issuer in `is_native_staff_request()` (3) and `staff_recovery_scope()` (25), including any already approved issuer overlay. Verify the referenced Auth user, session and factor columns, function visibility and exact JWT claim shapes. The Staff resolver requires `staff_session_is_live()`, `current_school_id()` (10), `list_school_memberships()` and `select_school_context(uuid,text)` (11), `current_active_role()` (18), and school-scoped RLS reads of `schools`, `profiles`, `user_roles` and `role_contexts`. Verify that any direct Admin read is denied without Admin MFA, including when a token still has AAL2 after factor removal. App checks alone do not establish this.
+3. If migration 27 is present, stop before issuing pilot sessions. Its replacements allow Admin AAL1 to establish database context and change authorization and freshness predicates. It does not replace the recovery RPC. Use an independently approved compatible baseline, or separately review an additive correction with a compatibility and rollback plan. Keep the AAL2/TOTP policy and historical migrations intact. Audit the live definitions and ACLs again after any separately approved change.
+4. Inventory authenticated EXECUTE grants and table policies for every held workflow. Examples include `collect_fee_payment_atomic` (17, including review of legacy overloads), `admit_student_idempotent` (22), `manage_academics` (24), and the homework INSERT policy (18). Include invitation issuance and revocation, attendance, settings, onboarding, marks, and subscription and payment paths. Existing application blocks do not revoke underlying grants. Use least-privilege fixture memberships and require proof of denied direct writes. If a direct write remains reachable, stop and review a narrow database grant or policy correction separately.
+
+## Admin enrollment and recovery
+
+The migration 4 implementation of `consume_staff_mfa_enrollment_approval()` returns false. The application's enrollment action requires true and must stay fail-closed. Use an existing, independently approved synthetic Admin with an accessible verified factor for the initial test. First enrollment, expired approval, consumed approval, and lost-factor recovery need a separate operator-controlled workflow and explicit approval.
+
+The recovery action retains native PKCE exchange, confirmed user identity, `staff_recovery_scope()`, MFA where required, and global sign-out after password update. Staff access independently requires a signed password AMR, so a recovery-only token cannot become a Staff session. Confirm real token claims and PKCE cookie handling before release. Confirm old-token rejection after recovery and after context revocation plus local sign-out. Recovery scopes and ordinary session scopes must remain distinct.
+
+## Disposable acceptance criteria
+
+- Verify all three Staff role routes with native sessions and least-privilege fixtures. Verify Admin AAL1 and non-TOTP AAL2 denial, verified TOTP success, and newly revoked factors.
+- Verify exact school and role selection, unauthorized School B denial without altering School A context, and a permitted switch between two separately authorized schools. Confirm old-school requests are denied after switching.
+- Verify wrong roles, absent module grants including `reports.read`, expired token and context, suspended users and revoked memberships. Test refresh, reselection for expired context and replay of a revoked token.
+- Verify authentic recovery, single-use code and correct MFA, recovery-only resource denial, and local and global sign-out scope. Verify no held RPC or operational table write succeeds. Run provider rate-limit and password-spray checks before release.
+- Treat any transport, provider, RLS or catalog error as a blocker to confirmation. Keep the production demo and Student and Parent portal gates in place.
+
+No hosted checks are part of Phase 11.4. Read-only catalog inspection and native Staff session tests are separate approval steps. Session tests require ordinary disposable Auth and context writes, including audit entries.

@@ -56,6 +56,7 @@ import type {
   StudentAttendanceDay,
   StudentExamResultItem,
   ParentLinkedChild,
+  AnnouncementItem,
 } from '../domain/dashboard-contracts';
 
 const liveWriteUnavailable = { success: false, code: 'LIVE_STAFF_WRITE_UNAVAILABLE', error: 'Staff writes are unavailable during read-only recovery.' } as const;
@@ -144,10 +145,20 @@ export class SchoolAdminGateway {
   }
 
   static async createClass(context: PolicyContext, name: string, gradeLevel = 10, sectionName = 'A'): Promise<OperationResult<ClassRecord>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+      return SchoolAdminSupabaseService.createClass(context, name, gradeLevel, sectionName);
+    }
     return Promise.resolve(DevAdminService.createClass(context, name, gradeLevel, sectionName));
   }
 
-  static async createSection(context: PolicyContext, classId: string, _academicYearId: string, name: string): Promise<OperationResult<ClassRecord>> {
+  static async createSection(context: PolicyContext, classId: string, academicYearId: string, name: string): Promise<OperationResult<ClassRecord>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+      return SchoolAdminSupabaseService.createSection(context, classId, academicYearId, name);
+    }
     const gradeLevel = parseInt(classId.replace(/\D/g, ''), 10) || 10;
     return Promise.resolve(DevAdminService.createClass(context, `Class ${gradeLevel}`, gradeLevel, name));
   }
@@ -173,10 +184,15 @@ export class SchoolAdminGateway {
     teacherId: string,
     classId: string,
     sectionId: string,
-    _subjectId: string,
+    subjectId: string,
     subjectName: string,
     periodsPerWeek: number
   ): Promise<OperationResult<TeacherAssignmentRecord>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+      return SchoolAdminSupabaseService.createTeacherAssignment(context, teacherId, classId, sectionId, subjectId, subjectName, periodsPerWeek);
+    }
     return Promise.resolve(DevAdminService.assignTeacher(context, teacherId, classId, sectionId, subjectName, periodsPerWeek));
   }
 
@@ -211,6 +227,32 @@ export class SchoolAdminGateway {
       return SchoolAdminSupabaseService.listAuditTrail(context, params);
     }
     return Promise.resolve(DevAdminService.listAuditTrail(context, params));
+  }
+
+  static async listAnnouncements(context: PolicyContext, targetRole = 'all'): Promise<OperationResult<readonly AnnouncementItem[]>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      return SchoolAdminSupabaseService.listAnnouncements(context, targetRole);
+    }
+    return Promise.resolve(DevAdminService.listAnnouncements(context, targetRole));
+  }
+
+  static async createAnnouncement(
+    context: PolicyContext,
+    input: {
+      title: string;
+      content: string;
+      category: 'general' | 'academic' | 'sports' | 'fee' | 'holiday';
+      priority: 'normal' | 'important' | 'urgent';
+      targetRoles: readonly ('all' | 'teacher' | 'student' | 'parent')[];
+    }
+  ): Promise<OperationResult<AnnouncementItem>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+      return SchoolAdminSupabaseService.createAnnouncement(context, input);
+    }
+    return Promise.resolve(DevAdminService.createAnnouncement(context, input));
   }
 }
 
@@ -334,6 +376,25 @@ export class AccountantGateway {
     return Promise.resolve(DevAccountantService.listFeeStructures(context));
   }
 
+  static async createFeeStructure(
+    context: PolicyContext,
+    input: {
+      classId: string;
+      className?: string;
+      feeCategory: 'tuition' | 'admission' | 'transport' | 'laboratory' | 'sports' | 'library';
+      amountPaise: number;
+      frequency: 'one_time' | 'monthly' | 'quarterly' | 'annual';
+      dueDate: string;
+    }
+  ): Promise<OperationResult<FeeStructureItem>> {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
+      return AccountantSupabaseService.createFeeStructure(context, input);
+    }
+    return Promise.resolve(DevAccountantService.createFeeStructure(context, input));
+  }
+
   static async getStudentLedger(context: PolicyContext, studentId: string): Promise<OperationResult<StudentFeeLedger>> {
     const mode = resolveServiceMode(context);
     if (mode === 'supabase-live') {
@@ -439,6 +500,14 @@ export class ParentPortalGateway {
       return ParentPortalSupabaseService.getChildAcademicReport(context, parentProfileId, studentId);
     }
     return Promise.resolve(DevParentService.getChildAcademicReport(context, parentProfileId, studentId));
+  }
+
+  static async getChildFeeLedger(context: PolicyContext, parentProfileId: string, studentId: string) {
+    const mode = resolveServiceMode(context);
+    if (mode === 'supabase-live') {
+      return ParentPortalSupabaseService.getChildFeeLedger(context, parentProfileId, studentId);
+    }
+    return Promise.resolve(DevParentService.getChildFeeLedger(context, parentProfileId, studentId));
   }
 
   static async getChildrenSubscriptions(

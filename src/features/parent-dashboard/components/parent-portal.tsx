@@ -28,18 +28,49 @@ import { ParentProgressHighlights } from './parent-progress';
 import { ParentQuickAccess } from './parent-quick-access';
 import { ParentReveal } from './motion';
 import { navigateToModule } from '@/lib/navigation/use-active-module';
+import type { ParentSessionData } from '../types';
 
-export function ParentPortal({ activeModule = 'overview' }: { activeModule?: string }) {
-  const [selectedChildId, setSelectedChildId] = useState<ChildId>('aarav');
-  const child = children.find(c => c.id === selectedChildId) ?? children[0];
-  const summary = childSummary(child, parentProfile.referenceDate, schoolNotices.length);
+export function ParentPortal({
+  activeModule = 'overview',
+  sessionData
+}: {
+  activeModule?: string;
+  sessionData?: ParentSessionData | null;
+}) {
+  const learners = sessionData ? [
+    {
+      id: 'student_a1',
+      name: `${sessionData.student.name} (${sessionData.student.registrationNumber})`,
+      firstName: sessionData.student.name,
+      initials: 'S1',
+      className: sessionData.student.className,
+      rollNumber: '01',
+      teacher: 'Teacher A (Senior Teacher)',
+      tone: 'indigo' as const,
+      attendance: [],
+      marks: [],
+      homework: [],
+      installments: [],
+      payments: [],
+      timetable: [],
+      exams: [],
+      notices: [],
+      reading: [],
+      readingTarget: 0,
+    }
+  ] : children;
+
+  const [selectedChildId, setSelectedChildId] = useState<ChildId>(sessionData ? 'student_a1' : 'aarav');
+  const child = learners.find(c => c.id === selectedChildId) ?? learners[0];
+  const schoolNoticeCount = sessionData ? 0 : schoolNotices.length;
+  const summary = childSummary(child, parentProfile.referenceDate, schoolNoticeCount);
 
   return (
     <>
       {/* OVERVIEW MODULE */}
       {activeModule === 'overview' && (
         <div id="module-overview">
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <p className="pd-selection-summary" role="status" aria-live="polite">
             Viewing {child.name} · Class {child.className}. Key highlights below belong to {child.firstName}.
           </p>
@@ -54,13 +85,14 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'children' && (
         <section id="children" aria-labelledby="children-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="children"
             title="My Children"
             subtitle="Linked student profiles and school enrollments"
             icon={Users}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
-            {children.map(c => {
+            {learners.map(c => {
               const isSelected = c.id === child.id;
               const cSum = childSummary(c, parentProfile.referenceDate, schoolNotices.length);
               return (
@@ -77,14 +109,14 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <h3 style={{ fontSize: '16px', fontWeight: 700 }}>{c.name}</h3>
-                      <p style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>Class {c.className} · Brightcamp School</p>
+                      <p style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>Class {c.className} · {sessionData ? sessionData.schoolName : 'Brightcamp School'}</p>
                     </div>
                     {isSelected && (
                       <span className="pd-label" style={{ color: 'var(--primary)', fontWeight: 700 }}>Active View</span>
                     )}
                   </div>
                   <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '16px', fontSize: '11px' }}>
-                    <div><dt style={{ color: 'var(--muted-foreground)' }}>Student ID</dt><dd style={{ fontWeight: 600 }}>BC-{c.id.toUpperCase()}-2026</dd></div>
+                    <div><dt style={{ color: 'var(--muted-foreground)' }}>Student ID</dt><dd style={{ fontWeight: 600 }}>{sessionData ? sessionData.student.registrationNumber : `BC-${c.id.toUpperCase()}-2026`}</dd></div>
                     <div><dt style={{ color: 'var(--muted-foreground)' }}>Roll No</dt><dd style={{ fontWeight: 600 }}>{c.rollNumber}</dd></div>
                     <div><dt style={{ color: 'var(--muted-foreground)' }}>Class Teacher</dt><dd style={{ fontWeight: 600 }}>{c.teacher}</dd></div>
                     <div><dt style={{ color: 'var(--muted-foreground)' }}>Attendance</dt><dd style={{ fontWeight: 600, color: 'var(--ad-green-ink)' }}>{cSum.attendance.percentage}%</dd></div>
@@ -100,11 +132,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'attendance' && (
         <section id="attendance" aria-labelledby="attendance-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="attendance"
             title="Attendance Record"
             subtitle={`Daily school attendance register for ${child.firstName}`}
             icon={CalendarDays}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <ParentAttendance child={child} />
@@ -117,11 +150,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'progress' && (
         <section id="progress" aria-labelledby="progress-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="progress"
             title="Learning Progress & Milestones"
             subtitle={`Subject-wise mastery, academic scores, and milestones for ${child.firstName}`}
             icon={GraduationCap}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <ParentProgressHighlights child={child} />
@@ -137,11 +171,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'homework' && (
         <section id="homework" aria-labelledby="homework-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="homework"
             title="Homework & Active Tasks"
             subtitle={`Curriculum assignments and turn-in status for ${child.firstName}`}
             icon={ClipboardList}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <ParentHomework child={child} />
@@ -154,11 +189,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'exams' && (
         <section id="exams" aria-labelledby="exams-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="exams"
             title="Examinations & Daily Schedule"
             subtitle={`Assessment calendar and timetable for ${child.firstName}`}
             icon={FileText}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <div className="pd-two-columns">
@@ -174,11 +210,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'notices' && (
         <section id="notices" aria-labelledby="notices-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="notices"
             title="School Notices & Parent Circulars"
             subtitle="Campus broadcasts, event invitations, and PTM notices"
             icon={Bell}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <ParentAnnouncements child={child} />
@@ -191,11 +228,12 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
       {activeModule === 'fees' && (
         <section id="fees" aria-labelledby="fees-heading" className="pd-module-view">
           <ParentModuleHeader
+            moduleId="fees"
             title="Fees & Receipts Overview"
             subtitle={`Term fee dues and settled receipts for ${child.firstName}`}
             icon={Wallet}
           />
-          <ChildSwitcher learners={children} selected={child} onSelect={setSelectedChildId} />
+          <ChildSwitcher learners={learners} selected={child} onSelect={setSelectedChildId} />
           <div style={{ marginTop: '16px' }}>
             <ParentReveal key={child.id} className="pd-child-dashboard">
               <ParentFees child={child} />
@@ -207,7 +245,8 @@ export function ParentPortal({ activeModule = 'overview' }: { activeModule?: str
   );
 }
 
-function ParentModuleHeader({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon: LucideIcon }) {
+function ParentModuleHeader({ moduleId, title, subtitle, icon: Icon }: { moduleId?: string; title: string; subtitle: string; icon: LucideIcon }) {
+  const headingId = moduleId ? `${moduleId}-heading` : `${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-heading`;
   return (
     <div className="pd-page-title" style={{ marginBottom: '22px' }}>
       <div>
@@ -222,7 +261,7 @@ function ParentModuleHeader({ title, subtitle, icon: Icon }: { title: string; su
           <span style={{ color: 'var(--muted-foreground)' }}>/</span>
           <span className="eyebrow" style={{ margin: 0 }}>Parent</span>
         </div>
-        <h1 id={`${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-heading`} tabIndex={-1} style={{ fontSize: '24px', letterSpacing: '-0.7px' }}>
+        <h1 id={headingId} tabIndex={-1} style={{ fontSize: '24px', letterSpacing: '-0.7px' }}>
           {title}
         </h1>
         <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>{subtitle}</p>
