@@ -8,9 +8,9 @@ export default async function SelectSchoolPage({ searchParams }: {
   searchParams: Promise<{ notice?: string | string[] }>;
 }) {
   const client = await staffClient().catch(() => null);
-  if (!client) redirect('/login/staff');
+  if (!client) redirect('/login/staff?notice=unavailable');
   const choices = await listStaffSchoolChoices(client);
-  if (!choices.length) redirect('/login/staff');
+  if (!choices.length) redirect('/login/staff?notice=no_access');
   const { notice } = await searchParams;
   return <main style={{ padding: '2rem' }}>
     <h1>Select your school and role</h1>

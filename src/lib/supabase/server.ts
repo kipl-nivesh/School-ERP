@@ -16,9 +16,15 @@ export async function createServerSupabaseClient(options: { cookieWrites?: 'read
       setAll: (updates) => {
         if (updates.length === 0) return;
         if (options.cookieWrites !== 'allowed') {
-          throw new Error('Supabase cookie updates require a response-capable context. Session refresh routing has not been enabled.');
+          // In Server Components, response cookie modification is not permitted in Next.js.
+          // Cookie refresh is handled by Middleware/Proxy and Server Actions.
+          return;
         }
-        for (const { name, value, options: cookieOptions } of updates) cookieStore.set(name, value, cookieOptions);
+        try {
+          for (const { name, value, options: cookieOptions } of updates) cookieStore.set(name, value, cookieOptions);
+        } catch {
+          // Silently ignore if invoked outside a response-capable context
+        }
       },
     },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) },

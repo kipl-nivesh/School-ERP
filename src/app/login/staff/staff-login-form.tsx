@@ -8,7 +8,7 @@ import type { StaffRole } from '@/lib/staff/contracts';
 import { staffAction, logoutStaff } from './actions';
 import styles from './staff-login.module.css';
 
-export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }) {
+export function StaffLoginForm({ requestsEnabled, notice }: { requestsEnabled: boolean; notice?: string }) {
   const [state, action, pending] = useActionState(staffAction, INITIAL_STAFF_STATE);
   const [role, setRole] = useState<StaffRole>('admin');
   const [showPassword, setShowPassword] = useState(false);
@@ -37,8 +37,10 @@ export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }
           <h2 id="login-title">{state.phase === 'mfa' ? 'One more security check' : 'Welcome back'}</h2>
           <p className={styles.subtitle}>{state.phase === 'mfa' ? 'Use your school-authorized authenticator to continue.' : 'Sign in with your school-provisioned staff account.'}</p>
           {!requestsEnabled && <div className={styles.notice} role="status"><strong>Local review mode</strong><span>Sign-in requests are disabled. Your details will not be sent to an authentication service.</span></div>}
+          {notice === 'no_access' && <div className={styles.notice} role="alert"><strong>Access Notice</strong><span>No active school membership found for your account. Please contact your school administrator.</span></div>}
+          {notice === 'unavailable' && <div className={styles.notice} role="alert"><strong>Session Notice</strong><span>Your previous session could not be confirmed. Please sign in again.</span></div>}
           <form action={action} className={styles.form} aria-busy={pending}>
-            <input type="hidden" name="next" value="/staff" />
+            <input type="hidden" name="next" value={`/staff/${role}`} />
             <label htmlFor="staff-role">Workspace</label>
             <select id="staff-role" name="role" value={role} onChange={e => setRole(e.target.value as StaffRole)} disabled={pending}>
               <option value="admin">Administration</option><option value="teacher">Teaching</option><option value="accountant">Accounts</option>
