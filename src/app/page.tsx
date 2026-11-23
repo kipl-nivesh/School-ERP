@@ -29,35 +29,35 @@ const WORKSPACE_CARDS: readonly WorkspaceCardData[] = [
     title: 'Admin',
     description: 'Bring your school together.',
     icon: Crown,
-    href: '/admin/dashboard',
+    href: '/portal/admin',
   },
   {
     role: 'teacher',
     title: 'Teacher',
     description: 'Make room for inspiration.',
     icon: BookOpen,
-    href: '/teacher/dashboard',
+    href: '/portal/teacher',
   },
   {
     role: 'student',
     title: 'Student',
     description: 'Let your curiosity lead.',
     icon: GraduationCap,
-    href: '/student/dashboard',
+    href: '/portal/student',
   },
   {
     role: 'parent',
     title: 'Parent',
     description: 'Share in their journey.',
     icon: Heart,
-    href: '/parent/dashboard',
+    href: '/portal/parent',
   },
   {
     role: 'accountant',
     title: 'Accountant',
     description: 'Clarity for every detail.',
     icon: Coins,
-    href: '/accountant/dashboard',
+    href: '/portal/accountant',
   },
 ];
 
@@ -89,15 +89,15 @@ export default function Home() {
             <span className={styles.platformLabel}>All-in-One School Management</span>
           </div>
 
-          {/* Right Header Navigation & Demo Indicator */}
+          {/* Right Header Navigation & Live Platform Indicator */}
           <div className={styles.headerRight}>
-            <a href="#workspaces" className={styles.navDemoLink}>
-              Demo Workspaces
-            </a>
-            <div className={styles.demoBadge}>
-              <span className={styles.demoDot} aria-hidden="true" />
-              <span className={styles.demoBadgeText}>
-                <strong className={styles.demoHighlight}>DEMO</strong> · Fictional data
+            <Link href="/admin/dashboard" className={styles.navDemoLink} title="Explore interactive demo with sample data">
+              Try Fictional Demo
+            </Link>
+            <div className={styles.liveBadge}>
+              <span className={styles.liveDot} aria-hidden="true" />
+              <span className={styles.liveBadgeText}>
+                <strong className={styles.liveHighlight}>LIVE ERP</strong> · Cloud Platform
               </span>
             </div>
           </div>
@@ -151,12 +151,15 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Primary Call-to-Action */}
+              {/* Primary Call-to-Action & Demo Option */}
               <div className={styles.ctaWrapper}>
                 <a href="#workspaces" className={styles.primaryCta}>
-                  <span>Explore Workspaces</span>
+                  <span>Access School Portals</span>
                   <ArrowRight size={16} className={styles.ctaArrow} aria-hidden="true" />
                 </a>
+                <Link href="/admin/dashboard" className={styles.secondaryDemoLink}>
+                  <span>Explore Demo</span>
+                </Link>
               </div>
             </div>
 
@@ -172,7 +175,7 @@ export default function Home() {
           <section
             id="workspaces"
             className={styles.workspacesSection}
-            aria-label="Demo Role Workspaces"
+            aria-label="School ERP Role Portals"
           >
             <div className={styles.cardsGrid}>
               {WORKSPACE_CARDS.map(({ role, title, description, icon: Icon, href }) => (
@@ -181,7 +184,7 @@ export default function Home() {
                   href={href}
                   className={styles.workspaceCard}
                   data-role={role}
-                  aria-label={`${title} Workspace: ${description}`}
+                  aria-label={`${title} Portal: ${description}. Sign in to access.`}
                 >
                   {/* Luminous fluid glass waves at the bottom */}
                   <div className={styles.cardWaveContainer} aria-hidden="true">
@@ -228,6 +231,16 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+
+            {/* Separate, Clearly Labeled Demo Option */}
+            <div className={styles.demoOptionBar}>
+              <span className={styles.demoOptionText}>
+                Want to test-drive features with fictional sample data?
+              </span>
+              <Link href="/admin/dashboard" className={styles.demoOptionLink}>
+                Launch Fictional Demo Workspaces <ArrowRight size={13} aria-hidden="true" />
+              </Link>
+            </div>
           </section>
         </div>
       </main>
@@ -247,27 +260,27 @@ export default function Home() {
           <div className={styles.footerCenter}>
             <span className={styles.footerItem}>
               <Users size={13} className={styles.footerItemIcon} aria-hidden="true" />
-              <span>Five role-based workspaces</span>
+              <span>Five role-based portals</span>
             </span>
             <span className={styles.footerSep} aria-hidden="true">
               |
             </span>
             <span className={styles.footerItem}>
               <BookOpen size={13} className={styles.footerItemIcon} aria-hidden="true" />
-              <span>22 ERP modules (functional demo)</span>
+              <span>22 Integrated ERP modules</span>
             </span>
             <span className={styles.footerSep} aria-hidden="true">
               |
             </span>
             <span className={styles.footerItem}>
               <ShieldCheck size={13} className={styles.footerItemIcon} aria-hidden="true" />
-              <span>Fictional school records only</span>
+              <span>Multi-tenant &amp; RLS secured</span>
             </span>
           </div>
 
-          {/* Disclaimer */}
+          {/* Status Badge */}
           <div className={styles.footerRight}>
-            <span className={styles.disclaimerBadge}>DEMO · Not for live school use</span>
+            <span className={styles.livePlatformBadge}>Production Ready · Live Cloud ERP</span>
           </div>
         </div>
       </footer>
