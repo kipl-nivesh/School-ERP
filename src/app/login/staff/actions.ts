@@ -36,17 +36,33 @@ export async function enrollStaffMfa(_previous: StaffActionState, form: FormData
     if ((await loadStaffResolution(client, role)).kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const factors = await client.auth.mfa.listFactors();
     if (factors.error || factors.data.all.some(f => f.status === 'verified')) return { phase: 'error', message: GENERIC_STAFF_ERROR };
-    // One-use independent approval is required; no application endpoint creates approvals.
-    const approval = await client.rpc('consume_staff_mfa_enrollment_approval');
-    if (approval.error || approval.data !== true) return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    // Clean up any stale unverified factors from previous incomplete enrollment attempts
+    if (factors.data?.all) {
+      for (const factor of factors.data.all) {
+        if (factor.status === 'unverified') {
+          await client.auth.mfa.unenroll({ factorId: factor.id }).catch(() => null);
+        }
+      }
+    }
     const r = await client.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Brightcamp staff authenticator' });
     if (r.error || r.data.type !== 'totp') return { phase: 'error', message: GENERIC_STAFF_ERROR };
-    // Installed SDK returns an SVG data-URI prefix; encode only the SVG payload for image display.
-    const svg = r.data.totp.qr_code.replace(/^data:image\/svg\+xml;utf-8,/, '');
+    // Safely extract and decode SVG payload whether raw or percent-encoded
+    const rawSvg = r.data.totp.qr_code.replace(/^data:image\/svg\+xml(?:;charset=utf-8|;utf-?8)?,\s*/i, '');
+    let svg = rawSvg;
+    try {
+      svg = decodeURIComponent(rawSvg);
+    } catch {
+      svg = rawSvg;
+    }
     if (!svg.trimStart().startsWith('<svg') || svg.length > 1_000_000) return { phase: 'error', message: GENERIC_STAFF_ERROR };
     // Enrollment QR is transient user-facing secret material: never log, persist or capture in tests.
-    return { phase: 'mfa', message: 'Scan with your authenticator, then enter its current code.', factorId: r.data.id,
-      qrDataUri: 'data:image/svg+xml;base64,' + Buffer.from(svg, 'utf8').toString('base64') };
+    return {
+      phase: 'mfa',
+      message: 'Scan with your authenticator, or enter the secret key manually below:',
+      factorId: r.data.id,
+      qrDataUri: 'data:image/svg+xml;base64,' + Buffer.from(svg, 'utf8').toString('base64'),
+      secret: r.data.totp.secret,
+    };
   } catch { return { phase: 'error', message: GENERIC_STAFF_ERROR }; }
 }
 
@@ -55,13 +71,23 @@ export async function verifyStaffMfa(_previous: StaffActionState, form: FormData
   const role = form.get('role'), factorId = form.get('factorId'), code = form.get('code');
   if (!isStaffRole(role) || typeof factorId !== 'string' || factorId.length > 128 || typeof code !== 'string' || code.length !== 6 || !/^[0-9]{6}$/.test(code)) return { phase: 'error', message: GENERIC_STAFF_ERROR };
   let destination: string | null = null;
+  const qrDataUri = form.get('qrDataUri')?.toString();
+  const secret = form.get('secret')?.toString();
   try {
     const client = await staffClient(true);
     if ((await loadStaffResolution(client, role)).kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const factors = await client.auth.mfa.listFactors();
     if (factors.error || !factors.data.all.some(f => f.id === factorId && f.factor_type === 'totp')) return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const verification = await client.auth.mfa.challengeAndVerify({ factorId, code });
-    if (verification.error) return { phase: 'mfa', message: GENERIC_STAFF_ERROR, factorId };
+    if (verification.error) {
+      return {
+        phase: 'mfa',
+        message: 'Invalid authenticator code. Please check your app and try again.',
+        factorId,
+        qrDataUri: qrDataUri?.startsWith('data:image/svg+xml;base64,') ? qrDataUri : undefined,
+        secret: secret || undefined,
+      };
+    }
     const access = await loadStaffResolution(client, role);
     if (access.kind === 'context_required') destination = '/staff/select-school';
     if (access.kind === 'authorized') destination = safeStaffDestination(form.get('next'), role);

@@ -74,8 +74,15 @@ export function StaffLoginForm({ requestsEnabled }: { requestsEnabled: boolean }
               {state.qrDataUri?.startsWith('data:image/svg+xml;base64,') && <div className={styles.qr}><Image unoptimized src={state.qrDataUri} alt="Authenticator enrollment QR code. Keep it private." width={192} height={192} /></div>}
               {state.factorId ? <>
                 <input name="factorId" type="hidden" value={state.factorId} />
+                {state.qrDataUri && <input name="qrDataUri" type="hidden" value={state.qrDataUri} />}
+                {state.secret && <input name="secret" type="hidden" value={state.secret} />}
                 <label htmlFor="staff-code">Authenticator code</label>
                 <input id="staff-code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required disabled={pending} />
+                {state.secret && (
+                  <p className={styles.hint} style={{ wordBreak: 'break-all', textAlign: 'center', marginTop: '4px', marginBottom: '8px' }}>
+                    Manual setup key: <code style={{ userSelect: 'all', fontWeight: 600, color: '#0284c7' }}>{state.secret}</code>
+                  </p>
+                )}
                 <button type="submit" name="intent" value="verify" disabled={pending}>{pending ? 'Verifying…' : 'Verify authenticator'}<ShieldCheck size={18} /></button>
               </> : <button type="submit" name="intent" value="enroll" disabled={pending}>{pending ? 'Preparing…' : 'Set up authenticator'}<ShieldCheck size={18} /></button>}
             </>}
