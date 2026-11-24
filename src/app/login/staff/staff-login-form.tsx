@@ -88,7 +88,7 @@ export function StaffLoginForm({ requestsEnabled, notice }: { requestsEnabled: b
                 <button type="submit" name="intent" value="verify" disabled={pending}>{pending ? 'Verifying…' : 'Verify authenticator'}<ShieldCheck size={18} /></button>
               </> : <button type="submit" name="intent" value="enroll" disabled={pending}>{pending ? 'Preparing…' : 'Set up authenticator'}<ShieldCheck size={18} /></button>}
             </>}
-            {state.message && <p className={styles.feedback} role={state.phase === 'error' ? 'alert' : 'status'}>{state.message}</p>}
+            {state.message && <p className={styles.feedback} role={state.phase === 'error' || state.mfaError ? 'alert' : 'status'}>{state.message}</p>}
           </form>
           <p className={styles.support}>
             Need account or authenticator recovery? Contact the school administrator. Recovery requires identity verification; there is no public signup.

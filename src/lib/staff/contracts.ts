@@ -16,7 +16,7 @@ export function validateStaffInput(email: unknown, password: unknown, role: unkn
 export function safeStaffDestination(value: unknown, role: StaffRole): string {
   return value === '/staff' || value === `/staff/${role}` ? value : '/staff';
 }
-export type StaffActionState = { readonly phase: 'idle' | 'error' | 'mfa'; readonly message: string; readonly factorId?: string; readonly qrDataUri?: string; readonly secret?: string };
+export type StaffActionState = { readonly phase: 'idle' | 'error' | 'mfa'; readonly message: string; readonly mfaError?: true; readonly factorId?: string; readonly qrDataUri?: string; readonly secret?: string };
 export const INITIAL_STAFF_STATE: StaffActionState = { phase: 'idle', message: '' };
 
 declare const providerVerified: unique symbol;
