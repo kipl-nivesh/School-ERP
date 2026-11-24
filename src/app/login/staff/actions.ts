@@ -4,6 +4,33 @@ import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
 import { staffClient, staffRequestsEnabled, loadStaffResolution, readStaffSchoolChoices } from '@/lib/staff/server';
 import { GENERIC_STAFF_ERROR, STAFF_PENDING_MESSAGE, isStaffRole, performStaffLogin, safeStaffDestination } from '@/lib/staff/contracts';
 import type { StaffActionState } from '@/lib/staff/contracts';
+import { isTotpSetupSecret, normalizeTotpQr, parseTotpSetup } from '@/lib/staff/mfa-setup';
+
+const STAFF_REAUTHENTICATION: StaffActionState = {
+  phase: 'error',
+  message: 'Your staff session could not be confirmed. Sign in again to continue.',
+};
+
+function isInvalidSession(error?: { name?: string; code?: string } | null) {
+  const code = error?.code;
+  return error?.name === 'AuthSessionMissingError' || code === 'session_not_found' || code === 'session_expired' ||
+    code === 'bad_jwt' || code === 'refresh_token_not_found' || code === 'refresh_token_already_used';
+}
+
+function enrollmentFailure(stage: 'list_factors' | 'enroll' | 'setup_data', error?: { name?: string; code?: string }): StaffActionState {
+  const code = error?.code;
+  const sessionInvalid = isInvalidSession(error);
+  const safeCode = sessionInvalid ? 'invalid_session' : code === 'unauthorized_missing_api_key' ||
+    code === 'UNAUTHORIZED_MISSING_API_KEY' || code === 'mfa_totp_enroll_not_enabled' ||
+    code === 'over_request_rate_limit' || code === 'too_many_enrolled_mfa_factors' ? code : 'unknown';
+  console.warn('Staff MFA setup failed', { stage, code: safeCode });
+  if (sessionInvalid) return STAFF_REAUTHENTICATION;
+  return {
+    phase: 'mfa',
+    mfaError: true,
+    message: 'Authenticator setup could not be completed. Try again or contact your school administrator if the problem continues.',
+  };
+}
 
 export async function loginStaff(_previous: StaffActionState, form: FormData): Promise<StaffActionState> {
   const enabled = staffRequestsEnabled();
@@ -40,39 +67,42 @@ export async function enrollStaffMfa(_previous: StaffActionState, form: FormData
   if (!staffRequestsEnabled()) return { phase: 'error', message: STAFF_PENDING_MESSAGE };
   const role = form.get('role');
   if (!isStaffRole(role)) return { phase: 'error', message: GENERIC_STAFF_ERROR };
+  let stage: 'session' | 'list_factors' | 'enroll' | 'setup_data' = 'session';
   try {
     const client = await staffClient(true);
-    if ((await loadStaffResolution(client, role)).kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    const resolution = await loadStaffResolution(client, role);
+    if (resolution.kind === 'denied') return STAFF_REAUTHENTICATION;
+    if (resolution.kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    stage = 'list_factors';
     const factors = await client.auth.mfa.listFactors();
-    if (factors.error || factors.data.all.some(f => f.status === 'verified')) return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    if (factors.error) return enrollmentFailure(stage, factors.error);
+    const verifiedTotp = factors.data.totp.find(factor => factor.status === 'verified');
+    if (verifiedTotp) return { phase: 'mfa', message: 'Verify your school-authorized authenticator to continue.', factorId: verifiedTotp.id };
+    if (factors.data.all.some(factor => factor.status === 'verified')) return enrollmentFailure(stage);
     // Clean up any stale unverified factors from previous incomplete enrollment attempts
     if (factors.data?.all) {
       for (const factor of factors.data.all) {
         if (factor.status === 'unverified') {
-          await client.auth.mfa.unenroll({ factorId: factor.id }).catch(() => null);
+          const { error } = await client.auth.mfa.unenroll({ factorId: factor.id }).catch(() => ({ error: null }));
+          if (error && isInvalidSession(error)) return enrollmentFailure(stage, error);
         }
       }
     }
+    stage = 'enroll';
     const r = await client.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Brightcamp staff authenticator' });
-    if (r.error || r.data.type !== 'totp') return { phase: 'error', message: GENERIC_STAFF_ERROR };
-    // Safely extract and decode SVG payload whether raw or percent-encoded
-    const rawSvg = r.data.totp.qr_code.replace(/^data:image\/svg\+xml(?:;charset=utf-8|;utf-?8)?,\s*/i, '');
-    let svg = rawSvg;
-    try {
-      svg = decodeURIComponent(rawSvg);
-    } catch {
-      svg = rawSvg;
-    }
-    if (!svg.trimStart().startsWith('<svg') || svg.length > 1_000_000) return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    if (r.error) return enrollmentFailure(stage, r.error);
+    stage = 'setup_data';
+    const setup = parseTotpSetup(r.data);
+    if (!setup) return enrollmentFailure(stage);
     // Enrollment QR is transient user-facing secret material: never log, persist or capture in tests.
     return {
       phase: 'mfa',
       message: 'Scan with your authenticator, or enter the secret key manually below:',
-      factorId: r.data.id,
-      qrDataUri: 'data:image/svg+xml;base64,' + Buffer.from(svg, 'utf8').toString('base64'),
-      secret: r.data.totp.secret,
+      ...setup,
     };
-  } catch { return { phase: 'error', message: GENERIC_STAFF_ERROR }; }
+  } catch {
+    return stage === 'session' ? STAFF_REAUTHENTICATION : enrollmentFailure(stage);
+  }
 }
 
 export async function verifyStaffMfa(_previous: StaffActionState, form: FormData): Promise<StaffActionState> {
@@ -84,17 +114,21 @@ export async function verifyStaffMfa(_previous: StaffActionState, form: FormData
   const secret = form.get('secret')?.toString();
   try {
     const client = await staffClient(true);
-    if ((await loadStaffResolution(client, role)).kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
+    const resolution = await loadStaffResolution(client, role);
+    if (resolution.kind === 'denied') return STAFF_REAUTHENTICATION;
+    if (resolution.kind !== 'mfa_required') return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const factors = await client.auth.mfa.listFactors();
+    if (isInvalidSession(factors.error)) return STAFF_REAUTHENTICATION;
     if (factors.error || !factors.data.all.some(f => f.id === factorId && f.factor_type === 'totp')) return { phase: 'error', message: GENERIC_STAFF_ERROR };
     const verification = await client.auth.mfa.challengeAndVerify({ factorId, code });
+    if (isInvalidSession(verification.error)) return STAFF_REAUTHENTICATION;
     if (verification.error) {
       return {
         phase: 'mfa',
         message: 'Invalid authenticator code. Please check your app and try again.',
         factorId,
-        qrDataUri: qrDataUri?.startsWith('data:image/svg+xml;base64,') ? qrDataUri : undefined,
-        secret: secret || undefined,
+        qrDataUri: normalizeTotpQr(qrDataUri),
+        secret: isTotpSetupSecret(secret) ? secret : undefined,
       };
     }
     let access = await loadStaffResolution(client, role);

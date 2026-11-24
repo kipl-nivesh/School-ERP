@@ -7,6 +7,7 @@ import { requireSupabasePublicConfiguration } from './config';
 /** Request-scoped factory. Enable writes only inside a response-capable Server Action/Route Handler. */
 export async function createServerSupabaseClient(options: { cookieWrites?: 'read-only' | 'allowed'; httpOnlyCookies?: boolean } = {}) {
   const { url, publishableKey } = requireSupabasePublicConfiguration();
+  const origin = new URL(url).origin;
   const cookieStore = await cookies();
   const isSecure = process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false';
   return createServerClient(url, publishableKey, {
@@ -27,6 +28,13 @@ export async function createServerSupabaseClient(options: { cookieWrites?: 'read
         }
       },
     },
-    global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) },
+    global: {
+      fetch: (input, init) => {
+        const target = new URL(input instanceof Request ? input.url : input);
+        if (target.origin !== origin) throw new Error('Unexpected Supabase request origin.');
+        // A redirect must not forward SDK credentials to another origin.
+        return fetch(input, { ...init, cache: 'no-store', redirect: 'error' });
+      },
+    },
   });
 }
