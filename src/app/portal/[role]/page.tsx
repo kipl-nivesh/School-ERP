@@ -34,8 +34,8 @@ export default async function PortalWorkspace({ params }: { params: Promise<{ ro
         }
       }
     }
-    // Unauthenticated staff redirect to staff login
-    redirect('/login/staff');
+    // Unauthenticated staff redirect to staff login with pre-selected role
+    redirect(`/login/staff?role=${role}`);
   }
 
   // 2. Student Portal

@@ -1,17 +1,30 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, GraduationCap, HeartHandshake, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  KeyRound,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
+import { AuthShell } from '@/components/auth/auth-shell';
+import {
+  AuthAlert,
+  AuthButton,
+  AuthField,
+  AuthInput,
+} from '@/components/auth/auth-primitives';
+import shellStyles from '@/components/auth/auth-shell.module.css';
 import { sendParentOtp, verifyParentOtp, type ParentActionState } from './actions';
-import styles from './parent-login.module.css';
 
 const INITIAL_PARENT_STATE: ParentActionState = {
   phase: 'idle',
   message: '',
 };
 
-export function ParentLoginForm() {
+export function ParentLoginForm({ liveAuthEnabled = false }: { liveAuthEnabled?: boolean }) {
   const [sendState, sendAction, sendPending] = useActionState(sendParentOtp, INITIAL_PARENT_STATE);
   const [verifyState, verifyAction, verifyPending] = useActionState(verifyParentOtp, INITIAL_PARENT_STATE);
   const [resetCodeStep, setResetCodeStep] = useState(false);
@@ -22,116 +35,121 @@ export function ParentLoginForm() {
   const hasError = sendState.phase === 'error' || verifyState.phase === 'error';
 
   return (
-    <main className={styles.page}>
-      <div className={styles.shell}>
-        <section className={styles.story} aria-labelledby="parent-welcome">
-          <Link href="/" className={styles.brand}>
-            <span><GraduationCap size={25} /></span> Brightcamp
-          </Link>
-          <div className={styles.storyBody}>
-            <span className={styles.eyebrow}>
-              <HeartHandshake size={15} /> Guardian & Family Portal
-            </span>
-            <h1 id="parent-welcome">
-              Connected with<br /><em>their journey.</em>
-            </h1>
-            <p>Track academic attendance, view published report cards, manage school fees, and communicate with teachers.</p>
-            <div className={styles.art} aria-hidden="true">
-              <div className={styles.card}>
-                <Users size={48} />
-                <span>Family Space</span>
-              </div>
-            </div>
-            <div className={styles.trust}>
-              <LockKeyhole size={17} />
-              <span>Sign in with a one-time code sent to your verified guardian email.</span>
-            </div>
-          </div>
-          <small>Supporting every student&apos;s potential together.</small>
-        </section>
+    <AuthShell
+      tone="parent"
+      illustration="parent"
+      headline={
+        <>
+          Connected with
+          <br />
+          their journey.
+        </>
+      }
+      description={liveAuthEnabled ? 'Follow attendance, report cards, and school fees in one place.' : 'A preview of the Parent sign-in experience.'}
+      trustNote="Verified guardian email"
+      backHref="/login"
+      backLabel="Switch portal"
+      activePortal="parent"
+      kicker="PARENT & GUARDIAN"
+      title={isCodeSent ? 'Enter verification code' : 'Parent sign-in'}
+      subtitle={
+        isCodeSent
+          ? `Enter the one-time code sent to ${activeEmail}.`
+          : liveAuthEnabled ? 'Use the guardian email verified by your school.' : 'Parent sign-in is not available in this release.'
+      }
+      cardIcon={<Users size={18} />}
+      footer={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#475569' }}>
+            <ShieldCheck size={14} color="#059669" aria-hidden="true" />
+            <span>Guardian-scoped access only.</span>
+          </span>
+        </div>
+      }
+    >
+      <div className={shellStyles.formStack}>
+        {!liveAuthEnabled && <AuthAlert variant="info" title="Parent portal preview">
+          This preview does not send verification codes or open guardian records.
+        </AuthAlert>}
+        {feedbackMessage && (
+          <AuthAlert variant={hasError ? 'error' : 'info'} role={hasError ? 'alert' : 'status'}>
+            {feedbackMessage}
+          </AuthAlert>
+        )}
 
-        <section className={styles.panel} aria-labelledby="login-title">
-          <Link className={styles.back} href="/">← Public previews</Link>
-          <div className={styles.formWrap}>
-            <span className={styles.icon}><Users size={26} /></span>
-            <span className={styles.kicker}>PARENT & GUARDIAN PORTAL</span>
-            <h2 id="login-title">Parent sign-in</h2>
-            <p className={styles.subtitle}>
-              {isCodeSent
-                ? `Enter the verification code sent to ${activeEmail}.`
-                : 'Use the guardian email verified by your school.'}
-            </p>
+        {!isCodeSent ? (
+          <form action={liveAuthEnabled ? sendAction : undefined} className={shellStyles.formStack} aria-busy={sendPending}>
+            <AuthField
+              id="guardian-email"
+              label="Guardian email"
+              hint="We will send a one-time verification code to this address."
+            >
+              <AuthInput
+                id="guardian-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="parent@example.com"
+                defaultValue={activeEmail || ''}
+                icon={<Mail size={15} />}
+                aria-describedby="guardian-email-hint"
+                required
+                disabled={!liveAuthEnabled || sendPending}
+              />
+            </AuthField>
 
-            {feedbackMessage && (
-              <div className={hasError ? styles.feedback : styles.notice} role="status">
-                <span>{feedbackMessage}</span>
-              </div>
-            )}
+            <AuthButton
+              type="submit"
+              disabled={!liveAuthEnabled}
+              loading={sendPending}
+              loadingText="Sending code…"
+            >
+              {liveAuthEnabled ? 'Send one-time code' : 'Parent sign-in unavailable'}
+              <ArrowRight size={15} aria-hidden="true" />
+            </AuthButton>
+          </form>
+        ) : (
+          <form action={liveAuthEnabled ? verifyAction : undefined} className={shellStyles.formStack} aria-busy={verifyPending}>
+            <input type="hidden" name="email" value={activeEmail || ''} />
 
-            {!isCodeSent ? (
-              <form action={sendAction} className={styles.form} aria-busy={sendPending}>
-                <label htmlFor="guardian-email">Guardian email</label>
-                <input
-                  id="guardian-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="e.g. parent_a1@brightcamp.test"
-                  defaultValue={activeEmail || ''}
-                  required
-                  disabled={sendPending}
-                />
-                <button type="submit" disabled={sendPending}>
-                  {sendPending ? 'Sending code…' : 'Send one-time code'} <ArrowRight size={17} />
-                </button>
-              </form>
-            ) : (
-              <form action={verifyAction} className={styles.form} aria-busy={verifyPending}>
-                <input type="hidden" name="email" value={activeEmail || ''} />
-                <label htmlFor="guardian-code">One-time code</label>
-                <input
-                  id="guardian-code"
-                  name="code"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder="Enter 8-digit code"
-                  maxLength={10}
-                  required
-                  disabled={verifyPending}
-                  autoFocus
-                />
-                <button type="submit" disabled={verifyPending}>
-                  {verifyPending ? 'Verifying code…' : 'Verify code & Open Portal'} <ArrowRight size={17} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResetCodeStep(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748b',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    marginTop: '8px',
-                    textAlign: 'center'
-                  }}
-                >
-                  Use a different email address
-                </button>
-              </form>
-            )}
+            <AuthField id="guardian-code" label="One-time verification code">
+              <AuthInput
+                id="guardian-code"
+                name="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="Enter 8-digit code"
+                maxLength={10}
+                icon={<KeyRound size={15} />}
+                required
+                disabled={!liveAuthEnabled || verifyPending}
+                autoFocus
+              />
+            </AuthField>
 
-            <div className={styles.footer} style={{ marginTop: '24px' }}>
-              <ShieldCheck size={16} />
-              <span>Parent credentials never grant student or staff access.</span>
-            </div>
-          </div>
-          <small className={styles.previewNote}>
-            Looking for public preview? <Link href="/parent/dashboard" style={{ textDecoration: 'underline' }}>View Parent Preview</Link>
-          </small>
-        </section>
+            <AuthButton
+              type="submit"
+              disabled={!liveAuthEnabled}
+              loading={verifyPending}
+              loadingText="Verifying code…"
+            >
+              Verify code &amp; Open Portal
+              <ArrowRight size={15} aria-hidden="true" />
+            </AuthButton>
+
+            <AuthButton
+              type="button"
+              variant="ghost"
+              onClick={() => setResetCodeStep(true)}
+              disabled={!liveAuthEnabled || verifyPending}
+            >
+              <LockKeyhole size={14} aria-hidden="true" />
+              Use a different email address
+            </AuthButton>
+          </form>
+        )}
       </div>
-    </main>
+    </AuthShell>
   );
 }
