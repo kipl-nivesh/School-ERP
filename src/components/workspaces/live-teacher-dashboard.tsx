@@ -10,6 +10,8 @@ import { TeacherAttendance } from './teacher-attendance';
 import { TeacherHomework } from './teacher-homework';
 import { TeacherTimetable } from './teacher-timetable';
 import { TeacherExams } from './teacher-exams';
+import { TeacherAnnouncements } from './teacher-announcements';
+import { TeacherReports } from './teacher-reports';
 
 type Access = Parameters<typeof readTeacherDashboard>[0];
 type Ready = Extract<Awaited<ReturnType<typeof readTeacherDashboard>>, { kind: 'ready' }>;
@@ -50,6 +52,8 @@ function Navigation({ permitted, attendance, homework, timetable, exams }: {
     <Link href="/staff/teacher?workspace=exams#teacher-exams" aria-current={exams ? 'page' : undefined}>
       <FileText size={18} /> Exams &amp; Marks
     </Link>
+    <Link href="/staff/teacher?workspace=announcements#teacher-announcements">Staff announcements</Link>
+    <Link href="/staff/teacher?workspace=reports#teacher-reports">Teaching reports</Link>
   </nav>;
 }
 
@@ -125,7 +129,9 @@ export async function LiveTeacherDashboard({ access, query }: { access: Access; 
   const homework = query.workspace === 'homework';
   const timetable = query.workspace === 'timetable';
   const exams = query.workspace === 'exams';
-  const inModule = attendance || homework || timetable || exams;
+  const announcements = query.workspace === 'announcements';
+  const reports = query.workspace === 'reports';
+  const inModule = attendance || homework || timetable || exams || announcements || reports;
   const data = inModule ? null : await readTeacherDashboard(access, query);
   const canOpenClasses = inModule
     ? evaluatePermission(access.context, 'students.read', access.context.session.verifiedAt).allowed
@@ -152,6 +158,8 @@ export async function LiveTeacherDashboard({ access, query }: { access: Access; 
         {homework && <TeacherHomework access={access} query={query} />}
         {timetable && <TeacherTimetable access={access} query={query} />}
         {exams && <TeacherExams access={access} query={query} />}
+        {announcements && <TeacherAnnouncements access={access} />}
+        {reports && <TeacherReports access={access} query={query} />}
         {data && <>
         <section id="overview" className={styles.hero}><p>Teacher workspace</p><h1>Teaching overview</h1><span>{access.schoolName}</span></section>
         {data.kind === 'denied' && <p className={styles.empty}>Your membership does not grant access to class records or student rosters.</p>}

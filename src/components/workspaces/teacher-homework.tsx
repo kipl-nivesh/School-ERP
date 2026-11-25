@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { randomUUID } from 'node:crypto';
+import { HomeworkForm } from './homework-management';
 import { readTeacherHomework } from '@/lib/services/teacher-homework';
 import type { TeacherQuery } from '@/lib/services/teacher-dashboard';
 import styles from './live-admin-dashboard.module.css';
@@ -70,8 +72,10 @@ export async function TeacherHomework({ access, query }: {
         <dl className={teacherStyles.metrics}>{data.counts.map((count, i) =>
           <div key={names[i]}><dt>{names[i]}</dt><dd>{count}</dd></div>)}</dl>
         <p className={styles.limit}>Counts cover all accessible homework. Open items due before {data.cutoff} (UTC) are overdue. Open items due on or after that date are upcoming.</p>
-      </> : <p className={styles.empty}>Homework history and totals require homework-read permission.</p>}
+      </> : <p className={styles.empty}>{data.canRead ? 'Homework totals could not be loaded.' :
+      'Homework history and totals require homework-read permission.'}</p>}
       <p className={styles.limit}>Student submission tracking is unavailable.</p>
+      {data.writeChoices.length > 0 && <HomeworkForm requestId={randomUUID()} options={options} assignedSubjects={data.writeChoices} />}
     </section>
 
     {data.canRead && <section id="homework-directory" className={styles.section}>
@@ -103,7 +107,8 @@ export async function TeacherHomework({ access, query }: {
         <p>{placement(detail.section_id)} · {detail.subject_code} · {statusLabel(detail.status)}</p>
         <p>Assigned {detail.assigned_date} · Due {detail.due_date} · {detail.max_points} points</p>
         <p className="whitespace-pre-wrap break-words">{detail.description || 'No instructions.'}</p>
-
+        {data.editable && <HomeworkForm key={detail.id + ':' + detail.revision} requestId={randomUUID()}
+          options={options} editing row={detail} assignedSubjects={data.writeChoices} />}
       </div>}
     </section>}
 

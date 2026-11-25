@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { evaluatePermission } from '../auth/authorization';
-import { getStaffAccess, staffClient } from '../staff/server';
+import { getAccountantRenderAccess, getStaffAccess, staffClient } from '../staff/server';
 import {
   isValidDateString,
   isValidUuid,
@@ -21,6 +21,7 @@ import {
   type StaffReportMetrics,
 } from './report-fields';
 import type { InvoiceStatus } from './fee-fields';
+import { readAccountantInvoiceTotals, readAccountantPaymentTotals } from './accountant-render-totals';
 import { calculateFinanceReport, checkedFinanceRows, FINANCE_REPORT_LIMIT, reportInvoiceBalance } from './finance-report-calculation';
 
 export * from './report-fields';
@@ -207,10 +208,10 @@ function parseReportFilters(form: FormData): ReportFilters | null {
   };
 }
 
-export async function readReportsWorkspace(form = new FormData()): Promise<ReportPage> {
-  const access = await getStaffAccess('admin');
+export async function readReportsWorkspace(form = new FormData(), accountantRender = false): Promise<ReportPage> {
+  const access = await (accountantRender ? getAccountantRenderAccess() : getStaffAccess());
   const schoolId = access?.context.schoolId;
-  if (!access || !schoolId) {
+  if (!access || !schoolId || !['admin', 'accountant'].includes(access.role)) {
     return { kind: 'denied', reason: 'Active school session required to access reports.' };
   }
 
@@ -231,6 +232,9 @@ export async function readReportsWorkspace(form = new FormData()): Promise<Repor
   const filters = parseReportFilters(form);
   if (!filters) {
     return { kind: 'invalid', message: 'Invalid report query or filter parameters.' };
+  }
+  if (access.role === 'accountant' && (filters.category !== 'finance' || !canReadFees)) {
+    return { kind: 'denied', reason: 'Accountants can access only their school’s authorized financial reports.' };
   }
 
   const permissions: ReportPermissions = {
@@ -488,9 +492,15 @@ export async function readReportsWorkspace(form = new FormData()): Promise<Repor
           return { kind: 'denied', reason: 'Finance reports require fees.read permission.' };
         }
 
+        const accountant = access.role === 'accountant';
+        let invoiceSnapshot: Awaited<ReturnType<typeof readAccountantInvoiceTotals>> | undefined;
         let financeMetrics: FinanceReportMetrics | undefined;
         if (canReadReceipts || allowed('payments.read')) {
-          const [invoices, payments] = await Promise.all([
+          const snapshots = accountant ? await Promise.all([
+            readAccountantInvoiceTotals(schoolId), readAccountantPaymentTotals(schoolId),
+          ]) : null;
+          invoiceSnapshot = snapshots?.[0];
+          const [invoices, payments] = snapshots ?? await Promise.all([
             client.from('fee_invoices').select('amount_paise::text,paid_paise::text,due_date,status', { count: 'exact' })
               .eq('school_id', schoolId).limit(FINANCE_REPORT_LIMIT),
             client.from('fee_payments').select('amount_paise::text,payment_method,status', { count: 'exact' })
@@ -534,8 +544,17 @@ export async function readReportsWorkspace(form = new FormData()): Promise<Repor
           .order('id')
           .range(start, start + REPORT_PAGE_SIZE);
 
-        const invoiceRes = await invoiceQuery.overrideTypes<InvoiceQueryResult[], { merge: false }>();
-        const rowsRaw = checkedFinanceRows(invoiceRes, start, REPORT_PAGE_SIZE + 1);
+        // The initial Accountant report and its totals can use the same fully
+        // scoped invoice snapshot. Filtered or identity-bearing pages keep their own query.
+        const shared = accountant && !canReadStudents && filters.page === 1 && !filters.status &&
+          !filters.dateFrom && !filters.dateTo && !filters.search
+          ? invoiceSnapshot ?? await readAccountantInvoiceTotals(schoolId) : null;
+        const sharedRows = shared?.data;
+        const canReuse = shared && !shared.error && sharedRows && shared.count === sharedRows.length &&
+          sharedRows.every(row => row.school_id === schoolId);
+        const invoiceRes = canReuse ? { ...shared, data: sharedRows.slice(0, REPORT_PAGE_SIZE + 1) } :
+          await invoiceQuery.overrideTypes<InvoiceQueryResult[], { merge: false }>();
+        const rowsRaw = checkedFinanceRows<InvoiceQueryResult>(invoiceRes, start, REPORT_PAGE_SIZE + 1);
         const totalRows = invoiceRes.count!;
         const hasNext = rowsRaw.length > REPORT_PAGE_SIZE && filters.page < MAX_REPORT_PAGE;
         const rows: ReportTableRow[] = rowsRaw.slice(0, REPORT_PAGE_SIZE).map(inv => {

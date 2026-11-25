@@ -55,15 +55,13 @@ test('staff creation cannot report a fictional provisioned account',async()=>{
   const result=await admin.createStaffAccount(context,{fullName:'Synthetic Staff',email:'staff@example.invalid'});
   assert.equal(result.success,false);assert.equal(result.code,'INVITATION_REQUIRED');
 });
-for(const status of ['settled','idempotent_duplicate']) test(`payment accepts actual ${status} RPC contract`,async()=>{
-  setSupabaseClientFactory(async()=>({rpc:async()=>({data:{status,payment_id:'payment-fixture',receipt_number:'TEST-RECEIPT'},error:null})}));
+test('legacy payment DAL remains behind the recovery gate',async()=>{
+  let calls=0;
+  setSupabaseClientFactory(async()=>{calls++;throw Error('Legacy payment must remain gated');});
   const result=await accountant.collectPayment(context,{studentId:'student',invoiceId:'invoice',amountPaise:100,paymentMethod:'cash',transactionReference:'synthetic',idempotencyKey:'synthetic-key'});
-  assert.equal(result.success,true);
-});
-test('unknown payment status fails closed',async()=>{
-  setSupabaseClientFactory(async()=>({rpc:async()=>({data:{success:true,status:'pending'},error:null})}));
-  const result=await accountant.collectPayment(context,{studentId:'student',amountPaise:100,paymentMethod:'cash',transactionReference:'synthetic',idempotencyKey:'synthetic-key'});
   assert.equal(result.success,false);
+  assert.equal(result.code,'LIVE_STAFF_WRITE_UNAVAILABLE');
+  assert.equal(calls,0);
 });
 test('migration contract: explicit missing-context denial and correct receipt sequence',()=>{
   const sql=fs.readFileSync('supabase/migrations/20261111001700_financial_authorization_hardening.sql','utf8');
@@ -132,14 +130,43 @@ test('management rejects inherited kinds and excludes client-supplied authority 
   form.set('name','');assert.equal(management.managementPayload('class',form),null);
 });
 const managementActionJs=ts.transpileModule(fs.readFileSync('src/app/staff/management-actions.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText.replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
-const makeManagementAction=new Function('staffWorkspaceWritesEnabled','getStaffAccess','staffClient','evaluatePermission','isManagementKind','isRecordId','managementPayload','revalidatePath',managementActionJs+';return manageAcademicRecord;');
-for(const allow of [false,true]) test(`dormant management action with mocked write gate ${allow?'persists through RPC':'denies before database access'}`,async()=>{
+const makeManagementAction=new Function('getStaffAccess','staffClient','evaluatePermission','isManagementKind','isRecordId','managementPayload','revalidatePath',managementActionJs+';return manageAcademicRecord;');
+for(const [role, allow, expected] of [['admin',true,true],['admin',false,false],['teacher',true,false]]) test(`academic management ${role} permission=${allow} writes=${expected}`,async()=>{
   let calls=0;
-  const action=makeManagementAction(()=>true,async()=>({role:'admin',context}),async()=>({rpc:async(name,args)=>{
+  const action=makeManagementAction(async()=>({role,context}),async()=>({rpc:async(name,args)=>{
     calls++;assert.equal(name,'manage_academics');assert.equal('school_id' in args,false);return {data:{id:args.p_id},error:null};
   }}),()=>({allowed:allow}),management.isManagementKind,management.isRecordId,management.managementPayload,()=>{});
   const form=new FormData();form.set('kind','class');form.set('name','Synthetic class');form.set('recordId','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');form.set('requestId','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
-  const result=await action({ok:false,message:''},form);assert.equal(result.ok,allow);assert.equal(calls,allow?1:0);
+  const result=await action({ok:false,message:''},form);assert.equal(result.ok,expected);assert.equal(calls,expected?1:0);
+});
+const feeActionJs=ts.transpileModule(fs.readFileSync('src/app/staff/fee-workspace-actions.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText.replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
+const makeFeeAction=new Function('getStaffAccess','staffClient','evaluatePermission','isRecordId','revalidatePath',feeActionJs+';return recordFeePayment;');
+for (const [role, permit, correctSchool, resultStatus, expectedCalls, expectedOk] of [
+  ['accountant',true,true,'settled',1,true],
+  ['accountant',true,true,'idempotent_duplicate',1,true],
+  ['accountant',true,true,'unexpected',1,false],
+  ['accountant',false,true,'settled',0,false],
+  ['accountant',true,false,'settled',0,false],
+  ['teacher',true,true,'settled',0,false],
+]) test(`operational fee action ${role} permission=${permit} school=${correctSchool} result=${resultStatus}`,async()=>{
+  const schoolId='11111111-1111-4111-8111-111111111111';
+  const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  let calls=0;
+  const action=makeFeeAction(async()=>({role,context:{schoolId}}),async()=>({rpc:async(name,args)=>{
+    calls++;
+    assert.equal(name,'collect_fee_payment_atomic');
+    assert.equal(args.p_school_id,schoolId);
+    assert.equal(args.p_amount_paise,1250);
+    assert.equal(args.p_idempotency_key,'fixture-request-key');
+    return {error:null,data:{status:resultStatus,payment_id:id,receipt_number:'REC-2026-8'}};
+  }}),(_,permission)=>({allowed:permit && permission==='payments.record'}),management.isRecordId,()=>{});
+  const form=new FormData();
+  for(const [name,value] of Object.entries({studentId:id,invoiceId:id,expectedSchool:correctSchool?schoolId:id,
+    amountRupees:'12.50',paymentMethod:'cash',transactionReference:'fixture-reference',idempotencyKey:'fixture-request-key'})) form.set(name,value);
+  const response=await action({ok:false,message:''},form);
+  assert.equal(calls,expectedCalls);
+  assert.equal(response.ok,expectedOk);
+  if(expectedOk) assert.equal(response.isDuplicate,resultStatus==='idempotent_duplicate');
 });
 test('all migration function dollar delimiters are paired and not single dollar',()=>{
   for(const file of fs.readdirSync('supabase/migrations').filter(name=>name.endsWith('.sql'))) {

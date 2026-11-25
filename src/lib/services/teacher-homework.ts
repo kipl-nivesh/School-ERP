@@ -42,7 +42,7 @@ export async function readTeacherHomework(access: Access, input: TeacherQuery) {
   const now = Date.now();
   if (access.role !== 'teacher' || !school || !evaluatePermission(context, 'dashboard.teacher.view', now).allowed) return { kind: 'denied' } as const;
   const canRead = evaluatePermission(context, 'homework.read', now).allowed;
-  const canWrite = false;
+  const canWrite = evaluatePermission(context, 'homework.write', now).allowed;
   const canReadPlacement = evaluatePermission(context, 'students.read', now).allowed;
   if (!canRead && !canWrite) return { kind: 'denied' } as const;
   const filters = parse(input);
@@ -89,7 +89,7 @@ export async function readTeacherHomework(access: Access, input: TeacherQuery) {
         count().eq('status', 'active').gte('due_date', cutoff), count().eq('status', 'active').lt('due_date', cutoff)]) : null,
     ]);
     if ([catalog, assignmentCatalog, list, detail].some(value => value?.error) ||
-        counts?.some(row => row.error || row.count === null) || list?.data?.some(row => row.school_id !== school) ||
+        list?.data?.some(row => row.school_id !== school) ||
         (detail?.data && (detail.data.school_id !== school || detail.data.id !== filters.detail))) return { kind: 'error' } as const;
 
     let editable = false;
@@ -108,7 +108,7 @@ export async function readTeacherHomework(access: Access, input: TeacherQuery) {
     const writeChoices = [...new Map((assignmentCatalog?.data ?? []).slice(0, 200).map(row =>
       [JSON.stringify([row.section_id, row.subject_code]), { section: row.section_id, subject: row.subject_code }])).values()];
     return { kind: 'ready', canRead, canReadPlacement, options, filters, writeChoices, editable, cutoff,
-      counts: counts?.map(row => row.count ?? 0) ?? null,
+      counts: counts?.every(row => !row.error && row.count !== null) ? counts.map(row => row.count!) : null,
       rows: (list?.data ?? []).slice(0, pageSize).map(publicRow),
       next: (list?.data?.length ?? 0) > pageSize && filters.page < 999,
       detail: detail?.data ? publicRow(detail.data) : null, detailDenied: !!filters.detail && !detail?.data } as const;

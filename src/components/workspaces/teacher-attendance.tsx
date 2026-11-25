@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LiveAcademicForm } from './live-academic-form';
 import { attendanceStatuses } from '@/lib/services/attendance-fields';
 import { readTeacherAttendance } from '@/lib/services/teacher-attendance';
 import type { TeacherQuery } from '@/lib/services/teacher-dashboard';
@@ -91,6 +92,9 @@ export async function TeacherAttendance({ access, query }: {
         {!data.identities && <p className={styles.empty}>Student identities and class rosters require student-read permission.</p>}
         {data.identities && data.canRead && data.roster === null && <p className={styles.empty}>Choose an assigned section and date to view the read-only roster.</p>}
         {data.roster?.length === 0 && <p className={styles.empty}>No visible enrollments for this section and date.</p>}
+        {data.canWrite && data.picked && !filters.date && data.writeStudents.length > 0 &&
+          <LiveAcademicForm key={data.picked.id} kind="attendance" requestId=""
+            roster={{ section: data.picked.id, students: data.writeStudents }} />}
         {!!data.roster?.length && <div className={styles.tableScroll} role="region" aria-label="Class roster" tabIndex={0}>
           <table><thead><tr><th>Student</th><th>Registration</th><th>Status</th><th>Remarks</th></tr></thead>
             <tbody>{data.roster.map(row => <tr key={row.id}>

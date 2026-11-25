@@ -21,7 +21,7 @@ do $$ begin
   if has_function_privilege('authenticated','public.reset_auth_rate_limit(text)','EXECUTE') then raise exception 'Unsafe reset grant'; end if;
 end $$;
 select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
-select set_config('request.jwt.claims',jsonb_build_object('iss','https://yedvkcwkflhbqumjwknh.supabase.co/auth/v1','role','authenticated','aud','authenticated','session_id','cccccccc-cccc-4ccc-8ccc-cccccccccccc','aal','aal2','amr',jsonb_build_array(jsonb_build_object('method','password','timestamp',extract(epoch from now())),jsonb_build_object('method','totp','timestamp',extract(epoch from now()))))::text,false);
+select set_config('request.jwt.claims',jsonb_build_object('iss','https://yedvkcwkflhbqumjwknh.supabase.co/auth/v1','role','authenticated','aud','authenticated','session_id','cccccccc-cccc-4ccc-8ccc-cccccccccccc','aal','aal2','exp',extract(epoch from now()+interval '1 hour'),'amr',jsonb_build_array(jsonb_build_object('method','password','timestamp',extract(epoch from now())),jsonb_build_object('method','totp','timestamp',extract(epoch from now()))))::text,false);
 
 do $$
 declare input jsonb; first_result jsonb; retry_result jsonb; student uuid; result integer; homework uuid;
@@ -73,17 +73,37 @@ insert into auth.users(id,email) values('abababab-abab-4bab-8bab-abababababab','
 insert into public.profiles(id,account_status,credential_reset_required) values('abababab-abab-4bab-8bab-abababababab','active',false);
 insert into public.staff_profiles(profile_id,school_id,display_name) values('abababab-abab-4bab-8bab-abababababab','11111111-1111-4111-8111-111111111111','Fictional Teacher');
 insert into public.user_roles(id,profile_id,school_id,role_code,membership_status,permissions)
-values('bcbcbcbc-bcbc-4cbc-8cbc-bcbcbcbcbcbc','abababab-abab-4bab-8bab-abababababab','11111111-1111-4111-8111-111111111111','teacher','active',array['dashboard.teacher.view','students.read','homework.write','homework.read','attendance.write','attendance.read']);
+values('bcbcbcbc-bcbc-4cbc-8cbc-bcbcbcbcbcbc','abababab-abab-4bab-8bab-abababababab','11111111-1111-4111-8111-111111111111','teacher','active',array['dashboard.teacher.view','students.read','homework.write','homework.read','attendance.write','attendance.read','marks.read']);
 insert into auth.sessions(id,user_id) values('cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd','abababab-abab-4bab-8bab-abababababab');
 insert into public.role_contexts(id,profile_id,school_id,role_code,assignment_id,authorization_version,expires_at)
 select 'cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd',id,'11111111-1111-4111-8111-111111111111','teacher','bcbcbcbc-bcbc-4cbc-8cbc-bcbcbcbcbcbc',authorization_version,now()+interval '1 hour' from public.profiles where id='abababab-abab-4bab-8bab-abababababab';
 insert into public.teacher_assignments(school_id,teacher_profile_id,section_id,academic_year_id,subject_code,valid_from)
 values('11111111-1111-4111-8111-111111111111','abababab-abab-4bab-8bab-abababababab','ffffffff-ffff-4fff-8fff-ffffffffffff','dddddddd-dddd-4ddd-8ddd-dddddddddddd','MAT',current_date-10);
+insert into public.homework_assignments(school_id,section_id,subject_code,title,description,due_date,max_points,teacher_profile_id)
+values('11111111-1111-4111-8111-111111111111','ffffffff-ffff-4fff-8fff-ffffffffffff',
+  'SCI','Unassigned subject homework','Fictional instructions',current_date+1,10,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+insert into public.marks_sheets(school_id,section_id,exam_name,subject_code,exam_date,max_marks,passing_marks,created_by_profile_id)
+select '11111111-1111-4111-8111-111111111111','ffffffff-ffff-4fff-8fff-ffffffffffff',
+  'Subject scope fixture', subject_code, current_date, 100, 40,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+from (values ('MAT'),('SCI')) as subjects(subject_code);
+insert into public.marks_entries(school_id,marks_sheet_id,student_id,marks_obtained)
+select sheet.school_id,sheet.id,student.id,50
+from public.marks_sheets sheet
+join public.students student on student.school_id=sheet.school_id
+where sheet.exam_name='Subject scope fixture';
 set role authenticated;
 select set_config('request.jwt.claim.sub','abababab-abab-4bab-8bab-abababababab',false);
-select set_config('request.jwt.claims',jsonb_build_object('iss','https://yedvkcwkflhbqumjwknh.supabase.co/auth/v1','role','authenticated','aud','authenticated','session_id','cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd','aal','aal1','amr',jsonb_build_array(jsonb_build_object('method','password','timestamp',extract(epoch from now()))))::text,false);
+select set_config('request.jwt.claims',jsonb_build_object('iss','https://yedvkcwkflhbqumjwknh.supabase.co/auth/v1','role','authenticated','aud','authenticated','session_id','cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd','aal','aal1','exp',extract(epoch from now()+interval '1 hour'),'amr',jsonb_build_array(jsonb_build_object('method','password','timestamp',extract(epoch from now()))))::text,false);
 do $$ begin
   if (select count(*) from public.students)<>1 then raise exception 'Assigned teacher roster unavailable'; end if;
+  if not exists(select 1 from public.homework_assignments where subject_code='MAT')
+    or exists(select 1 from public.homework_assignments where subject_code='SCI') then
+    raise exception 'Teacher homework read did not enforce subject assignment';
+  end if;
+  if (select array_agg(subject_code) from public.marks_sheets where exam_name='Subject scope fixture')
+     is distinct from array['MAT'] or (select count(*) from public.marks_entries) <> 1 then
+    raise exception 'Teacher marks read did not enforce subject assignment';
+  end if;
   if exists(select 1 from public.schools where id='22222222-2222-4222-8222-222222222222') then raise exception 'Teacher cross-school read'; end if;
   begin perform public.create_homework_atomic(gen_random_uuid(),'ffffffff-ffff-4fff-8fff-ffffffffffff','SCI','Unauthorized subject','Fictional instructions',current_date+1,10); raise exception 'Unassigned subject accepted'; exception when insufficient_privilege then null; end;
   begin perform public.collect_fee_payment_atomic(null,null,100,'cash','fixture','teacher-finance'); raise exception 'Teacher collected payment'; exception when insufficient_privilege then null; end;
@@ -150,6 +170,52 @@ set role authenticated;
 do $$ begin if public.staff_recovery_scope() is not null then raise exception 'Suspended account recovery accepted'; end if; end $$;
 reset role;
 select 'PASS: teacher management denial, direct write revocation and suspended recovery denial.';
+
+-- Accountant settlement with an independently scoped, synthetic session.
+begin;
+insert into auth.users(id,email) values('34343434-3434-4434-8434-343434343434','finance@example.invalid');
+insert into public.profiles(id,account_status,credential_reset_required)
+values('34343434-3434-4434-8434-343434343434','active',false);
+insert into public.staff_profiles(profile_id,school_id,display_name)
+values('34343434-3434-4434-8434-343434343434','11111111-1111-4111-8111-111111111111','Finance Fixture');
+insert into public.user_roles(id,profile_id,school_id,role_code,membership_status,permissions)
+values('35353535-3535-4535-8535-353535353535','34343434-3434-4434-8434-343434343434',
+  '11111111-1111-4111-8111-111111111111','accountant','active',app_private.default_managed_staff_permissions('accountant'));
+insert into auth.sessions(id,user_id)
+values('36363636-3636-4636-8636-363636363636','34343434-3434-4434-8434-343434343434');
+insert into public.role_contexts(id,profile_id,school_id,role_code,assignment_id,authorization_version,expires_at)
+select '36363636-3636-4636-8636-363636363636',id,'11111111-1111-4111-8111-111111111111','accountant',
+  '35353535-3535-4535-8535-353535353535',authorization_version,now()+interval '1 hour'
+from public.profiles where id='34343434-3434-4434-8434-343434343434';
+set local role authenticated;
+do $$
+declare invoice constant uuid := '99999999-9999-4999-8999-999999999999';
+  school constant uuid := '11111111-1111-4111-8111-111111111111';
+  student uuid;
+  first_result jsonb;
+  retry_result jsonb;
+begin
+  perform set_config('request.jwt.claim.sub','34343434-3434-4434-8434-343434343434',true);
+  perform set_config('request.jwt.claims',jsonb_build_object(
+    'iss','https://yedvkcwkflhbqumjwknh.supabase.co/auth/v1','role','authenticated','aud','authenticated',
+    'session_id','36363636-3636-4636-8636-363636363636','aal','aal1','exp',extract(epoch from now()+interval '1 hour'),
+    'amr',jsonb_build_array(jsonb_build_object('method','password','timestamp',extract(epoch from now()))))::text,true);
+  select student_id into student from public.fee_invoices where id=invoice;
+  first_result:=public.collect_fee_payment_atomic(student,invoice,100,'cash','accountant fixture','accountant-fixture-request',null,school);
+  retry_result:=public.collect_fee_payment_atomic(student,invoice,100,'cash','accountant fixture','accountant-fixture-request',null,school);
+  if first_result->>'status' is distinct from 'settled'
+     or retry_result->>'status' is distinct from 'idempotent_duplicate'
+     or first_result->>'payment_id' is distinct from retry_result->>'payment_id' then
+    raise exception 'Accountant settlement retry mismatch';
+  end if;
+  begin
+    perform public.collect_fee_payment_atomic(student,invoice,100,'cash','accountant fixture',
+      'accountant-foreign-request',null,'22222222-2222-4222-8222-222222222222');
+    raise exception 'Cross-school settlement allowed';
+  exception when insufficient_privilege then null; end;
+end $$;
+rollback;
+select 'PASS: Accountant settlement, idempotent retry, and cross-school denial.';
 
 insert into auth.users(id,email) values('dddddddd-dddd-4ddd-8ddd-dddddddddddd','invitee@example.invalid');
 insert into auth.sessions(id,user_id) values('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','dddddddd-dddd-4ddd-8ddd-dddddddddddd');

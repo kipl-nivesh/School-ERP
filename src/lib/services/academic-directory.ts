@@ -6,7 +6,7 @@ const datasets = {
   years: { table: 'academic_years', search: 'label', fields: ['label', 'starts_on', 'ends_on', 'id'] },
   classes: { table: 'classes', search: 'name', fields: ['name', 'id'] },
   sections: { table: 'sections', search: 'name', fields: ['name', 'class_id', 'academic_year_id', 'id'] },
-  assignments: { table: 'teacher_assignments', search: 'subject_code', fields: ['subject_code', 'teacher_profile_id', 'section_id', 'valid_from', 'valid_until'] },
+  assignments: { table: 'teacher_assignments', search: 'subject_code', fields: ['subject_code', 'teacher_profile_id', 'section_id', 'valid_from', 'valid_until', 'id'] },
 } as const;
 export type AcademicList = keyof typeof datasets;
 export type AcademicPage = { kind: 'denied' | 'error' | 'invalid' } |
@@ -16,6 +16,22 @@ async function academicAccess() {
   const access = await getStaffAccess('admin');
   if (!access?.context.schoolId || !evaluatePermission(access.context, 'academics.manage', Date.now()).allowed) return null;
   return access.context.schoolId;
+}
+
+export async function readAssignmentStaffOptions() {
+  const access = await getStaffAccess('admin');
+  const school = access?.context.schoolId;
+  if (!access || !school || !evaluatePermission(access.context, 'academics.manage', Date.now()).allowed ||
+      !evaluatePermission(access.context, 'staff.read', Date.now()).allowed) return [];
+  try {
+    const { data, error } = await (await staffClient()).from('staff_profiles')
+      .select('profile_id,school_id,display_name,employee_code').eq('school_id', school).eq('is_active', true)
+      .order('display_name').order('profile_id').limit(100);
+    if (error) return [];
+    return (data ?? []).filter(row => row.school_id === school).map(row => ({
+      id: row.profile_id, label: [row.display_name, row.employee_code].filter(Boolean).join(' · '),
+    }));
+  } catch { return []; }
 }
 
 export async function readAcademicPage(kind: unknown, form = new FormData()): Promise<AcademicPage> {

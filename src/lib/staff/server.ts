@@ -1,9 +1,11 @@
 import 'server-only';
+import { cache } from 'react';
 import { createServerSupabaseClient } from '../supabase/server';
 import { getSupabasePublicConfiguration } from '../supabase/config';
 import { evaluateDashboardAccess } from '../auth/authorization';
 import { isStaffRole, isStaffUuid, resolveStaffAuthorization } from './contracts';
 import type { StaffRole, StaffResolution, StaffSchoolSnapshot, VerifiedStaffProvider } from './contracts';
+import { accountantExportAuthentication } from './accountant-export-mfa';
 
 import { staffRequestsEnabled } from './request-policy';
 export { staffRequestsEnabled };
@@ -13,7 +15,9 @@ export async function staffClient(writable = false) {
 }
 type StaffClient = Awaited<ReturnType<typeof staffClient>>;
 
-async function verifiedProvider(client: StaffClient): Promise<(VerifiedStaffProvider & { readonly verifiedTotp: boolean }) | null> {
+type ProviderEvidence = VerifiedStaffProvider & { readonly verifiedTotp: boolean; readonly accountantExportReauthAt: number | null };
+
+async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence | null> {
   const config = getSupabasePublicConfiguration();
   if (!config.configured) return null;
   const { data, error } = await client.auth.getClaims();
@@ -55,9 +59,11 @@ async function verifiedProvider(client: StaffClient): Promise<(VerifiedStaffProv
   const verifiedTotp = user.data.user.factors?.some(factor => factor.factor_type === 'totp' && factor.status === 'verified') === true &&
     claims.aal === 'aal2' && hasTotpAmr;
   const authTimeMs = Math.min(passwordTimestamp * 1000, now);
+  const accountantEvidence = accountantExportAuthentication(amr, now);
   // SDK verification, Auth identity and live server-side session are required before this evidence exists.
   return { profileId: user.data.user.id, sessionId: claims.session_id, expiresAt: claims.exp * 1000,
-    authenticatedAt: authTimeMs, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp } as VerifiedStaffProvider & { verifiedTotp: boolean };
+    authenticatedAt: authTimeMs, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp,
+    accountantExportReauthAt: verifiedTotp && accountantEvidence.freshMfa ? accountantEvidence.passwordAt : null } as ProviderEvidence;
 }
 
 export type StaffSchoolChoice = { schoolId: string; schoolName: string; role: StaffRole };
@@ -105,7 +111,8 @@ export async function loadStaffResolution(client: StaffClient, requestedRole?: S
     // These are protected self-scope DB rows, not form input or user_metadata.
     // Super Admin permanently removed; privilege is null in School Admin architecture.
     const snapshot: StaffSchoolSnapshot = { profile: p.data, memberships: memberships.data, privilege: null, context: context.data };
-    const resolution = resolveStaffAuthorization(provider, snapshot, role, Date.now());
+    const resolution = resolveStaffAuthorization(role === 'accountant' ?
+      { ...provider, reauthenticatedAt: provider.accountantExportReauthAt } : provider, snapshot, role, Date.now());
     if (role === 'admin' && !provider.verifiedTotp &&
       (resolution.kind === 'authorized' || resolution.kind === 'context_required')) return { kind: 'mfa_required' };
     if (resolution.kind !== 'authorized') return resolution;
@@ -124,3 +131,7 @@ export async function getStaffAccess(target?: StaffRole): Promise<Extract<StaffR
     return result;
   } catch { return null; }
 }
+
+// Share an authorization snapshot only within one Accountant server render.
+// Server Actions continue to load fresh evidence through getStaffAccess.
+export const getAccountantRenderAccess = cache(() => getStaffAccess('accountant'));

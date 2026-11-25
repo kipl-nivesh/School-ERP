@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { randomUUID } from 'node:crypto';
+import { LiveManagementForm } from './live-management-form';
 import { Suspense, type ReactNode } from 'react';
 import { ArrowUpRight, BarChart3, BookOpen, CalendarDays, ClipboardList, GraduationCap, LayoutDashboard, ListChecks, LogOut, Megaphone, Menu, Settings, ShieldCheck, Users, Wallet } from 'lucide-react';
 import { logoutStaff } from '@/app/login/staff/actions';
@@ -9,8 +11,9 @@ import { readStudentDirectory } from '@/lib/services/student-directory';
 import { StudentDirectory } from './student-directory';
 import { readStaffDirectory } from '@/lib/services/staff-directory';
 import { StaffDirectory } from './staff-directory';
+import { StaffExpenseDrafts } from './staff-expense-drafts';
 import { AcademicDirectory } from './academic-management';
-import { readAcademicOptions, readAcademicPage } from '@/lib/services/academic-directory';
+import { readAcademicOptions, readAcademicPage, readAssignmentStaffOptions } from '@/lib/services/academic-directory';
 import { AttendanceManagement } from './attendance-management';
 import { readAttendance, readAttendancePlacements } from '@/lib/services/attendance-workspace';
 import { TimetableManagement } from './timetable-management';
@@ -98,8 +101,15 @@ async function AdmissionEnrollments() {
 
 async function AcademicManagement() {
   const kinds = ['years', 'classes', 'sections', 'assignments'] as const;
-  const [options, ...pages] = await Promise.all([readAcademicOptions(), ...kinds.map(kind => readAcademicPage(kind))]);
-  return <>{kinds.map((kind, index) => <AcademicDirectory key={kind} kind={kind} initial={pages[index]} options={options} />)}</>;
+  const [options, staff, ...pages] = await Promise.all([
+    readAcademicOptions(), readAssignmentStaffOptions(), ...kinds.map(kind => readAcademicPage(kind)),
+  ]);
+  return <>
+    {(['class', 'section', 'assignment'] as const).map(kind => (
+      <LiveManagementForm key={kind} kind={kind} requestId={randomUUID()} recordId={randomUUID()} options={options} staff={staff} />
+    ))}
+    {kinds.map((kind, index) => <AcademicDirectory key={kind} kind={kind} initial={pages[index]} options={options} staff={staff} />)}
+  </>;
 }
 
 async function LiveAttendance({ canRead, canRoster, canWrite }: { canRead: boolean; canRoster: boolean; canWrite: boolean }) {
@@ -168,9 +178,10 @@ export function AdminDashboardView({ data }: { data: Awaited<ReturnType<typeof r
     examinations: data.canReadMarks && <Suspense fallback={<p role="status">Loading exams…</p>}>
       <LiveExams canReadStudents={data.canReadStudents} />
     </Suspense>,
-    fees: (data.canReadFees || data.canReadReceipts) && (
+    fees: (data.canReadFees || data.canReadReceipts || data.canReadExpenses) && (
       <Suspense fallback={<p role="status">Loading financial workspace…</p>}>
-        <LiveFees canReadStudents={data.canReadStudents} canCollect={false} />
+        {(data.canReadFees || data.canReadReceipts) && <LiveFees canReadStudents={data.canReadStudents} canCollect={false} />}
+        {data.canReadExpenses && <StaffExpenseDrafts role="admin" />}
       </Suspense>
     ),
     announcements: data.canReadAnnouncements && (
