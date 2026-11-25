@@ -3,12 +3,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { staffRequestsEnabled } from './lib/staff/request-policy';
 import { getSupabasePublicConfiguration } from './lib/supabase/config';
 
-/** Cookie refresh only for separate staff routes. The server DAL independently verifies authorization. */
+/** Cookie refresh for staff and Student routes. The server DAL independently verifies authorization. */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   response.headers.set('Cache-Control', 'private, no-store');
   response.headers.set('Referrer-Policy', 'no-referrer');
-  if (!staffRequestsEnabled()) return response;
+  if (!request.nextUrl.pathname.startsWith('/student/') && !staffRequestsEnabled()) return response;
   const configuration = getSupabasePublicConfiguration();
   if (!configuration.configured) return response;
   const client = createServerClient(configuration.url, configuration.publishableKey, {
@@ -27,4 +27,4 @@ export async function proxy(request: NextRequest) {
   try { await client.auth.getClaims(); } catch { /* No authority granted; page/DAL fails closed. */ }
   return response;
 }
-export const config = { matcher: ['/staff/:path*', '/login/staff/:path*', '/invite'] };
+export const config = { matcher: ['/staff/:path*', '/login/staff/:path*', '/invite', '/student/:path*'] };

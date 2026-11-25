@@ -15,7 +15,7 @@ export async function staffClient(writable = false) {
 }
 type StaffClient = Awaited<ReturnType<typeof staffClient>>;
 
-type ProviderEvidence = VerifiedStaffProvider & { readonly verifiedTotp: boolean; readonly accountantExportReauthAt: number | null };
+type ProviderEvidence = VerifiedStaffProvider & { readonly verifiedTotp: boolean; readonly freshPasswordTotpAt: number | null };
 
 async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence | null> {
   const config = getSupabasePublicConfiguration();
@@ -63,7 +63,7 @@ async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence |
   // SDK verification, Auth identity and live server-side session are required before this evidence exists.
   return { profileId: user.data.user.id, sessionId: claims.session_id, expiresAt: claims.exp * 1000,
     authenticatedAt: authTimeMs, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp,
-    accountantExportReauthAt: verifiedTotp && accountantEvidence.freshMfa ? accountantEvidence.passwordAt : null } as ProviderEvidence;
+    freshPasswordTotpAt: verifiedTotp && accountantEvidence.freshMfa ? accountantEvidence.passwordAt : null } as ProviderEvidence;
 }
 
 export type StaffSchoolChoice = { schoolId: string; schoolName: string; role: StaffRole };
@@ -86,7 +86,7 @@ export async function listStaffSchoolChoices(client: StaffClient): Promise<Staff
   } catch { return []; }
 }
 
-export async function loadStaffResolution(client: StaffClient, requestedRole?: StaffRole): Promise<StaffResolution> {
+export async function loadStaffResolution(client: StaffClient, requestedRole?: StaffRole, studentAdministration = false): Promise<StaffResolution> {
   try {
     const provider = await verifiedProvider(client);
     if (!provider) return { kind: 'denied' };
@@ -111,8 +111,9 @@ export async function loadStaffResolution(client: StaffClient, requestedRole?: S
     // These are protected self-scope DB rows, not form input or user_metadata.
     // Super Admin permanently removed; privilege is null in School Admin architecture.
     const snapshot: StaffSchoolSnapshot = { profile: p.data, memberships: memberships.data, privilege: null, context: context.data };
-    const resolution = resolveStaffAuthorization(role === 'accountant' ?
-      { ...provider, reauthenticatedAt: provider.accountantExportReauthAt } : provider, snapshot, role, Date.now());
+    const useFreshEvidence = role === 'accountant' || (role === 'admin' && studentAdministration);
+    const resolution = resolveStaffAuthorization(useFreshEvidence
+      ? { ...provider, reauthenticatedAt: provider.freshPasswordTotpAt } : provider, snapshot, role, Date.now());
     if (role === 'admin' && !provider.verifiedTotp &&
       (resolution.kind === 'authorized' || resolution.kind === 'context_required')) return { kind: 'mfa_required' };
     if (resolution.kind !== 'authorized') return resolution;
@@ -130,6 +131,16 @@ export async function getStaffAccess(target?: StaffRole): Promise<Extract<StaffR
     if (result.kind !== 'authorized' || target && !evaluateDashboardAccess(result.context, target, Date.now()).allowed) return null;
     return result;
   } catch { return null; }
+}
+
+/** Only Student administration opts into fresh native Admin credentials here. */
+export async function getStudentAdminAccess(): Promise<Extract<StaffResolution, { kind: 'authorized' }> | null> {
+  try {
+    const result = await loadStaffResolution(await staffClient(), 'admin', true);
+    return result.kind === 'authorized' && evaluateDashboardAccess(result.context, 'admin', Date.now()).allowed ? result : null;
+  } catch {
+    return null;
+  }
 }
 
 // Share an authorization snapshot only within one Accountant server render.

@@ -1,20 +1,21 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
-import { getStaffAccess, staffClient } from '../staff/server';
+import { getStudentAdminAccess, staffClient } from '../staff/server';
 
 export const studentStatuses = ['active', 'inactive', 'withdrawn'] as const;
 export type StudentStatus = typeof studentStatuses[number];
 export type DirectoryFilters = { search: string; status: string; classId: string; sectionId: string; page: number };
 type Section = { id: string; name: string; class_id: string; school_id: string; classroom: { name: string; school_id: string } | null; year: { label: string; school_id: string } | null };
 type Student = {
-  id: string; display_name: string; registration_number: string; enrollment_status: StudentStatus; school_id: string;
+  id: string; display_name: string; registration_number: string; enrollment_status: StudentStatus; school_id: string; profile_id: string | null; portal_access_status: string;
   enrollment: { school_id: string; section: Section | null }[];
 };
-type StudentRow = { id: string; name: string; registration: string; status: StudentStatus; className?: string; sectionName?: string; year?: string };
+type StudentPortalOperation = 'link' | 'activate' | 'initialize' | 'reset' | 'suspend';
+type StudentRow = { id: string; name: string; registration: string; status: StudentStatus; identityLinked?: boolean; portalStatus?: string; className?: string; sectionName?: string; year?: string };
 type SectionOption = { id: string; name: string; classId: string; className: string; year?: string };
 export type DirectoryResult =
   | { kind: 'denied' | 'error' | 'invalid' }
-  | { kind: 'ready'; filters: DirectoryFilters; rows: StudentRow[]; options: SectionOption[]; moreOptions: boolean; hasNext: boolean };
+  | { kind: 'ready'; filters: DirectoryFilters; rows: StudentRow[]; options: SectionOption[]; moreOptions: boolean; hasNext: boolean; portalOperations?: StudentPortalOperation[] };
 
 const pageSize = 25;
 const maxPage = 1000;
@@ -39,7 +40,7 @@ function parseFilters(form: FormData): DirectoryFilters | null {
 }
 
 export async function readStudentDirectory(form: FormData = new FormData(), scope: 'students' | 'admissions' = 'students'): Promise<DirectoryResult> {
-  const access = await getStaffAccess('admin');
+  const access = await getStudentAdminAccess();
   const schoolId = access?.context.schoolId;
   if (!schoolId || !access || !evaluatePermission(access.context, 'students.read', Date.now()).allowed) return { kind: 'denied' };
   if (scope === 'admissions' && !evaluatePermission(access.context, 'admissions.read', Date.now()).allowed) return { kind: 'denied' };
@@ -66,7 +67,7 @@ export async function readStudentDirectory(form: FormData = new FormData(), scop
       '(school_id,section:sections!enrollments_section_year_school_fkey' + match + '(' + optionFields + '))';
     const today = new Date().toISOString().slice(0, 10);
     const start = (filters.page - 1) * pageSize;
-    let query = client.from('students').select('id,display_name,registration_number,enrollment_status,school_id,' + enrollmentFields)
+    let query = client.from('students').select('id,display_name,registration_number,enrollment_status,school_id,profile_id,portal_access_status,' + enrollmentFields)
       .eq('school_id', schoolId)
       .eq('enrollment.school_id', schoolId)
       .lte('enrollment.valid_from', today)
@@ -90,13 +91,18 @@ export async function readStudentDirectory(form: FormData = new FormData(), scop
       const enrollment = student.enrollment.find(entry => entry.school_id === schoolId && entry.section?.school_id === schoolId);
       const section = enrollment?.section;
       return {
-        id: student.id, name: student.display_name, registration: student.registration_number, status: student.enrollment_status,
+        id: student.id, name: student.display_name, registration: student.registration_number, status: student.enrollment_status, identityLinked: !!student.profile_id, portalStatus: student.portal_access_status,
         className: section?.classroom?.school_id === schoolId ? section.classroom.name : undefined,
         sectionName: section?.name,
         year: section?.year?.school_id === schoolId ? section.year.label : undefined,
       };
     });
-    return { kind: 'ready', filters, rows, options, moreOptions: (catalog.data?.length ?? 0) > optionLimit,
+    const portalOperations: StudentPortalOperation[] = [];
+    if (evaluatePermission(access.context, 'security.accounts.create', Date.now()).allowed &&
+        evaluatePermission(access.context, 'admissions.write', Date.now()).allowed) portalOperations.push('link', 'activate', 'initialize');
+    if (evaluatePermission(access.context, 'security.credentials.reset', Date.now()).allowed) portalOperations.push('reset');
+    if (evaluatePermission(access.context, 'security.accounts.suspend', Date.now()).allowed) portalOperations.push('suspend');
+    return { kind: 'ready', filters, rows, options, portalOperations, moreOptions: (catalog.data?.length ?? 0) > optionLimit,
       hasNext: students.length > pageSize && filters.page < maxPage };
   } catch {
     return { kind: 'error' };
