@@ -69,13 +69,13 @@ export async function readAcademicPage(kind: unknown, form = new FormData()): Pr
 
 type PlacementOption = { id: string; label: string };
 export type AcademicOptions = { years: PlacementOption[]; classes: PlacementOption[]; sections: (PlacementOption & { classId: string; yearId: string })[]; partial: boolean };
-export async function readAcademicOptions(scope: 'academics' | 'homework' | 'marks' = 'academics'): Promise<AcademicOptions> {
+export async function readAcademicOptions(scope: 'academics' | 'homework' | 'marks' | 'admissions' = 'academics'): Promise<AcademicOptions> {
   const unavailable: AcademicOptions = { years: [], classes: [], sections: [], partial: true };
   const access = scope !== 'academics' ? await getStaffAccess('admin') : null;
-  const allowed = (permission: 'marks.read' | 'homework.read' | 'homework.write' | 'students.read' | 'academics.manage') =>
+  const allowed = (permission: 'marks.read' | 'homework.read' | 'homework.write' | 'students.read' | 'academics.manage' | 'admissions.write') =>
     !!access && evaluatePermission(access.context, permission, Date.now()).allowed;
   const school = scope === 'academics' ? await academicAccess() :
-    (scope === 'marks' ? allowed('marks.read') : allowed('homework.read') || allowed('homework.write')) &&
+    (scope === 'marks' ? allowed('marks.read') : scope === 'admissions' ? allowed('admissions.write') : allowed('homework.read') || allowed('homework.write')) &&
     (allowed('students.read') || allowed('academics.manage'))
       ? access?.context.schoolId : null;
   if (!school) return unavailable;

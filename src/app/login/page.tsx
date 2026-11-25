@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 import { AuthShell } from '@/components/auth/auth-shell';
 import styles from '@/components/auth/auth-shell.module.css';
+import { studentPortalRequestsEnabled } from '@/lib/student/request-policy';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Sign in · Role selection',
@@ -71,6 +74,7 @@ const PORTAL_OPTIONS = [
 ] as const;
 
 export default function LoginRoleSelectionPage() {
+  const studentEnabled = studentPortalRequestsEnabled();
   return (
     <AuthShell
       tone="admin"
@@ -150,7 +154,7 @@ export default function LoginRoleSelectionPage() {
                       color: item.accent,
                     }}
                   >
-                    {item.badge}
+                    {item.role === 'student' && studentEnabled ? '6-digit PIN' : item.badge}
                   </span>
                 </span>
                 <span
@@ -162,7 +166,7 @@ export default function LoginRoleSelectionPage() {
                     color: '#64748b',
                   }}
                 >
-                  {item.description}
+                  {item.role === 'student' && studentEnabled ? 'Timetable, homework, results and receipts' : item.description}
                 </span>
               </span>
               <ArrowRight size={15} color="#94a3b8" aria-hidden="true" />

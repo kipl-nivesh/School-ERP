@@ -1,26 +1,28 @@
 import 'server-only';
 import { resolveStudentBinding, selectCurrentStudentEnrollment } from './identity-contracts';
 import type { EnrollmentCandidate, StudentBinding, StudentSessionEvidence } from './identity-contracts';
-import type { StudentDashboardData, StudentDashboardResult, StudentPanel, StudentProfile } from './dashboard-model';
+import type { StudentAttendance, StudentDashboardData, StudentDashboardResult, StudentPanel, StudentProfile } from './dashboard-model';
 import { validAttendanceDate } from '../services/attendance-fields';
 
 type School = { school_id: string };
 type Own = School & { student_id: string };
 type Section = School & { section_id: string };
-type Exam = Section & { id: string; exam_name: string; subject_code: string; exam_date: string; is_published: boolean; max_marks: number };
+type Exam = Section & { id: string; exam_name: string; subject_code: string; exam_date: string; is_published: boolean; max_marks: number; passing_marks?: number };
 export type StudentDashboardProjection = {
   databaseDate: string;
   enrollments: EnrollmentCandidate[];
   placement: (Section & { class_name: string; section_name: string; academic_year_id: string; academic_year: string }) | null;
-  attendance: (Own & { present: number; absent: number; late: number; excused: number }) | null;
+  attendance: (Own & { present: number; absent: number; late: number; excused: number; history?: StudentAttendance['history'] }) | null;
   timetable: (Section & { day_of_week: string; start_time: string; end_time: string; subject_code: string; room_number: string })[] | null;
-  homework: (Section & { title: string; subject_code: string; due_date: string; status: string })[] | null;
+  homework: (Section & { title: string; subject_code: string; due_date: string; status: string; description?: string })[] | null;
   /** A separately authorized schedule projection. The marks publication flag is not a schedule visibility field. */
-  examSchedule: Omit<Exam, 'is_published' | 'max_marks'>[] | null;
+  examSchedule: (Omit<Exam, 'is_published' | 'max_marks' | 'passing_marks'> & {
+    starts_at?: string; ends_at?: string; venue?: string;
+  })[] | null;
   results: (Own & { exam: Exam; marks_obtained: number | null })[] | null;
   announcements: (School & { title: string; content: string; target_audience: string; published_at: string; expires_at: string | null })[] | null;
   invoices: (Own & { invoice_number: string; title: string; due_date: string; amount_paise: number; paid_paise: number })[] | null;
-  receipts: (Own & { receipt_number: string; payment_date: string; amount_paise: number; status: string })[] | null;
+  receipts: (Own & { id?: string; receipt_number: string; payment_date: string; amount_paise: number; status: string })[] | null;
 };
 type VerifiedStudentRequest = { role: 'student'; session: StudentSessionEvidence; bindings: StudentBinding[]; currentCredentialVersion: number };
 type StudentDashboardRepository = {
@@ -40,11 +42,6 @@ function scopedRows<T>(rows: T[] | null, valid: (row: T) => boolean): T[] | null
 
 function projectRows<T, R>(rows: T[] | null, valid: (row: T) => boolean, project: (row: T) => R): StudentPanel<R[]> {
   return rows && rows.every(valid) ? ready(rows.map(project)) : unavailable;
-}
-
-/** The production entry is deliberately unwired while native Student Auth and RLS remain unverified. */
-export async function readStudentDashboard(): Promise<StudentDashboardResult> {
-  return unavailable;
 }
 
 /** Server-only adapter seam. The repository must be supplied by trusted server composition. */
@@ -75,6 +72,7 @@ export function projectStudentDashboard(
   source: StudentDashboardProjection,
   now: number,
   audience: 'students' | 'parents',
+  weekly = false,
 ): StudentDashboardData {
   const enrollment = selectCurrentStudentEnrollment(scope, source.enrollments, source.databaseDate);
   const school = (row: School) => row.school_id === scope.schoolId;
@@ -87,35 +85,46 @@ export function projectStudentDashboard(
       : { kind: 'unavailable' };
   const academic = (row: Section) => placementView.kind === 'current' && section(row);
   const day = new Date(source.databaseDate + 'T00:00:00Z').getUTCDay();
-  const weekday = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day];
+  const weekdayOrder = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const weekday = weekdayOrder[(day + 6) % 7];
 
   const listedExams = scopedRows(source.examSchedule, academic)?.filter(row => row.exam_date >= source.databaseDate) ?? null;
-  const examView = (row: Pick<Exam, 'exam_name' | 'subject_code' | 'exam_date'>) =>
-    ({ title: row.exam_name, subject: row.subject_code, date: row.exam_date });
-  const publishedResults = scopedRows(source.results, row => own(row) && academic(row.exam))?.filter(row => row.exam.is_published === true && row.marks_obtained !== null) ?? null;
+  const examView = (row: NonNullable<StudentDashboardProjection['examSchedule']>[number]) =>
+    ({ title: row.exam_name, subject: row.subject_code, date: row.exam_date,
+      start: row.starts_at, end: row.ends_at, venue: row.venue });
+  // Student results have their own enrollment-at-exam-date authorization in the database.
+  const resultScope = (row: NonNullable<StudentDashboardProjection['results']>[number]) =>
+    own(row) && (audience === 'students' ? school(row.exam) : academic(row.exam));
+  const publishedResults = scopedRows(source.results, resultScope)?.filter(row =>
+    row.exam.is_published === true && row.marks_obtained !== null) ?? null;
   const attendance = source.attendance;
   const invoices = projectRows(source.invoices, row => own(row) && isCount(row.amount_paise) && isCount(row.paid_paise) &&
     row.paid_paise <= row.amount_paise, row => ({
     number: row.invoice_number, title: row.title, due: row.due_date, amountPaise: row.amount_paise, paidPaise: row.paid_paise,
   }));
   const receipts = projectRows(scopedRows(source.receipts, own)?.filter(row => row.status === 'settled') ?? null,
-    row => own(row) && isCount(row.amount_paise), row => ({ number: row.receipt_number, date: row.payment_date, amountPaise: row.amount_paise }));
+    row => own(row) && isCount(row.amount_paise), row => ({ id: row.id, number: row.receipt_number, date: row.payment_date, amountPaise: row.amount_paise }));
+  const paymentHistory = projectRows(scopedRows(source.receipts, own)?.filter(row =>
+    row.status === 'settled' || row.status === 'refunded') ?? null, row => isCount(row.amount_paise),
+    row => ({ number: row.receipt_number, date: row.payment_date, amountPaise: row.amount_paise, status: row.status }));
   return {
     profile, databaseDate: source.databaseDate, placement: placementView,
     attendance: attendance && own(attendance) && [attendance.present, attendance.absent, attendance.late, attendance.excused].every(isCount)
-      ? ready({ present: attendance.present, absent: attendance.absent, late: attendance.late, excused: attendance.excused }) : unavailable,
-    timetable: placementView.kind === 'current' ? projectRows(scopedRows(source.timetable, academic)?.filter(row => row.day_of_week === weekday)
-      .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? null, academic,
-    row => ({ subject: row.subject_code, start: row.start_time, end: row.end_time, room: row.room_number })) : unavailable,
+      ? ready({ present: attendance.present, absent: attendance.absent, late: attendance.late, excused: attendance.excused, history: attendance.history }) : unavailable,
+    timetable: placementView.kind === 'current' ? projectRows(scopedRows(source.timetable, academic)?.filter(row => weekly || row.day_of_week === weekday)
+      .sort((a, b) => weekdayOrder.indexOf(a.day_of_week) - weekdayOrder.indexOf(b.day_of_week) || a.start_time.localeCompare(b.start_time)) ?? null, academic,
+    row => ({ day: row.day_of_week, subject: row.subject_code, start: row.start_time, end: row.end_time, room: row.room_number })) : unavailable,
     homework: placementView.kind === 'current' ? projectRows(scopedRows(source.homework, academic)?.filter(row => row.status === 'active') ?? null, academic,
-      row => ({ title: row.title, subject: row.subject_code, due: row.due_date })) : unavailable,
+      row => ({ title: row.title, subject: row.subject_code, due: row.due_date, description: row.description })) : unavailable,
     exams: placementView.kind === 'current' ? projectRows(listedExams, academic, examView) : unavailable,
-    results: placementView.kind === 'current' ? projectRows(publishedResults, row => own(row) && academic(row.exam) &&
+    results: audience === 'students' || placementView.kind === 'current' ? projectRows(publishedResults, row => resultScope(row) &&
       typeof row.marks_obtained === 'number' && Number.isFinite(row.marks_obtained) && row.marks_obtained >= 0 &&
-      row.marks_obtained <= row.exam.max_marks, row => ({ ...examView(row.exam), score: row.marks_obtained!, maximum: row.exam.max_marks })) : unavailable,
+      row.marks_obtained <= row.exam.max_marks, row => ({ ...examView(row.exam), score: row.marks_obtained!, maximum: row.exam.max_marks,
+        passed: typeof row.exam.passing_marks === 'number' ? row.marks_obtained! >= row.exam.passing_marks : undefined })) : unavailable,
     announcements: projectRows(scopedRows(source.announcements, school)?.filter(row => ['all', audience].includes(row.target_audience) &&
       Date.parse(row.published_at) <= now && (!row.expires_at || Date.parse(row.expires_at) > now)) ?? null, school,
       row => ({ title: row.title, content: row.content })),
-    fees: invoices.kind === 'ready' && receipts.kind === 'ready' ? ready({ invoices: invoices.data, receipts: receipts.data }) : unavailable,
+    fees: invoices.kind === 'ready' && receipts.kind === 'ready' ? ready({ invoices: invoices.data, receipts: receipts.data,
+      ...(weekly && paymentHistory.kind === 'ready' ? { paymentHistory: paymentHistory.data } : {}) }) : unavailable,
   };
 }

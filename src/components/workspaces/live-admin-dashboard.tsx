@@ -19,6 +19,9 @@ import { readAttendance, readAttendancePlacements } from '@/lib/services/attenda
 import { TimetableManagement } from './timetable-management';
 import { readTimetable, readTimetableOptions } from '@/lib/services/timetable-workspace';
 import admissionStyles from './admissions.module.css';
+import { LiveAdmissionForm } from './live-record-forms';
+import { StudentPublicationControls } from './student-publication-controls';
+import { readAdminStudentPublications } from '@/lib/student/publications';
 import { FeeManagement } from './fee-management';
 import { readFinanceOptions, readFinanceWorkspace } from '@/lib/services/fee-workspace';
 import { AnnouncementManagement } from './announcement-management';
@@ -47,6 +50,7 @@ const groups = [
     { id: 'timetable', label: 'Timetable', icon: CalendarDays, tables: [] },
     { id: 'homework', label: 'Homework', icon: BookOpen, tables: [] },
     { id: 'examinations', label: 'Exams & Results', icon: ClipboardList, tables: [] },
+    { id: 'student-publications', label: 'Student Publications', icon: BookOpen, tables: [] },
   ] },
   { title: 'Finance', sections: [
     { id: 'fees', label: 'Fees and Payments', icon: Wallet, tables: ['Expenses'] },
@@ -91,6 +95,11 @@ async function LiveStaffDirectory() {
   return <StaffDirectory initial={await readStaffDirectory()} />;
 }
 
+async function StudentAdmissionRegistration({ requestId }: { requestId: string }) {
+  const options = await readAcademicOptions('admissions');
+  return <LiveAdmissionForm initialRequestId={requestId} options={options} />;
+}
+
 async function AdmissionEnrollments() {
   return <section className={admissionStyles.records} aria-labelledby="admission-enrollments-heading">
     <h2 id="admission-enrollments-heading">Enrollment records</h2>
@@ -127,6 +136,17 @@ async function LiveHomework({ canRead, identifiers }: { canRead: boolean; identi
   return <HomeworkManagement initial={initial} options={options} identifiers={identifiers} />;
 }
 
+async function StudentPublications() {
+  const data = await readAdminStudentPublications();
+  if (!data) return null;
+  return <div className="space-y-6">
+    {data.exams === null && <p role="status">Exam publications are unavailable.</p>}
+    {data.exams && <StudentPublicationControls kind="exam" records={data.exams} sections={data.sections} classes={data.classes} />}
+    {data.materials === null && <p role="status">Material publications are unavailable.</p>}
+    {data.materials && <StudentPublicationControls kind="material" records={data.materials} sections={data.sections} classes={data.classes} />}
+  </div>;
+}
+
 async function LiveExams({ canReadStudents }: { canReadStudents: boolean }) {
   const [initial, options] = await Promise.all([readExams(), readAcademicOptions('marks')]);
   return <ExamManagement initial={initial} options={options} studentSearch={canReadStudents} />;
@@ -160,9 +180,14 @@ export function AdminDashboardView({ data }: { data: Awaited<ReturnType<typeof r
     'staff-records': data.canReadStaff && <Suspense fallback={<p role="status">Loading staff directory…</p>}>
       <LiveStaffDirectory />
     </Suspense>,
-    admissions: data.canReadAdmissionEnrollments && <Suspense fallback={<p role="status">Loading enrollment records…</p>}>
-      <AdmissionEnrollments />
-    </Suspense>,
+    admissions: (data.canReadAdmissionEnrollments || data.canAdmit) && <>
+      {data.canAdmit && <Suspense fallback={<p role="status">Loading registration form…</p>}>
+        <StudentAdmissionRegistration requestId={data.admissionRequestId} />
+      </Suspense>}
+      {data.canReadAdmissionEnrollments && <Suspense fallback={<p role="status">Loading enrollment records…</p>}>
+        <AdmissionEnrollments />
+      </Suspense>}
+    </>,
     classes: data.canManageAcademics && <Suspense fallback={<p role="status">Loading academic records…</p>}>
       <AcademicManagement />
     </Suspense>,
@@ -174,6 +199,9 @@ export function AdminDashboardView({ data }: { data: Awaited<ReturnType<typeof r
     </Suspense>,
     homework: data.canReadHomework && <Suspense fallback={<p role="status">Loading homework…</p>}>
       <LiveHomework canRead={data.canReadHomework} />
+    </Suspense>,
+    'student-publications': data.canManageStudentPublications && <Suspense fallback={<p role="status">Loading Student publications…</p>}>
+      <StudentPublications />
     </Suspense>,
     examinations: data.canReadMarks && <Suspense fallback={<p role="status">Loading exams…</p>}>
       <LiveExams canReadStudents={data.canReadStudents} />

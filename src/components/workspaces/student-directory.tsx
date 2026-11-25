@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Search } from 'lucide-react';
 import { filterAdmissionEnrollments, filterStudentDirectory } from '@/app/staff/student-directory-actions';
 import type { DirectoryResult } from '@/lib/services/student-directory';
 import styles from './student-directory.module.css';
+import { StudentPortalControls } from './student-portal-controls';
 
 const statusLabels = { active: 'Active', inactive: 'Inactive', withdrawn: 'Withdrawn' };
 
@@ -95,6 +96,13 @@ export function StudentDirectory({ initial, admissions = false }: { initial: Dir
           <div><dt>Section</dt><dd>{detail.sectionName ?? 'Unavailable'}</dd></div>
           <div><dt>Academic year</dt><dd>{detail.year ?? 'Unavailable'}</dd></div>
         </dl>
+        {!admissions && detail.portalStatus && <p>Portal status: {detail.portalStatus.replaceAll('_', ' ')}</p>}
+        {!admissions && result.portalOperations && <StudentPortalControls key={detail.id + detail.portalStatus + detail.identityLinked}
+          student={detail.id} permissions={result.portalOperations.filter(operation =>
+            operation === 'link' ? detail.status === 'active' && !detail.identityLinked && detail.portalStatus === 'pending_activation' :
+            operation === 'activate' ? detail.status === 'active' && detail.identityLinked &&
+              (detail.portalStatus === 'pending_activation' || detail.portalStatus === 'suspended') :
+            detail.identityLinked && detail.portalStatus === 'active' && (operation === 'suspend' || detail.status === 'active'))} />}
       </section>}
       <form action={action} className={styles.pagination} aria-label="Student directory pagination">
         <input type="hidden" name="search" value={result.filters.search} />

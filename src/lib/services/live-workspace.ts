@@ -1,4 +1,5 @@
 import 'server-only';
+import { randomUUID } from 'node:crypto';
 import { evaluatePermission } from '../auth/authorization';
 import { getAccountantRenderAccess, getStaffAccess, staffClient } from '../staff/server';
 import type { StaffRole } from '../staff/contracts';
@@ -52,15 +53,18 @@ export async function readLiveWorkspace(role: StaffRole, expectedSchool?: string
   const admin = access.role === 'admin';
   return {
     records, schoolName: access.schoolName,
-    admissionRequestId: '', homeworkRequestId: '',
+    admissionRequestId: admin && allowed('admissions.write') ? randomUUID() : '', homeworkRequestId: '',
     managementIds: [] as { kind: string; requestId: string; recordId: string }[],
     canManageAcademics: admin && allowed('academics.manage'),
-    canAttend: false, canAssignHomework: false, canAdmit: false, canCollect: false,
+    canAttend: false, canAssignHomework: false, canAdmit: admin && allowed('admissions.write'), canCollect: false,
     canReadStudents: admin && allowed('students.read'),
     canReadStaff: admin && allowed('staff.read'),
     canReadAttendance: admin && allowed('attendance.read'),
     canReadHomework: admin && allowed('homework.read'),
     canReadMarks: admin && allowed('marks.read'),
+    canManageStudentPublications: admin && (access.context.assignments.some(assignment =>
+      assignment.id === access.context.activeRole.assignmentId && assignment.permissions.includes('marks.publish')) ||
+      (allowed('academics.manage') && allowed('documents.read'))),
     canReadTimetable: admin && (allowed('academics.manage') || allowed('students.read')),
     canReadAdmissionEnrollments: admin && allowed('students.read') && allowed('admissions.read'),
     canReadExpenses: admin && allowed('expenses.read'),

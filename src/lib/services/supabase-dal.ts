@@ -247,7 +247,6 @@ export class SchoolAdminSupabaseService {
 
   static async createStudentAdmission(context: PolicyContext, input: NewStudentAdmissionInput): Promise<OperationResult<StudentRecord>> {
     if (!checkAuth(context, 'admissions.write')) return { success: false, error: 'Admission not authorized', code: 'PERMISSION_DENIED' };
-    if (!staffWorkspaceWritesEnabled()) return liveWriteUnavailable;
     try {
       const client = await getAuthenticatedClient(context, true);
       if (!input.requestId || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.requestId)) {

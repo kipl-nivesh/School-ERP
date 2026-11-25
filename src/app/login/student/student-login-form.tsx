@@ -71,8 +71,8 @@ export function StudentLoginForm({ liveAuthEnabled = true }: { liveAuthEnabled?:
               name="schoolCode"
               type="text"
               autoComplete="organization"
-              maxLength={30}
-              placeholder="e.g. BC-2026"
+              maxLength={20}
+              placeholder="Your school’s code"
               icon={<Building2 size={15} />}
               required
               disabled={!liveAuthEnabled || pending}
@@ -85,8 +85,8 @@ export function StudentLoginForm({ liveAuthEnabled = true }: { liveAuthEnabled?:
               name="studentId"
               type="text"
               autoComplete="username"
-              maxLength={64}
-              placeholder="e.g. STU-2026-0001"
+              maxLength={80}
+              placeholder="Your admission or registration number"
               icon={<Hash size={15} />}
               required
               disabled={!liveAuthEnabled || pending}

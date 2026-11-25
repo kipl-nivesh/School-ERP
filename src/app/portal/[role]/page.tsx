@@ -4,6 +4,7 @@ import { isStaffRole, type StaffRole } from '@/lib/staff/contracts';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
 import { staffRequestsEnabled } from '@/lib/staff/request-policy';
+import { getStudentPortalAccess } from '@/lib/student/live-dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,31 +39,8 @@ export default async function PortalWorkspace({ params }: { params: Promise<{ ro
     redirect(`/login/staff?role=${role}`);
   }
 
-  // 2. Student Portal
   if (role === 'student') {
-    try {
-      const config = getSupabasePublicConfiguration();
-      if (config.configured) {
-        const supabase = await createServerSupabaseClient({ cookieWrites: 'read-only' });
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          redirect('/student/dashboard');
-        }
-      }
-    } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === 'object' &&
-        'digest' in err &&
-        typeof (err as { digest: unknown }).digest === 'string' &&
-        (err as { digest: string }).digest.startsWith('NEXT_REDIRECT')
-      ) {
-        throw err;
-      }
-    }
-    redirect('/login/student');
+    redirect(await getStudentPortalAccess() ? '/student/dashboard' : '/login/student');
   }
 
   // 3. Parent Portal
