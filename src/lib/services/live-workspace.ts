@@ -1,6 +1,6 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
-import { getStaffAccess, staffClient } from '../staff/server';
+import { getAccountantRenderAccess, getStaffAccess, staffClient } from '../staff/server';
 import type { StaffRole } from '../staff/contracts';
 import type { PermissionId } from '../auth/permissions';
 
@@ -24,7 +24,7 @@ const modules: readonly { title: string; table: string; columns: string; permiss
 
 /** Request-local authorization; no context or table names are accepted from the browser. */
 export async function readLiveWorkspace(role: StaffRole, expectedSchool?: string) {
-  const access = await getStaffAccess(role);
+  const access = await (role === 'accountant' && expectedSchool ? getAccountantRenderAccess() : getStaffAccess(role));
   const schoolId = access?.context.schoolId;
   if (!access || access.role !== role || !schoolId || (expectedSchool !== undefined && expectedSchool !== schoolId)) throw new Error('Authorized school session required');
   const client = await staffClient();
@@ -34,8 +34,11 @@ export async function readLiveWorkspace(role: StaffRole, expectedSchool?: string
   const records = await Promise.all(permitted.map(async module => {
     const columns = module.columns.split(',');
     try {
-      const { data, error } = await client.from(module.table).select(module.columns + ',school_id')
-        .eq('school_id', schoolId).order(columns[0]).limit(50);
+      const query = client.from(module.table).select(module.columns + ',school_id').eq('school_id', schoolId);
+      // Recent audit records can use the existing (school_id, occurred_at) index.
+      const ordered = role === 'accountant' && module.table === 'audit_events'
+        ? query.order('occurred_at', { ascending: false }).order('id') : query.order(columns[0]);
+      const { data, error } = await ordered.limit(50);
       if (error) throw new Error('Read unavailable');
       const rows = (data ?? []) as unknown as Record<string, unknown>[];
       if (rows.some(row => row.school_id !== schoolId)) throw new Error('Read unavailable');
@@ -60,6 +63,7 @@ export async function readLiveWorkspace(role: StaffRole, expectedSchool?: string
     canReadMarks: admin && allowed('marks.read'),
     canReadTimetable: admin && (allowed('academics.manage') || allowed('students.read')),
     canReadAdmissionEnrollments: admin && allowed('students.read') && allowed('admissions.read'),
+    canReadExpenses: admin && allowed('expenses.read'),
     canReadFees: admin && allowed('fees.read'),
     canReadReceipts: admin && allowed('receipts.read'),
     canReadAnnouncements: admin && allowed('announcements.read'),

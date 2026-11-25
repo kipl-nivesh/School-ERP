@@ -2,7 +2,10 @@
 import { useActionState, useState } from 'react';
 import { saveAcademic } from '@/app/staff/academic-actions';
 
-export function LiveAcademicForm({ kind, requestId }: { kind: 'attendance' | 'homework'; requestId: string }) {
+export function LiveAcademicForm({ kind, requestId, roster }: {
+  kind: 'attendance' | 'homework'; requestId: string;
+  roster?: { section: string; students: { id: string; name: string; registration: string }[] };
+}) {
   const [id] = useState(requestId);
   const [state, action, pending] = useActionState(saveAcademic, { ok: false, message: '' });
   const fields = kind === 'attendance'
@@ -13,7 +16,15 @@ export function LiveAcademicForm({ kind, requestId }: { kind: 'attendance' | 'ho
     <h2 className="text-lg font-semibold">{kind === 'attendance' ? 'Record today’s attendance' : 'Assign homework'}</h2>
     <input type="hidden" name="kind" value={kind} /><input type="hidden" name="id" value={id} />
     <div className="grid gap-4 sm:grid-cols-2">
-      {[{ name: 'section', label: 'Section ID', type: 'text' }, ...fields].map(field => <label key={field.name} className="block text-sm font-medium">
+      {roster && kind === 'attendance' && <>
+        <input type="hidden" name="section" value={roster.section} />
+        <label>Student<select name="student" required defaultValue="">
+          <option value="" disabled>Select a student</option>
+          {roster.students.map(student => <option key={student.id} value={student.id}>{student.name} · {student.registration}</option>)}
+        </select></label>
+      </>}
+      {(roster && kind === 'attendance' ? fields.filter(field => field.name !== 'student') :
+        [{ name: 'section', label: 'Section ID', type: 'text' }, ...fields]).map(field => <label key={field.name} className="block text-sm font-medium">
         {field.label}<input {...field} required={field.name !== 'remarks'} maxLength={field.name === 'description' ? 10000 : 200}
           className="mt-1 block w-full rounded-lg border border-slate-300 p-2" />
       </label>)}

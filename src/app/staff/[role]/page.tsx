@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { redirect, notFound } from 'next/navigation';
-import { getStaffAccess } from '@/lib/staff/server';
+import { getAccountantRenderAccess, getStaffAccess } from '@/lib/staff/server';
 import { isStaffRole } from '@/lib/staff/contracts';
 import { LiveAdminDashboard, AdminDashboardLoading } from '@/components/workspaces/live-admin-dashboard';
 import { LiveTeacherDashboard, TeacherDashboardLoading } from '@/components/workspaces/live-teacher-dashboard';
@@ -15,7 +15,7 @@ export default async function StaffRoleWorkspace({ params, searchParams }: {
 }) {
   const { role } = await params;
   if (!isStaffRole(role)) notFound();
-  const access = await getStaffAccess(role);
+  const access = await (role === 'accountant' ? getAccountantRenderAccess() : getStaffAccess(role));
   if (!access || access.role !== role || !access.context.schoolId) redirect('/login/staff');
   if (role === 'admin') return <Suspense fallback={<AdminDashboardLoading />}>
     <LiveAdminDashboard />
@@ -25,6 +25,6 @@ export default async function StaffRoleWorkspace({ params, searchParams }: {
   </Suspense>;
 
   return <Suspense fallback={<p role="status">Loading school finance...</p>}>
-    <LiveAccountantDashboard query={await searchParams} />
+    <LiveAccountantDashboard access={access} query={await searchParams} />
   </Suspense>;
 }

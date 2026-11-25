@@ -25,9 +25,10 @@ import styles from './report-management.module.css';
 
 interface ReportManagementProps {
   initial: ReportPage;
+  financeOnly?: boolean;
 }
 
-export function ReportManagement({ initial }: ReportManagementProps) {
+export function ReportManagement({ initial, financeOnly = false }: ReportManagementProps) {
   const [state, formAction, isPending] = useActionState(filterReports, initial);
   const [, startTransition] = useTransition();
 
@@ -120,13 +121,13 @@ export function ReportManagement({ initial }: ReportManagementProps) {
   return (
     <div className={styles.container}>
       {/* Export Safety Notice */}
-      <div className={styles.noticeBanner} role="status">
+      {!financeOnly && <div className={styles.noticeBanner} role="status">
         <Info size={18} className={styles.noticeIcon} aria-hidden="true" />
         <span>{exportNotice}</span>
-      </div>
+      </div>}
 
       {/* Category Navigation Tabs */}
-      <nav className={styles.tabs} aria-label="Report Categories">
+      {!financeOnly && <nav className={styles.tabs} aria-label="Report Categories">
         <button
           type="button"
           className={`${styles.tabButton} ${category === 'enrollment' ? styles.activeTab : ''}`}
@@ -172,7 +173,7 @@ export function ReportManagement({ initial }: ReportManagementProps) {
           <Building2 size={16} aria-hidden="true" />
           Staff & Operations
         </button>
-      </nav>
+      </nav>}
 
       {/* Overview Metric Cards */}
       {category === 'enrollment' && enrollmentMetrics && (

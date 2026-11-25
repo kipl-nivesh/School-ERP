@@ -2,6 +2,7 @@
 
 import { useActionState, useId, useState } from 'react';
 import { filterAcademicRecords } from '@/app/staff/academic-directory-actions';
+import { updateAcademicLifecycle } from '@/app/staff/management-actions';
 import type { AcademicList, AcademicOptions, AcademicPage } from '@/lib/services/academic-directory';
 import styles from './academic-management.module.css';
 
@@ -12,7 +13,41 @@ const labels = {
   assignments: { title: 'Teaching assignments', search: 'Search subject code', columns: ['Subject code', 'Teacher profile ID', 'Section', 'Valid from', 'Valid until'] },
 } as const;
 
-export function AcademicDirectory({ kind, initial, options }: { kind: AcademicList; initial: AcademicPage; options: AcademicOptions }) {
+type StaffOption = { id: string; label: string };
+
+function AcademicRowEditor({ kind, row, staff }: { kind: Exclude<AcademicList, 'years'>; row: string[]; staff: StaffOption[] }) {
+  const [state, action, pending] = useActionState(updateAcademicLifecycle, { ok: false, message: '' });
+  const [replace, setReplace] = useState(false);
+  const listId = useId();
+  const assignment = kind === 'assignments';
+  return <details>
+    <summary>{assignment ? 'End or reassign' : 'Edit name'}</summary>
+    <form action={action} aria-busy={pending} className={styles.controls}>
+      <input type="hidden" name="id" value={row.at(-1)} />
+      <input type="hidden" name="expected" value={assignment ? row[4] === '—' ? '' : row[4] : row[0]} />
+      <input type="hidden" name="kind" value={assignment ? replace ? 'replace_assignment' : 'end_assignment' :
+        kind === 'classes' ? 'rename_class' : 'rename_section'} />
+      <fieldset disabled={pending || state.ok}>
+        {assignment ? <>
+          <label>Change<select value={replace ? 'replace' : 'end'} onChange={event => setReplace(event.target.value === 'replace')}>
+            <option value="end">End assignment</option><option value="replace">Reassign section and subject</option>
+          </select></label>
+          <label>Effective date<input name="effective" type="date" required /></label>
+          {replace && <label>Replacement Teacher profile<input name="replacement" list={listId} maxLength={36} required />
+            <datalist id={listId}>{staff.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</datalist>
+          </label>}
+          <p>Use a future effective date. Historical attendance, homework and marks are retained.</p>
+        </> : <label>Name<input name="name" maxLength={80} defaultValue={row[0]} required /></label>}
+        <button type="submit">{pending ? 'Saving…' : 'Save change'}</button>
+      </fieldset>
+      {state.message && <p role={state.ok ? 'status' : 'alert'}>{state.message}</p>}
+    </form>
+  </details>;
+}
+
+export function AcademicDirectory({ kind, initial, options, staff = [] }: {
+  kind: AcademicList; initial: AcademicPage; options: AcademicOptions; staff?: StaffOption[];
+}) {
   const [result, action, pending] = useActionState(filterAcademicRecords, initial);
   const [search, setSearch] = useState('');
   const [placement, setPlacement] = useState('');
@@ -47,9 +82,11 @@ export function AcademicDirectory({ kind, initial, options }: { kind: AcademicLi
     {result.kind === 'ready' && <>
       {result.rows.length ? <div className={styles.table} role="region" aria-label={config.title + ' table'} tabIndex={0}>
         <table>
-          <thead><tr>{config.columns.map(column => <th scope="col" key={column}>{column}</th>)}</tr></thead>
-          <tbody>{result.rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((value, index) =>
-            index === 0 ? <th key={index} scope="row">{cell(value, index)}</th> : <td key={index}>{cell(value, index)}</td>)}</tr>)}</tbody>
+          <thead><tr>{config.columns.map(column => <th scope="col" key={column}>{column}</th>)}
+            {kind !== 'years' && <th scope="col">Actions</th>}</tr></thead>
+          <tbody>{result.rows.map(row => <tr key={row.at(-1)}>{row.slice(0, config.columns.length).map((value, index) =>
+            index === 0 ? <th key={index} scope="row">{cell(value, index)}</th> : <td key={index}>{cell(value, index)}</td>)}
+            {kind !== 'years' && <td><AcademicRowEditor kind={kind} row={row} staff={staff} /></td>}</tr>)}</tbody>
         </table>
       </div> : <p role="status" className={styles.notice}>No accessible records match these filters.</p>}
       <form action={action} className={styles.pager} aria-label={config.title + ' pagination'}>

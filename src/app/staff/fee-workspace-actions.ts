@@ -1,9 +1,7 @@
 'use server';
-import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
-
 import { revalidatePath } from 'next/cache';
-import { getStaffAccess } from '@/lib/staff/server';
-import { AccountantSupabaseService } from '@/lib/services/supabase-dal';
+import { getStaffAccess, staffClient } from '@/lib/staff/server';
+import { evaluatePermission } from '@/lib/auth/authorization';
 import type { CollectPaymentInput } from '@/lib/domain/dashboard-contracts';
 import { isRecordId } from '@/lib/services/management-contracts';
 import { readFinanceWorkspace, type FinancePage } from '@/lib/services/fee-workspace';
@@ -28,11 +26,14 @@ export async function recordFeePayment(
   _state: FeePaymentActionState,
   form: FormData
 ): Promise<FeePaymentActionState> {
-  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Fee collection is unavailable during read-only recovery." };
   const access = await getStaffAccess();
-  if (!access || !['admin', 'accountant'].includes(access.role)) {
+  const school = access?.context.schoolId;
+  if (!access || !school || !['admin', 'accountant'].includes(access.role) ||
+      !evaluatePermission(access.context, 'payments.record', Date.now()).allowed) {
     return failed;
   }
+  const expectedSchool = form.get('expectedSchool');
+  if (expectedSchool !== null && expectedSchool !== school) return failed;
 
   const val = (key: string) => {
     const item = form.get(key);
@@ -104,16 +105,23 @@ export async function recordFeePayment(
   };
 
   try {
-    const result = await AccountantSupabaseService.collectPayment(access.context, input);
-    if (!result.success) {
-      return { ok: false, message: result.error || 'Payment could not be recorded.' };
-    }
+    const { data, error } = await (await staffClient(true)).rpc('collect_fee_payment_atomic', {
+      p_school_id: school, p_student_id: input.studentId, p_invoice_id: invoiceId,
+      p_amount_paise: input.amountPaise, p_payment_method: input.paymentMethod,
+      p_transaction_reference: input.transactionReference, p_idempotency_key: input.idempotencyKey,
+      p_notes: input.notes ?? null,
+    });
+    if (error || !data || !['settled', 'idempotent_duplicate'].includes(data.status) ||
+        !isRecordId(data.payment_id ?? '') || !/^REC-[0-9]{4}-[0-9]+$/.test(data.receipt_number ?? '')) return failed;
 
     revalidatePath(`/staff/${access.role}`);
+    const isDuplicate = data.status === 'idempotent_duplicate';
     return {
       ok: true,
-      receiptNumber: result.data.receiptNumber,
-      message: result.message || `Payment recorded. Receipt: ${result.data.receiptNumber}`,
+      isDuplicate,
+      receiptNumber: data.receipt_number,
+      message: isDuplicate ? `Existing payment confirmed. Receipt: ${data.receipt_number}` :
+        `Payment recorded. Receipt: ${data.receipt_number}`,
     };
   } catch {
     return {

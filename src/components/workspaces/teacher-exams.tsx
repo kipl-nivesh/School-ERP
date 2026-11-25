@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DraftMarkForm } from './draft-mark-form';
 import { readTeacherExams } from '@/lib/services/teacher-exams';
 import type { TeacherQuery } from '@/lib/services/teacher-dashboard';
 import styles from './live-admin-dashboard.module.css';
@@ -73,6 +74,19 @@ function ResultDetails({ data }: { data: Ready }) {
       <div><dt>Grading</dt><dd>Maximum {exam.max_marks} · Passing threshold {exam.passing_marks}</dd></div>
       <div><dt>Result status</dt><dd>{publication(exam.is_published)}{exam.is_published && exam.published_at ? ' · ' + exam.published_at : ''}</dd></div>
     </dl>
+    {data.draftUnavailable && <p role="alert" className={styles.failure}>The draft marks roster could not be loaded.</p>}
+    {data.draft && <section>
+      <h3>Enter or edit draft marks</h3>
+      {data.draft.rows.length ? <div className={styles.tableScroll} tabIndex={0} role="region" aria-label="Draft marks roster">
+        <table><thead><tr><th>Student</th><th>Mark out of {exam.max_marks}</th></tr></thead>
+          <tbody>{data.draft.rows.map(row => <tr key={row.id}>
+            <th scope="row">{row.label}</th>
+            <td><DraftMarkForm key={row.score ?? 'new'} school={data.draft!.school} exam={exam.id}
+              student={row.id} score={row.score} max={exam.max_marks} label={row.label} /></td>
+          </tr>)}</tbody>
+        </table>
+      </div> : <p>No eligible students on this page.</p>}
+    </section>}
     <h3>Recorded marks</h3>
     <p className={styles.limit}>Pass and fail use the stored passing threshold. Students without a visible marks entry are omitted. A missing score never counts as zero.</p>
     {data.marksUnavailable ? <p role="alert" className={styles.failure}>Marks could not be loaded for this exam.</p> :
@@ -85,7 +99,7 @@ function ResultDetails({ data }: { data: Ready }) {
           </tr>)}</tbody>
         </table>
       </div> : <p className={styles.empty}>No visible marks entries on this page.</p>}
-    {!data.marksUnavailable && <nav className={teacherStyles.pagination} aria-label="Marks pages">
+    {(!data.marksUnavailable || data.draft) && <nav className={teacherStyles.pagination} aria-label="Marks pages">
       {data.filters.marksPage > 1 && <Link href={examLink(data.filters, { marksPage: data.filters.marksPage - 1 }, 'exam-details')}>Previous</Link>}
       <span>Page {data.filters.marksPage}</span>
       {data.marksNext && <Link href={examLink(data.filters, { marksPage: data.filters.marksPage + 1 }, 'exam-details')}>Next</Link>}
@@ -99,7 +113,7 @@ export async function TeacherExams({ access, query }: {
   const data = await readTeacherExams(access, query);
   return <section id="teacher-exams" className={styles.section}>
     <h1 className="text-2xl font-bold">Exams &amp; Marks</h1>
-    <p className={styles.limit}>Marks entry, editing, and publication are unavailable in this read-only workspace.</p>
+    <p className={styles.limit}>Teachers can save draft marks for assigned exams. Publication remains restricted.</p>
     {(data.kind === 'denied' || data.kind === 'invalid' || data.kind === 'error') ?
       <>
         <p role={data.kind === 'error' ? 'alert' : undefined} className={data.kind === 'denied' ? styles.empty : styles.failure}>
@@ -113,9 +127,11 @@ export async function TeacherExams({ access, query }: {
         {data.kind === 'select' && <p className={styles.empty}>{data.options.length
           ? 'Choose an assignment to load its exams and figures.' : 'No active assignments match these filters.'}</p>}
         {data.kind === 'ready' && <>
+          {data.counts ? <>
           <dl className={teacherStyles.metrics}>{data.counts.map((value, index) =>
             <div key={metricNames[index]}><dt>{metricNames[index]}</dt><dd>{value}</dd></div>)}</dl>
           <p className={styles.limit}>Counts cover the selected section and subject across all pages. Upcoming includes {data.cutoff} (UTC). Past exam dates do not indicate completion.</p>
+          </> : <p className={styles.limit}>Exam totals could not be loaded.</p>}
           <section id="exam-directory" className={styles.record}>
             <h2>Exam directory</h2>
             {data.rows.length ? <div className={styles.tableScroll} tabIndex={0} role="region" aria-label="Exam directory">

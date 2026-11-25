@@ -10,11 +10,14 @@ type Access = NonNullable<Awaited<ReturnType<typeof getStaffAccess>>>;
 type Placement = { id: string; school_id: string; name: string; class_id: string; academic_year_id: string; classroom: { name: string }; year: { label: string } };
 type Assignment = { school_id: string; teacher_profile_id: string; section_id: string; subject_code: string; placement?: Placement | null };
 type Sheet = Exam & { school_id: string };
-type Entry = { id: string; school_id: string; marks_sheet_id: string; marks_obtained: number | null;
+type Entry = { id: string; school_id: string; marks_sheet_id: string; student_id: string; marks_obtained: number | null;
   student?: { school_id: string; display_name: string; registration_number: string } | null };
 const placementJoin = ',placement:sections!teacher_assignments_section_year_school_fkey!inner(id,school_id,name,class_id,academic_year_id,classroom:classes!sections_class_school_fkey!inner(name),year:academic_years!sections_academic_year_school_fkey!inner(label))';
 const sheetFields = 'id,school_id,section_id,exam_name,subject_code,exam_date,max_marks,passing_marks,is_published,published_at';
 const pageSize = 25;
+type DraftStudent = { student_id: string; school_id: string; student: {
+  school_id: string; display_name: string; registration_number: string;
+} | null };
 
 function parse(input: TeacherQuery) {
   const { year = '', classId = '', section = '', subject = '', search = '', published = '', from = '', to = '', exam = '', page = '1', marksPage = '1' } = input;
@@ -66,40 +69,86 @@ export async function readTeacherExams(access: Access, input: TeacherQuery) {
       if (result.error) throw new Error('Assignment unavailable');
       return result.data?.find(row => validAssignment(row) && row.section_id === filters.section && row.subject_code === filters.subject);
     };
-    const scope = await authorize();
+    const scope = catalog.data.find(row => row.section_id === filters.section && row.subject_code === filters.subject) ??
+      (catalog.data.length > 200 ? await authorize() : undefined);
     if (!scope) return { kind: 'unassigned', ...selection } as const;
     // RLS independently verifies school and section. The exact pair adds the Teacher's subject boundary.
-    const sheets = (fields: string, options?: { head: true; count: 'exact' }) => client.from('marks_sheets')
+    const sheets = (fields: string, options?: { head?: true; count: 'exact' }) => client.from('marks_sheets')
       .select(fields, options).eq('school_id', school).eq('section_id', scope.section_id).eq('subject_code', scope.subject_code);
     const validSheet = (row: Sheet) => row.school_id === school && row.section_id === scope.section_id && row.subject_code === scope.subject_code;
     const count = () => sheets('id', { head: true, count: 'exact' });
     const cutoff = new Date(now).toISOString().slice(0, 10);
+    const readCounts = async () => {
+      const scoped = await sheets('school_id,section_id,subject_code,exam_date,is_published', { count: 'exact' }).limit(200)
+        .overrideTypes<Pick<Sheet, 'school_id' | 'section_id' | 'subject_code' | 'exam_date' | 'is_published'>[], { merge: false }>();
+      if (scoped.error || !scoped.data || scoped.count === null || scoped.count < scoped.data.length ||
+        scoped.data.some(row => row.school_id !== school || row.section_id !== scope.section_id ||
+          row.subject_code !== scope.subject_code || typeof row.exam_date !== 'string' || typeof row.is_published !== 'boolean')) return null;
+      if (scoped.count === scoped.data.length) {
+        const all = scoped.data;
+        const upcoming = all.filter(row => row.exam_date >= cutoff).length;
+        const published = all.filter(row => row.is_published).length;
+        return [all.length, upcoming, all.length - upcoming, published, all.length - published];
+      }
+      const result = await Promise.all([count(), count().gte('exam_date', cutoff), count().lt('exam_date', cutoff),
+        count().eq('is_published', true), count().eq('is_published', false)]);
+      return result.every(row => !row.error && row.count !== null) ? result.map(row => row.count!) : null;
+    };
     let directory = sheets(sheetFields);
     if (filters.search) directory = directory.ilike('exam_name', '%' + filters.search + '%');
     if (filters.published) directory = directory.eq('is_published', filters.published === 'published');
     if (filters.from) directory = directory.gte('exam_date', filters.from);
     if (filters.to) directory = directory.lte('exam_date', filters.to);
     const offset = (filters.page - 1) * pageSize;
-    const [list, detail, counts] = await Promise.all([
-      directory.order('exam_date', { ascending: false }).order('id').range(offset, offset + pageSize)
-        .overrideTypes<Sheet[], { merge: false }>(),
-      filters.exam ? sheets(sheetFields).eq('id', filters.exam).maybeSingle().overrideTypes<Sheet, { merge: false }>() : null,
-      Promise.all([count(), count().gte('exam_date', cutoff), count().lt('exam_date', cutoff),
-        count().eq('is_published', true), count().eq('is_published', false)]),
-    ]);
-    if (list.error || !list.data || !list.data.every(validSheet) || detail?.error ||
-        (detail?.data && (!validSheet(detail.data) || detail.data.id !== filters.exam)) ||
-        counts.some(row => row.error || row.count === null)) return { kind: 'error' } as const;
-
+    const countsRead = readCounts();
+    const listRead = Promise.resolve(directory.order('exam_date', { ascending: false }).order('id').range(offset, offset + pageSize)
+      .overrideTypes<Sheet[], { merge: false }>());
+    const detail = filters.exam ? await sheets(sheetFields).eq('id', filters.exam).maybeSingle().overrideTypes<Sheet, { merge: false }>() : null;
+    if (detail?.error || (detail?.data && (!validSheet(detail.data) || detail.data.id !== filters.exam))) return { kind: 'error' } as const;
     const exam = detail?.data;
     const marksOffset = (filters.marksPage - 1) * pageSize;
-    const entries = exam ? await client.from('marks_entries').select(
-      'id,school_id,marks_sheet_id,marks_obtained,exam:marks_sheets!marks_entries_sheet_school_fkey!inner(id)' +
+    // The validated exam supplies the scope, and marks-entry RLS also checks the parent
+    // sheet. Rejoining it here repeats those checks for each displayed entry.
+    const entriesRead = exam ? Promise.resolve(client.from('marks_entries').select(
+      'id,school_id,marks_sheet_id,student_id,marks_obtained' +
       (identities ? ',student:students!marks_entries_student_school_fkey(school_id,display_name,registration_number)' : ''),
     ).eq('school_id', school).eq('marks_sheet_id', exam.id)
-      .eq('exam.school_id', school).eq('exam.section_id', scope.section_id).eq('exam.subject_code', scope.subject_code)
       .order('id').range(marksOffset, marksOffset + pageSize)
-      .overrideTypes<Entry[], { merge: false }>() : null;
+      .overrideTypes<Entry[], { merge: false }>()) : null;
+    let draft: { school: string; rows: { id: string; label: string; score: number | null }[]; next: boolean } | null = null;
+    let draftUnavailable = false;
+    if (exam && !exam.is_published && !exam.published_at && identities &&
+        evaluatePermission(context, 'marks.write', now).allowed) {
+      const dates = [cutoff, exam.exam_date].sort();
+      const roster = await client.from('enrollments')
+        .select('student_id,school_id,student:students!enrollments_student_school_fkey!inner(school_id,display_name,registration_number)')
+        .eq('school_id', school).eq('section_id', exam.section_id)
+        .lte('valid_from', dates[0]).or('valid_until.is.null,valid_until.gte.' + dates[1])
+        .order('student_id').order('id').range(marksOffset, marksOffset + pageSize)
+        .overrideTypes<DraftStudent[], { merge: false }>();
+      if (roster.error || !roster.data || roster.data.some(row =>
+        row.school_id !== school || row.student?.school_id !== school)) draftUnavailable = true;
+      else {
+        const students = roster.data.slice(0, pageSize);
+        const recorded = await entriesRead;
+        // Reuse only explicit scores for every roster student. Missing rows may be on a different results page.
+        const complete = recorded && !recorded.error && recorded.data &&
+          recorded.data.every(row => row.school_id === school && row.marks_sheet_id === exam.id) &&
+          students.every(student => recorded.data!.some(row => row.student_id === student.student_id));
+        const saved = complete ? recorded : students.length ? await client.from('marks_entries').select('student_id,marks_obtained')
+          .eq('school_id', school).eq('marks_sheet_id', exam.id).in('student_id', students.map(row => row.student_id)) : null;
+        if (saved?.error) draftUnavailable = true;
+        else {
+          const scores = new Map((saved?.data ?? []).map(row => [row.student_id, Number(row.marks_obtained)]));
+          draft = { school, next: roster.data.length > pageSize, rows: students.map(row => ({
+            id: row.student_id, label: row.student!.display_name + ' · ' + row.student!.registration_number,
+            score: scores.get(row.student_id) ?? null,
+          })) };
+        }
+      }
+    }
+    const [list, entries, counts] = await Promise.all([listRead, entriesRead, countsRead]);
+    if (list.error || !list.data || !list.data.every(validSheet)) return { kind: 'error' } as const;
     const unavailable = !!entries && (entries.error || !entries.data || entries.data.some(row =>
       row.school_id !== school || row.marks_sheet_id !== exam?.id || (row.student && row.student.school_id !== school)));
     // Recheck subject access before returning any data. This is not an atomic database policy check.
@@ -114,10 +163,12 @@ export async function readTeacherExams(access: Access, input: TeacherQuery) {
         score: valid ? score : null, passed: valid && exam ? score >= exam.passing_marks : null };
     });
     return { kind: 'ready', ...selection, placement: scope.placement, cutoff,
-      counts: counts.map(row => row.count ?? 0), rows: list.data.slice(0, pageSize).map(project),
+      counts,
+      rows: list.data.slice(0, pageSize).map(project),
       next: list.data.length > pageSize && filters.page < 999,
       detail: exam ? project(exam) : null, detailDenied: !!filters.exam && !exam,
-      marks, marksUnavailable: !!unavailable, marksNext: !unavailable && (entries?.data?.length ?? 0) > pageSize && filters.marksPage < 999 } as const;
+      marks, draft, draftUnavailable, marksUnavailable: !!unavailable,
+      marksNext: (!!draft?.next || (!unavailable && (entries?.data?.length ?? 0) > pageSize)) && filters.marksPage < 999 } as const;
   } catch {
     return { kind: 'error' } as const;
   }

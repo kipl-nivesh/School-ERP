@@ -1,6 +1,8 @@
 import 'server-only';
 import { evaluateDashboardAccess, evaluatePermission } from '../auth/authorization';
-import { getStaffAccess, staffClient } from '../staff/server';
+import { getAccountantRenderAccess, staffClient } from '../staff/server';
+import { readAccountantInvoiceTotals, readAccountantPaymentTotals } from './accountant-render-totals';
+import { accountantMayRequestExport } from '../staff/accountant-export-mfa';
 import { validAttendanceDate } from './attendance-fields';
 import { isRecordId } from './management-contracts';
 import { invoiceBalance, invoiceStatuses, invoiceTotals, parsePaise, paymentStatuses, settledTotal } from './accountant-finance-fields';
@@ -70,7 +72,7 @@ function paymentView(row: Payment, receiptVisible: boolean) {
 }
 
 export async function readAccountantFinance(query: AccountantQuery) {
-  const access = await getStaffAccess('accountant');
+  const access = await getAccountantRenderAccess();
   const school = access?.context.schoolId;
   if (!access || !school || access.role !== 'accountant' ||
       !evaluateDashboardAccess(access.context, 'accountant', Date.now()).allowed) return denied;
@@ -81,10 +83,14 @@ export async function readAccountantFinance(query: AccountantQuery) {
   const fees = allowed('fees.read');
   const payments = allowed('payments.read');
   const receipts = allowed('receipts.read');
-  const canCollect = false;
+  const canCollect = fees && allowed('payments.record');
+  const canConfigure = fees && allowed('fees.write');
+  const canReport = fees && allowed('reports.read');
+  const canRequestExport = accountantMayRequestExport(access.context, Date.now());
   if (!fees && !payments && !receipts) return { kind: 'ready', schoolId: school, filters, schoolName: access.schoolName,
-    invoiceTotals: denied, collected: denied, ledger: denied, history: denied, recent: denied,
-    receipt: denied, structures: denied, classes: denied, canCollect: false } as const;
+    invoiceTotals: Promise.resolve(denied), collected: Promise.resolve(denied), ledger: denied, history: denied, recent: denied,
+    receipt: denied, structures: denied, classes: denied, canCollect: false, canConfigure: false,
+    canReport: false, canRequestExport: false } as const;
 
   try {
     const client = await staffClient();
@@ -94,17 +100,15 @@ export async function readAccountantFinance(query: AccountantQuery) {
     const receiptFields = historyFields + ',receipt_number';
     const visibleFields = (receipts ? receiptFields : historyFields) + (payments ? ',transaction_reference' : '');
     const selectedStudent = (row: { student_id: string }) => !filters.studentId || row.student_id === filters.studentId;
-    const [summary, collected, ledger, history, recent, receipt, structures, classes] = await Promise.all([
-      panel(fees, async () => {
-        const result = await client.from('fee_invoices').select('id,school_id,amount_paise::text,paid_paise::text,due_date', { count: 'exact' })
-          .eq('school_id', school).limit(totalsLimit);
-        return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), null);
-      }),
-      panel(payments || receipts, async () => {
-        const result = await client.from('fee_payments').select('id,school_id,amount_paise::text,status', { count: 'exact' })
-          .eq('school_id', school).eq('status', 'settled').limit(totalsLimit);
-        return settledTotal(complete(scoped<Payment>(result, school), result.count));
-      }),
+    const summary = panel(fees, async () => {
+      const result = await readAccountantInvoiceTotals(school);
+      return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), null);
+    });
+    const collected = panel(payments || receipts, async () => {
+      const result = await readAccountantPaymentTotals(school);
+      return settledTotal(complete(scoped<Payment>(result, school), result.count));
+    });
+    const [ledger, history, recent, receipt, structures, classes] = await Promise.all([
       panel(fees, async () => {
         let request = client.from('fee_invoices')
           .select('id,school_id,student_id,invoice_number,title,issue_date,due_date,amount_paise::text,paid_paise::text,status')
@@ -156,10 +160,9 @@ export async function readAccountantFinance(query: AccountantQuery) {
           amount: parsePaise(row.amount_paise), frequency: row.frequency, due: row.due_date,
         }));
       }),
-      panel(fees, async () => scoped<SchoolClass>(await client.from('classes').select('id,school_id,name')
-        .eq('school_id', school).order('name').order('id').limit(100), school)),
+      panel(fees, async () => scoped<SchoolClass>(await client.rpc('list_accountant_fee_classes', { p_school: school }), school)),
     ]);
     return { kind: 'ready', schoolId: school, schoolName: access.schoolName, filters, invoiceTotals: summary, collected,
-      ledger, history, recent, receipt, structures, classes, canCollect } as const;
+      ledger, history, recent, receipt, structures, classes, canCollect, canConfigure, canReport, canRequestExport } as const;
   } catch { return unavailable; }
 }

@@ -69,7 +69,7 @@ insert into public.staff_profiles(profile_id,school_id,display_name,employee_cod
  values('10000000-0000-0000-0000-000000000004','00000000-0000-0000-0000-00000000000b','Foreign staff','USED');
 insert into public.user_roles(id,profile_id,school_id,role_code,membership_status,permissions)
  values('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000004',
- '00000000-0000-0000-0000-00000000000b','teacher','active',array['dashboard.teacher.view']);
+ '00000000-0000-0000-0000-00000000000b','teacher','active',array['dashboard.teacher.view','homework.read']);
 
 insert into public.staff_invitations(school_id,email,display_name,role_code,invitation_token,invited_by)
 values ('00000000-0000-0000-0000-00000000000a','legacy@example.invalid','Legacy Teacher','teacher',
@@ -78,6 +78,7 @@ values ('00000000-0000-0000-0000-00000000000a','legacy@example.invalid','Legacy 
 
 \ir verify-managed-staff-preflight.sql
 \ir ../supabase/migrations/20261124002900_managed_staff_accounts.sql
+\ir ../supabase/migrations/20261124003000_managed_staff_default_permissions.sql
 
 -- Run the same catalog checks supplied for hosted verification.
 \ir verify-managed-staff-postflight.sql
@@ -90,6 +91,9 @@ begin
     or not has_function_privilege('authenticated','public.manage_school_staff(uuid,text,text,text,text,text)','EXECUTE')
     or not has_function_privilege('anon','public.managed_staff_invitation_matches(text,text)','EXECUTE')
     or has_function_privilege('authenticated','app_private.managed_staff_school(text)','EXECUTE')
+    or has_function_privilege('authenticated','app_private.default_managed_staff_permissions(text)','EXECUTE')
+    or has_function_privilege('anon','app_private.default_managed_staff_permissions(text)','EXECUTE')
+    or has_function_privilege('service_role','app_private.default_managed_staff_permissions(text)','EXECUTE')
   then raise exception 'unexpected RPC privileges'; end if;
 end $$;
 
@@ -99,18 +103,33 @@ declare school constant uuid:='00000000-0000-0000-0000-00000000000a';
   admin constant uuid:='10000000-0000-0000-0000-000000000001';
   teacher constant uuid:='10000000-0000-0000-0000-000000000002';
   accountant constant uuid:='10000000-0000-0000-0000-000000000003';
+  teacher_grants constant text[] := array[
+    'dashboard.teacher.view','students.read','attendance.read','attendance.write',
+    'homework.read','homework.write','marks.read','marks.write','reports.read',
+    'announcements.read','announcements.write','documents.read'];
+  accountant_grants constant text[] := array[
+    'dashboard.accountant.view','fees.read','fees.write','payments.read','payments.record',
+    'expenses.read','expenses.write','receipts.read','reports.read','reports.export',
+    'announcements.read','documents.read','audit.read'];
   token text:=repeat('a',64); inactive_token text:=repeat('c',64);
   membership uuid; invite uuid; role_name text;
 begin
   if not exists(select 1 from public.staff_profiles
     where school_id=foreign_school and display_name='Foreign staff' and employee_code='USED')
     then raise exception 'existing staff record changed'; end if;
+  if not exists(select 1 from public.user_roles where school_id=foreign_school
+    and id='20000000-0000-0000-0000-000000000001'
+    and permissions=array['dashboard.teacher.view','homework.read'])
+    then raise exception 'existing custom permissions changed'; end if;
   perform set_config('fixture.actor','10000000-0000-0000-0000-000000000005',false);
   if not public.accept_staff_invitation(repeat('d',64))
     then raise exception 'existing legacy invitation failed'; end if;
   if not exists(select 1 from public.staff_profiles where school_id=school
       and profile_id=auth.uid() and employee_code is null)
     then raise exception 'legacy staff profile was not provisioned'; end if;
+  if not exists(select 1 from public.user_roles where school_id=school and profile_id=auth.uid()
+    and permissions=array['dashboard.teacher.view'])
+    then raise exception 'legacy invitation permissions changed'; end if;
 
   perform set_config('fixture.actor',admin::text,false);
   perform set_config('fixture.school',school::text,false);
@@ -150,7 +169,8 @@ begin
     or public.managed_staff_invitation_matches(token,'wrong@example.invalid') then raise exception 'invitation verification incorrect'; end if;
   perform set_config('fixture.actor',teacher::text,false);
   if not public.accept_staff_invitation(token) or public.accept_staff_invitation(token) then raise exception 'invitation redemption or replay failed'; end if;
-  select id into membership from public.user_roles where profile_id=teacher and school_id=school and role_code='teacher' and membership_status='active';
+  select id into membership from public.user_roles where profile_id=teacher and school_id=school
+    and role_code='teacher' and membership_status='active' and permissions=teacher_grants;
   if membership is null or not exists(select 1 from public.staff_profiles where profile_id=teacher and department='Science') then raise exception 'teacher provisioning incomplete'; end if;
   insert into public.user_roles(profile_id,school_id,role_code,membership_status,permissions)
     values(teacher,foreign_school,'teacher','active',array['dashboard.teacher.view']);
@@ -163,6 +183,9 @@ begin
     or not exists(select 1 from public.profiles where id=teacher and account_status='active')
     then raise exception 'school-local suspension failed'; end if;
   if not public.manage_school_staff(membership,'activate') or not public.manage_school_staff(membership,'reset') then raise exception 'reactivation or reset scope failed'; end if;
+  if not exists(select 1 from public.user_roles where id=membership
+    and membership_status='active' and permissions=teacher_grants)
+    then raise exception 'Teacher grants changed after suspension and reactivation'; end if;
   if not exists(select 1 from public.list_managed_school_staff('teacher@example.invalid','active','teacher',0)
     where membership_id=membership and employee_code='EMP2') then raise exception 'staff search or role filter failed'; end if;
 
@@ -170,7 +193,8 @@ begin
     encode(sha256(convert_to(inactive_token,'UTF8')),'hex'),'used',null,null,false);
   perform set_config('fixture.actor',accountant::text,false);
   if not public.accept_staff_invitation(inactive_token) then raise exception 'Accountant invitation not accepted'; end if;
-  if not exists(select 1 from public.user_roles where profile_id=accountant and role_code='accountant' and membership_status='suspended')
+  if not exists(select 1 from public.user_roles where profile_id=accountant and school_id=school
+    and role_code='accountant' and membership_status='suspended' and permissions=accountant_grants)
     then raise exception 'inactive Accountant provisioning failed'; end if;
   if (select count(*) from public.staff_profiles where lower(employee_code)='used') <> 2
     then raise exception 'cross-school employee code reuse failed'; end if;

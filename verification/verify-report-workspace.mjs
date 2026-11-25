@@ -51,14 +51,37 @@ function setupReportWorkspace({
   role = 'admin',
   badSchool = false,
   failure = false,
+  snapshotOverflow = false,
+  snapshotInvoiceCount = 3,
 } = {}) {
   const calls = [];
+  const snapshots = [];
 
   const client = new PostgrestClient('http://reports.invalid', {
     fetch: async (input, init) => {
       const url = new URL(input);
       calls.push(url);
       const method = init?.method ?? 'GET';
+      if (url.pathname === '/rpc/read_accountant_finance_snapshot') {
+        assert.equal(method, 'POST');
+        const args = JSON.parse(init.body);
+        assert.equal(args.p_school, school);
+        snapshots.push(args.p_dataset);
+        if (snapshotOverflow) return Response.json({ complete: false });
+        const rows = args.p_dataset === 'invoices'
+          ? Array.from({ length: snapshotInvoiceCount }, (_, i) => ({
+              id: 'invoice-' + i, school_id: school, student_id: 'student-' + i,
+              invoice_number: 'INV-S-' + i, title: 'Invoice ' + i, due_date: '2026-11-01',
+              status: ['paid', 'partial', 'unpaid'][i % 3],
+              amount_paise: ['500000', '750000', '400000'][i % 3],
+              paid_paise: ['500000', '250000', '0'][i % 3],
+            }))
+          : [
+              { id: 'p1', school_id: school, amount_paise: '500000', payment_method: 'upi', status: 'settled' },
+              { id: 'p2', school_id: school, amount_paise: '250000', payment_method: 'card', status: 'settled' },
+            ];
+        return Response.json({ complete: true, count: rows.length, rows });
+      }
       assert.ok(method === 'GET' || method === 'HEAD');
 
       if (failure) return Response.json({ message: 'Database query failed' }, { status: 500 });
@@ -179,12 +202,14 @@ function setupReportWorkspace({
 
       // Finance queries
       if (url.pathname === '/fee_invoices') {
-        if (url.searchParams.get('select') === 'amount_paise::text,paid_paise::text,due_date,status') {
+        if (['amount_paise::text,paid_paise::text,due_date,status',
+          'id,school_id,student_id,invoice_number,title,amount_paise::text,paid_paise::text,due_date,status'].includes(url.searchParams.get('select'))) {
           return Response.json([
             { amount_paise: 500000, paid_paise: 500000, due_date: '2026-10-01', status: 'paid' },
             { amount_paise: 750000, paid_paise: 250000, due_date: '2026-11-01', status: 'partial' },
             { amount_paise: 400000, paid_paise: 0, due_date: '2026-11-10', status: 'unpaid' },
-          ], { headers: { 'content-range': '0-2/3' } });
+          ].map((row, i) => ({ ...row, id: 'iv-'+i, school_id: school, student_id: 's1',
+            invoice_number: 'INV-R-' + i, title: 'Invoice ' + i })), { headers: { 'content-range': '0-2/3' } });
         }
         return Response.json([
           {
@@ -276,6 +301,16 @@ function setupReportWorkspace({
   });
 
   const staffClient = async () => client;
+  const accountantTotals = loadReportDependency('src/lib/services/accountant-render-totals.ts', {
+    'server-only': {}, react: { cache: fn => {
+      const memo = new Map();
+      return key => {
+        if (!memo.has(key)) memo.set(key, fn(key));
+        return memo.get(key);
+      };
+    } }, '../staff/server': { staffClient },
+    './finance-report-calculation': financeCalculation,
+  });
 
   const workspaceModule = { exports: {} };
   new Function('require', 'module', 'exports', workspaceSource)(
@@ -288,7 +323,8 @@ function setupReportWorkspace({
           }),
         };
       }
-      if (specifier === '../staff/server') return { getStaffAccess, staffClient };
+      if (specifier === '../staff/server') return { getStaffAccess, getAccountantRenderAccess: getStaffAccess, staffClient };
+      if (specifier === './accountant-render-totals') return accountantTotals;
       if (specifier === './report-fields') return fieldsModule.exports;
       if (specifier === './finance-report-calculation') return financeCalculation;
       if (specifier === './fee-fields') return { formatPaise: fieldsModule.exports.formatPaise };
@@ -309,7 +345,7 @@ function setupReportWorkspace({
   );
 
   return {
-    calls,
+    calls, snapshots,
     workspace: workspaceModule.exports,
     actions: actionsModule.exports,
   };
@@ -349,13 +385,13 @@ test('formatPaise, formatPercentage, and formatReportDate correctly handle India
 // ---------------------------------------------------------------------------
 // TEST 2: Base reports.read access control
 // ---------------------------------------------------------------------------
-test('readReportsWorkspace denies access when reports.read is missing for non-admin', async () => {
+test('readReportsWorkspace denies access when reports.read is missing for an Accountant', async () => {
   const { workspace } = setupReportWorkspace({
-    role: 'teacher',
-    permissions: ['students.read'], // missing reports.read
+    role: 'accountant',
+    permissions: ['fees.read'], // missing reports.read
   });
 
-  const res = await workspace.readReportsWorkspace(form({ category: 'enrollment' }));
+  const res = await workspace.readReportsWorkspace(form({ category: 'finance' }));
   assert.equal(res.kind, 'denied');
   assert.match(res.reason, /permission/i);
 });
@@ -474,6 +510,44 @@ test('finance report computes integer paise totals and only settled receipts as 
   assert.equal(res.rows[0].invoiceNumber, 'INV-2026-001');
   assert.equal(res.rows[0].amountPaise, '750000');
   assert.equal(res.rows[0].balancePaise, '500000');
+});
+
+test('Accountant render totals preserve scoped invoice and settled payment totals', async () => {
+  const { workspace, calls, snapshots } = setupReportWorkspace({
+    role: 'accountant', permissions: ['reports.read', 'fees.read', 'receipts.read'],
+  });
+  const result = await workspace.readReportsWorkspace(form({ category: 'finance' }), true);
+  assert.equal(result.kind, 'ready');
+  assert.equal(result.financeMetrics.totalBilledPaise, '1650000');
+  assert.equal(result.financeMetrics.totalCollectedPaise, '750000');
+  const financialReads = calls.filter(url => ['/fee_invoices', '/fee_payments'].includes(url.pathname));
+  assert.deepEqual(financialReads, []);
+  assert.deepEqual(snapshots.sort(), ['invoices', 'settled_payments']);
+  assert.equal(result.totalRows, 3);
+  assert.equal(result.rows.length, 3);
+});
+
+test('Accountant snapshot pagination proves a next page without an exact-count read', async () => {
+  const { workspace, snapshots } = setupReportWorkspace({
+    role: 'accountant', permissions: ['reports.read', 'fees.read', 'receipts.read'],
+    snapshotInvoiceCount: 26,
+  });
+  const result = await workspace.readReportsWorkspace(form({ category: 'finance' }), true);
+  assert.equal(result.kind, 'ready');
+  assert.equal(result.totalRows, 26);
+  assert.equal(result.rows.length, 25);
+  assert.equal(result.hasNext, true);
+  assert.equal(snapshots.filter(x => x === 'invoices').length, 1);
+});
+
+test('Accountant snapshot overflow does not display incomplete finance totals', async () => {
+  const { workspace } = setupReportWorkspace({
+    role: 'accountant', permissions: ['reports.read', 'fees.read', 'receipts.read'],
+    snapshotOverflow: true,
+  });
+  const result = await workspace.readReportsWorkspace(form({ category: 'finance' }), true);
+  assert.equal(result.kind, 'error');
+  assert.match(result.message, /complete records/i);
 });
 
 test('finance totals reject query failures, missing counts, server caps, and incomplete pages', () => {

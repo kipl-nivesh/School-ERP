@@ -36,7 +36,7 @@ export async function readTeacherAttendance(access: Access, input: TeacherQuery)
     return { kind: 'denied' } as const;
   }
   const canRead = evaluatePermission(context, 'attendance.read', now).allowed;
-  const canWrite = false;
+  const canWrite = evaluatePermission(context, 'attendance.write', now).allowed;
   const identities = evaluatePermission(context, 'students.read', now).allowed;
   if (!canRead && !canWrite) return { kind: 'denied' } as const;
   const filters = filtersFrom(input);

@@ -1,12 +1,10 @@
 'use server';
-import { staffWorkspaceWritesEnabled } from '@/lib/services/staff-workspace-policy';
 import { revalidatePath } from 'next/cache';
 import { getStaffAccess, staffClient } from '@/lib/staff/server';
 import { executeAcademic } from '@/lib/services/academic-commands';
 import type { AcademicInput } from '@/lib/services/academic-commands';
 
 export async function saveAcademic(_state: { ok: boolean; message: string }, form: FormData) {
-  if (!staffWorkspaceWritesEnabled()) return { ok: false, message: "Academic changes are unavailable during read-only recovery." };
   const field = (key: string) => typeof form.get(key) === 'string' ? String(form.get(key)).trim() : '';
   const kind = field('kind');
   if (kind !== 'attendance' && kind !== 'homework') return { ok: false, message: 'Invalid operation.' };
