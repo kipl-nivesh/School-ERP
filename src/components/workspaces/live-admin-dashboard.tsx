@@ -114,7 +114,7 @@ async function AcademicManagement() {
     readAcademicOptions(), readAssignmentStaffOptions(), ...kinds.map(kind => readAcademicPage(kind)),
   ]);
   return <>
-    {(['class', 'section', 'assignment'] as const).map(kind => (
+    {(['academic_year', 'class', 'section', 'assignment'] as const).map(kind => (
       <LiveManagementForm key={kind} kind={kind} requestId={randomUUID()} recordId={randomUUID()} options={options} staff={staff} />
     ))}
     {kinds.map((kind, index) => <AcademicDirectory key={kind} kind={kind} initial={pages[index]} options={options} staff={staff} />)}

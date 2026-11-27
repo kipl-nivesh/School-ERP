@@ -16,7 +16,14 @@ export async function manageAcademicRecord(_state: { ok: boolean; message: strin
     if (!access || !access.context.schoolId || !evaluatePermission(access.context, kind === 'homework' ? 'homework.write' : 'academics.manage', Date.now()).allowed ||
       (kind !== 'homework' && access.role !== 'admin')) return fail;
     const result = await (await staffClient(true)).rpc('manage_academics', { p_request: requestId, p_kind: kind, p_id: id, p_data: payload });
-    if (result.error || result.data?.id !== id) return fail;
+    if (result.error || result.data?.id !== id) {
+      if (result.error?.message) {
+        if (result.error.message.includes('already exists')) return { ok: false, message: 'An academic year already exists with this name.' };
+        if (result.error.message.includes('after start date')) return { ok: false, message: 'End date must be strictly after start date.' };
+        if (result.error.message.includes('MFA')) return { ok: false, message: 'Active AAL2 MFA verification required.' };
+      }
+      return fail;
+    }
     revalidatePath('/staff/[role]', 'page');
     return { ok: true, message: 'Record saved. Reload to start another change.' };
   } catch { return fail; }

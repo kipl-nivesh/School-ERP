@@ -17,7 +17,7 @@ const TIMEZONE_NOTICE =
   'Timezone & Regional Notice: The database currently records and evaluates attendance and date records using the database server date (current_date, UTC). School-specific timezone configuration is not currently supported in the database schema. Future backend migrations must add a verified IANA timezone column (e.g. timezone text default \'Asia/Kolkata\') to public.schools and update date-deriving RPCs to use (now() at time zone s.timezone)::date.';
 
 const ACADEMIC_NOTICE =
-  'Academic Year Lifecycle Notice: New academic year provisioning is managed through onboarding. Year rollover, activation toggles, and deletion procedures are disabled to prevent orphan records across enrollments, fees, and marks.';
+  'Academic Year Lifecycle Notice: Academic years can be provisioned in the Academic Management workspace. Year rollover, activation toggles, and deletion procedures are disabled to prevent orphan records across enrollments, fees, and marks.';
 
 interface SchoolRow {
   id: string;
