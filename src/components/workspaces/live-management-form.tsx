@@ -4,7 +4,7 @@ import { manageAcademicRecord } from '@/app/staff/management-actions';
 import type { AcademicOptions } from '@/lib/services/academic-directory';
 import { managementForms, type ManagementKind } from '@/lib/services/management-contracts';
 
-const labels: Record<string,string> = { classId:'Class ID',yearId:'Academic year ID',teacherId:'Teacher profile ID',sectionId:'Section ID',validFrom:'Valid from',validUntil:'Valid until (optional)',revision:'Current revision (0 for a new timetable slot)',subject:'Subject code',period:'Period number',start:'Start time',end:'End time',due:'Due date',points:'Maximum points' };
+const labels: Record<string,string> = { label:'Academic year name (e.g. 2026-2027)',startsOn:'Start date',endsOn:'End date',classId:'Class ID',yearId:'Academic year ID',teacherId:'Teacher profile ID',sectionId:'Section ID',validFrom:'Valid from',validUntil:'Valid until (optional)',revision:'Current revision (0 for a new timetable slot)',subject:'Subject code',period:'Period number',start:'Start time',end:'End time',due:'Due date',points:'Maximum points' };
 export function LiveManagementForm({ kind, requestId, recordId, options, staff }: {
   kind: ManagementKind; requestId: string; recordId: string;
   options?: AcademicOptions; staff?: { id: string; label: string }[];
@@ -37,7 +37,7 @@ export function LiveManagementForm({ kind, requestId, recordId, options, staff }
           field === 'status' ? <select name={field} className="block rounded border p-2"><option>active</option><option>closed</option></select> :
           <input name={field} required={field !== 'validUntil'} maxLength={field === 'description' ? 10000 : 254}
             list={field === 'teacherId' && staff?.length ? target + '-staff' : undefined}
-            type={['due','validFrom','validUntil'].includes(field) ? 'date' : ['start','end'].includes(field) ? 'time' : ['revision','points','period'].includes(field) ? 'number' : 'text'}
+            type={['due','validFrom','validUntil','startsOn','endsOn'].includes(field) ? 'date' : ['start','end'].includes(field) ? 'time' : ['revision','points','period'].includes(field) ? 'number' : 'text'}
             defaultValue={field === 'revision' && kind === 'timetable' ? '0' : undefined} className="mt-1 block w-full rounded border p-2" />}
       </label>})}</div>
       {staff?.length && kind === 'assignment' ? <datalist id={target + '-staff'}>

@@ -1,4 +1,5 @@
 export const managementForms = {
+  academic_year: { title: 'Create academic year', fields: ['label', 'startsOn', 'endsOn'] },
   class: { title: 'Create class', fields: ['name'] },
   section: { title: 'Create section', fields: ['name','classId','yearId'] },
   assignment: { title: 'Assign teacher', fields: ['teacherId','sectionId','subject','validFrom','validUntil'] },
