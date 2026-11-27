@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { randomUUID } from 'node:crypto';
-import { LiveManagementForm } from './live-management-form';
 import { Suspense, type ReactNode } from 'react';
 import { ArrowUpRight, BarChart3, BookOpen, CalendarDays, ClipboardList, GraduationCap, LayoutDashboard, ListChecks, LogOut, Megaphone, Menu, Settings, ShieldCheck, Users, Wallet } from 'lucide-react';
 import { logoutStaff } from '@/app/login/staff/actions';
@@ -12,7 +11,7 @@ import { StudentDirectory } from './student-directory';
 import { readStaffDirectory } from '@/lib/services/staff-directory';
 import { StaffDirectory } from './staff-directory';
 import { StaffExpenseDrafts } from './staff-expense-drafts';
-import { AcademicDirectory } from './academic-management';
+import { AcademicWorkspace } from './academic-management';
 import { readAcademicOptions, readAcademicPage, readAssignmentStaffOptions } from '@/lib/services/academic-directory';
 import { AttendanceManagement } from './attendance-management';
 import { readAttendance, readAttendancePlacements } from '@/lib/services/attendance-workspace';
@@ -113,12 +112,24 @@ async function AcademicManagement() {
   const [options, staff, ...pages] = await Promise.all([
     readAcademicOptions(), readAssignmentStaffOptions(), ...kinds.map(kind => readAcademicPage(kind)),
   ]);
-  return <>
-    {(['academic_year', 'class', 'section', 'assignment'] as const).map(kind => (
-      <LiveManagementForm key={kind} kind={kind} requestId={randomUUID()} recordId={randomUUID()} options={options} staff={staff} />
-    ))}
-    {kinds.map((kind, index) => <AcademicDirectory key={kind} kind={kind} initial={pages[index]} options={options} staff={staff} />)}
-  </>;
+  return (
+    <AcademicWorkspace
+      pages={{
+        years: pages[0],
+        classes: pages[1],
+        sections: pages[2],
+        assignments: pages[3],
+      }}
+      options={options}
+      staff={staff}
+      identifiers={{
+        years: { requestId: randomUUID(), recordId: randomUUID() },
+        classes: { requestId: randomUUID(), recordId: randomUUID() },
+        sections: { requestId: randomUUID(), recordId: randomUUID() },
+        assignments: { requestId: randomUUID(), recordId: randomUUID() },
+      }}
+    />
+  );
 }
 
 async function LiveAttendance({ canRead, canRoster, canWrite }: { canRead: boolean; canRoster: boolean; canWrite: boolean }) {

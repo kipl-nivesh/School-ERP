@@ -5,7 +5,7 @@ import { getStaffAccess } from '@/lib/staff/server';
 import { AccountantSupabaseService, SchoolAdminSupabaseService } from '@/lib/services/supabase-dal';
 import type { CollectPaymentInput, NewStudentAdmissionInput } from '@/lib/domain/dashboard-contracts';
 
-export type RecordActionState = { ok: boolean; message: string };
+export type RecordActionState = { ok: boolean; message: string; admissionNumber?: string };
 const failed: RecordActionState = { ok: false, message: 'The record could not be saved. Check your access and entries.' };
 const value = (form: FormData, key: string) => typeof form.get(key) === 'string' ? String(form.get(key)).trim() : '';
 
@@ -18,7 +18,11 @@ export async function saveAdmission(_state: RecordActionState, form: FormData): 
     const result = await SchoolAdminSupabaseService.createStudentAdmission(access.context, input);
     if (!result.success) return failed;
     revalidatePath('/staff/admin');
-    return { ok: true, message: `Admission saved: ${result.data.admissionNumber}. Portal activation is separate.` };
+    return {
+      ok: true,
+      admissionNumber: result.data.admissionNumber,
+      message: `Admission saved: ${result.data.admissionNumber}. Portal activation is separate.`,
+    };
   } catch { return failed; }
 }
 

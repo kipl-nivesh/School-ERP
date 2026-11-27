@@ -230,7 +230,7 @@ export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementPr
               <tbody>
                 {academicYears.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '1.5rem', color: '#94a3b8' }}>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '1.5rem', color: '#475569' }}>
                       No academic years registered.
                     </td>
                   </tr>
@@ -248,7 +248,7 @@ export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementPr
                             Current Academic Session
                           </span>
                         ) : (
-                          <span style={{ color: '#94a3b8', fontSize: '0.8125rem' }}>Archived / Inactive</span>
+                          <span style={{ color: '#475569', fontSize: '0.8125rem' }}>Archived / Inactive</span>
                         )}
                       </td>
                     </tr>
@@ -279,7 +279,7 @@ export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementPr
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Timezone Column Status</span>
               <span className={styles.infoValue}>Not Deployed</span>
-              <span style={{ fontSize: '0.75rem', color: '#f87171' }}>Schema modification required</span>
+              <span style={{ fontSize: '0.75rem', color: '#b91c1c' }}>Schema modification required</span>
             </div>
           </div>
 
@@ -321,7 +321,7 @@ export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementPr
               <span className={styles.infoLabel}>Password Reauthentication</span>
               <span
                 className={styles.infoValue}
-                style={{ color: security.hasRecentPassword ? '#4ade80' : '#facc15' }}
+                style={{ color: security.hasRecentPassword ? '#166534' : '#b45309' }}
               >
                 {security.hasRecentPassword ? 'Verified (< 10m)' : 'Stale / Required'}
               </span>
