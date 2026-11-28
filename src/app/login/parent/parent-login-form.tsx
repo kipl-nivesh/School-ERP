@@ -1,11 +1,12 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import {
   ArrowRight,
   KeyRound,
   LockKeyhole,
   Mail,
+  RefreshCw,
   ShieldCheck,
   Users,
 } from 'lucide-react';
@@ -28,11 +29,20 @@ export function ParentLoginForm({ liveAuthEnabled = false }: { liveAuthEnabled?:
   const [sendState, sendAction, sendPending] = useActionState(sendParentOtp, INITIAL_PARENT_STATE);
   const [verifyState, verifyAction, verifyPending] = useActionState(verifyParentOtp, INITIAL_PARENT_STATE);
   const [resetCodeStep, setResetCodeStep] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  const activeEmail = sendState.email || verifyState.email;
+  const activeEmail = verifyState.email || sendState.email;
   const isCodeSent = (sendState.phase === 'code_sent' || verifyState.phase === 'code_sent') && !resetCodeStep;
   const feedbackMessage = verifyState.message || sendState.message;
   const hasError = sendState.phase === 'error' || verifyState.phase === 'error';
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = window.setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [cooldown]);
 
   return (
     <AuthShell
@@ -78,7 +88,15 @@ export function ParentLoginForm({ liveAuthEnabled = false }: { liveAuthEnabled?:
         )}
 
         {!isCodeSent ? (
-          <form action={liveAuthEnabled ? sendAction : undefined} className={shellStyles.formStack} aria-busy={sendPending}>
+          <form
+            action={liveAuthEnabled ? sendAction : undefined}
+            onSubmit={() => {
+              setResetCodeStep(false);
+              setCooldown(60);
+            }}
+            className={shellStyles.formStack}
+            aria-busy={sendPending}
+          >
             <AuthField
               id="guardian-email"
               label="Guardian email"
@@ -109,45 +127,67 @@ export function ParentLoginForm({ liveAuthEnabled = false }: { liveAuthEnabled?:
             </AuthButton>
           </form>
         ) : (
-          <form action={liveAuthEnabled ? verifyAction : undefined} className={shellStyles.formStack} aria-busy={verifyPending}>
-            <input type="hidden" name="email" value={activeEmail || ''} />
+          <div className={shellStyles.formStack}>
+            <form action={liveAuthEnabled ? verifyAction : undefined} className={shellStyles.formStack} aria-busy={verifyPending}>
+              <input type="hidden" name="email" value={activeEmail || ''} />
 
-            <AuthField id="guardian-code" label="One-time verification code">
-              <AuthInput
-                id="guardian-code"
-                name="code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                placeholder="Enter 8-digit code"
-                maxLength={10}
-                icon={<KeyRound size={15} />}
-                required
-                disabled={!liveAuthEnabled || verifyPending}
-                autoFocus
-              />
-            </AuthField>
+              <AuthField id="guardian-code" label="One-time verification code">
+                <AuthInput
+                  id="guardian-code"
+                  name="code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="Enter 6–8 digit code"
+                  maxLength={10}
+                  icon={<KeyRound size={15} />}
+                  required
+                  disabled={!liveAuthEnabled || verifyPending}
+                  autoFocus
+                />
+              </AuthField>
 
-            <AuthButton
-              type="submit"
-              disabled={!liveAuthEnabled}
-              loading={verifyPending}
-              loadingText="Verifying code…"
+              <AuthButton
+                type="submit"
+                disabled={!liveAuthEnabled}
+                loading={verifyPending}
+                loadingText="Verifying code…"
+              >
+                Verify code &amp; Open Portal
+                <ArrowRight size={15} aria-hidden="true" />
+              </AuthButton>
+            </form>
+
+            <form
+              action={liveAuthEnabled ? sendAction : undefined}
+              onSubmit={() => {
+                setResetCodeStep(false);
+                setCooldown(60);
+              }}
             >
-              Verify code &amp; Open Portal
-              <ArrowRight size={15} aria-hidden="true" />
-            </AuthButton>
+              <input type="hidden" name="email" value={activeEmail || ''} />
+              <AuthButton
+                type="submit"
+                variant="ghost"
+                disabled={!liveAuthEnabled || sendPending || verifyPending || cooldown > 0}
+                loading={sendPending}
+                loadingText="Resending code…"
+              >
+                <RefreshCw size={14} aria-hidden="true" />
+                {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend verification code'}
+              </AuthButton>
+            </form>
 
             <AuthButton
               type="button"
               variant="ghost"
               onClick={() => setResetCodeStep(true)}
-              disabled={!liveAuthEnabled || verifyPending}
+              disabled={!liveAuthEnabled || verifyPending || sendPending}
             >
               <LockKeyhole size={14} aria-hidden="true" />
               Use a different email address
             </AuthButton>
-          </form>
+          </div>
         )}
       </div>
     </AuthShell>

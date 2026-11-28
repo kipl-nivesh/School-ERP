@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
+import { getParentPortalAccess } from '@/lib/parent/server';
 import { ParentLoginForm } from './parent-login-form';
 
 export const metadata: Metadata = {
@@ -8,6 +11,11 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default function ParentLoginPage() {
-  return <ParentLoginForm />;
+export default async function ParentLoginPage() {
+  const existing = await getParentPortalAccess();
+  if (existing) {
+    redirect('/parent/dashboard');
+  }
+  const config = getSupabasePublicConfiguration();
+  return <ParentLoginForm liveAuthEnabled={config.configured} />;
 }
