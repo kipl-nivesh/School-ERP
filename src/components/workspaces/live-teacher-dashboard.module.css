@@ -31,3 +31,62 @@
 .status[data-status="present"] { background: #d8f5ea; color: #145743; }
 .status[data-status="absent"] { background: #ffe9e5; color: #852e27; }
 .status[data-status="late"] { background: #fff0cf; color: #68470f; }
+
+.skeletonWrap {
+  display: grid;
+  gap: 1.15rem;
+}
+.skeletonHeader {
+  display: grid;
+  gap: .55rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 1rem;
+  border: 1px solid #d0dfed;
+  background: #fff;
+}
+.skeletonTitle {
+  width: min(16rem, 65%);
+  height: 1.75rem;
+  border-radius: .45rem;
+  background: linear-gradient(90deg, #e2ecf7 25%, #f1f6fc 50%, #e2ecf7 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.3s ease-in-out infinite;
+}
+.skeletonSubtitle {
+  width: min(26rem, 85%);
+  height: .95rem;
+  border-radius: .35rem;
+  background: linear-gradient(90deg, #e8f0f9 25%, #f5f9fd 50%, #e8f0f9 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.3s ease-in-out infinite;
+}
+.skeletonCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: .75rem;
+}
+.skeletonCard {
+  height: 5.5rem;
+  border-radius: .8rem;
+  border: 1px solid #d0dfed;
+  background: linear-gradient(90deg, #eef4fb 25%, #f8fbff 50%, #eef4fb 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.3s ease-in-out infinite;
+}
+.skeletonPanel {
+  height: 14rem;
+  border-radius: .85rem;
+  border: 1px solid #d0dfed;
+  background: linear-gradient(90deg, #eef4fb 25%, #f8fbff 50%, #eef4fb 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.3s ease-in-out infinite;
+}
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeletonTitle, .skeletonSubtitle, .skeletonCard, .skeletonPanel {
+    animation: none;
+  }
+}

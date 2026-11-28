@@ -17,7 +17,7 @@ type StaffClient = Awaited<ReturnType<typeof staffClient>>;
 
 type ProviderEvidence = VerifiedStaffProvider & { readonly verifiedTotp: boolean; readonly freshPasswordTotpAt: number | null };
 
-async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence | null> {
+async function readValidClaims(client: StaffClient) {
   const config = getSupabasePublicConfiguration();
   if (!config.configured) return null;
   const { data, error } = await client.auth.getClaims();
@@ -42,9 +42,16 @@ async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence |
     typeof claims.exp !== 'number' || !Number.isSafeInteger(claims.exp) || claims.exp * 1000 <= now ||
     !hasPasswordMethod || passwordTimestamp < 0 || passwordTimestamp * 1000 > now + CLOCK_TOLERANCE_MS ||
     (claims.aal !== 'aal1' && claims.aal !== 'aal2')) return null;
-  const user = await client.auth.getUser();
+  return { claims, now, amr, passwordTimestamp, CLOCK_TOLERANCE_MS };
+}
+
+function buildProviderEvidence(
+  parsed: NonNullable<Awaited<ReturnType<typeof readValidClaims>>>,
+  user: Awaited<ReturnType<StaffClient['auth']['getUser']>>,
+  live: Awaited<ReturnType<StaffClient['rpc']>>,
+): ProviderEvidence | null {
+  const { claims, now, amr, passwordTimestamp, CLOCK_TOLERANCE_MS } = parsed;
   if (user.error || !user.data.user?.email_confirmed_at || user.data.user.id !== claims.sub) return null;
-  const live = await client.rpc('staff_session_is_live');
   if (live.error || live.data !== true || claims.exp * 1000 <= Date.now()) return null;
   const hasTotpAmr = amr.some(entry => {
     if (typeof entry === 'string') return entry === 'totp' || entry === 'mfa';
@@ -64,6 +71,16 @@ async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence |
   return { profileId: user.data.user.id, sessionId: claims.session_id, expiresAt: claims.exp * 1000,
     authenticatedAt: authTimeMs, verifiedAt: now, assurance: claims.aal, reauthenticatedAt: null, verifiedTotp,
     freshPasswordTotpAt: verifiedTotp && accountantEvidence.freshMfa ? accountantEvidence.passwordAt : null } as ProviderEvidence;
+}
+
+async function verifiedProvider(client: StaffClient): Promise<ProviderEvidence | null> {
+  const parsed = await readValidClaims(client);
+  if (!parsed) return null;
+  const [user, live] = await Promise.all([
+    client.auth.getUser(),
+    client.rpc('staff_session_is_live'),
+  ]);
+  return buildProviderEvidence(parsed, user, live);
 }
 
 export type StaffSchoolChoice = { schoolId: string; schoolName: string; role: StaffRole };
@@ -88,22 +105,30 @@ export async function listStaffSchoolChoices(client: StaffClient): Promise<Staff
 
 export async function loadStaffResolution(client: StaffClient, requestedRole?: StaffRole, studentAdministration = false): Promise<StaffResolution> {
   try {
-    const provider = await verifiedProvider(client);
-    if (!provider) return { kind: 'denied' };
-    const tenant = await client.rpc('current_school_id');
-    if (tenant.error) return { kind: 'denied' };
+    const parsed = await readValidClaims(client);
+    if (!parsed) return { kind: 'denied' };
+    const profileId = parsed.claims.sub;
+    const sessionId = parsed.claims.session_id;
+    const [user, live, tenant, activeRole, p, context] = await Promise.all([
+      client.auth.getUser(),
+      client.rpc('staff_session_is_live'),
+      client.rpc('current_school_id'),
+      client.rpc('current_active_role'),
+      client.from('profiles').select('id,account_status,credential_reset_required,authorization_version').eq('id', profileId).maybeSingle(),
+      client.from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at,school_id').eq('id', sessionId).eq('profile_id', profileId).maybeSingle(),
+    ]);
+    const provider = buildProviderEvidence(parsed, user, live);
+    if (!provider || tenant.error) return { kind: 'denied' };
     if (tenant.data === null) {
       if (!requestedRole || !(await readStaffSchoolChoices(client)).some(choice => choice.role === requestedRole)) return { kind: 'denied' };
       return requestedRole === 'admin' && !provider.verifiedTotp ? { kind: 'mfa_required' } : { kind: 'context_required' };
     }
     if (!isStaffUuid(tenant.data)) return { kind: 'denied' };
-    const school = await client.from('schools').select('id,status,name').eq('id', tenant.data).maybeSingle();
-    if (school.error || school.data?.status !== 'active' || school.data.id !== tenant.data) return { kind: 'denied' };
-    const [p, memberships, context] = await Promise.all([
-      client.from('profiles').select('id,account_status,credential_reset_required,authorization_version').eq('id', provider.profileId).maybeSingle(),
+    const [school, memberships] = await Promise.all([
+      client.from('schools').select('id,status,name').eq('id', tenant.data).maybeSingle(),
       client.from('user_roles').select('id,profile_id,role_code,membership_status,valid_from,valid_until,permissions,school_id').eq('profile_id', provider.profileId).eq('school_id', tenant.data),
-      client.from('role_contexts').select('id,profile_id,role_code,assignment_id,context_version,authorization_version,expires_at,revoked_at,school_id').eq('id', provider.sessionId).eq('profile_id', provider.profileId).eq('school_id', tenant.data).maybeSingle(),
     ]);
+    if (school.error || school.data?.status !== 'active' || school.data.id !== tenant.data) return { kind: 'denied' };
     if (p.error || memberships.error || context.error || !p.data || !memberships.data || memberships.data.some(row => row.school_id !== tenant.data) ||
       (context.data && context.data.school_id !== tenant.data)) return { kind: 'denied' };
     const role = requestedRole ?? context.data?.role_code;
@@ -117,20 +142,23 @@ export async function loadStaffResolution(client: StaffClient, requestedRole?: S
     if (role === 'admin' && !provider.verifiedTotp &&
       (resolution.kind === 'authorized' || resolution.kind === 'context_required')) return { kind: 'mfa_required' };
     if (resolution.kind !== 'authorized') return resolution;
-    const activeRole = await client.rpc('current_active_role');
     if (activeRole.error || activeRole.data !== role ||
       Math.min(resolution.context.session.expiresAt, resolution.context.activeRole.expiresAt) <= Date.now()) return { kind: 'denied' };
     return { ...resolution, schoolName: school.data.name, context: { ...resolution.context, schoolId: tenant.data } };
   } catch { return { kind: 'denied' }; }
 }
 
-export async function getStaffAccess(target?: StaffRole): Promise<Extract<StaffResolution, { kind: 'authorized' }> | null> {
+const getCachedStaffAccess = cache(async (target?: StaffRole): Promise<Extract<StaffResolution, { kind: 'authorized' }> | null> => {
   if (!staffRequestsEnabled()) return null;
   try {
     const result = await loadStaffResolution(await staffClient());
     if (result.kind !== 'authorized' || target && !evaluateDashboardAccess(result.context, target, Date.now()).allowed) return null;
     return result;
   } catch { return null; }
+});
+
+export async function getStaffAccess(target?: StaffRole): Promise<Extract<StaffResolution, { kind: 'authorized' }> | null> {
+  return getCachedStaffAccess(target);
 }
 
 /** Only Student administration opts into fresh native Admin credentials here. */
