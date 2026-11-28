@@ -4,7 +4,7 @@ import { getAccountantRenderAccess, getStaffAccess } from '@/lib/staff/server';
 import { isStaffRole } from '@/lib/staff/contracts';
 import { LiveAdminDashboard, AdminDashboardLoading } from '@/components/workspaces/live-admin-dashboard';
 import { LiveTeacherDashboard, TeacherDashboardLoading } from '@/components/workspaces/live-teacher-dashboard';
-import { LiveAccountantDashboard } from '@/components/workspaces/live-accountant-dashboard';
+import { LiveAccountantDashboard, AccountantDashboardLoading } from '@/components/workspaces/live-accountant-dashboard';
 import type { TeacherQuery } from '@/lib/services/teacher-dashboard';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export default async function StaffRoleWorkspace({ params, searchParams }: {
     <LiveTeacherDashboard access={access} query={await searchParams} />
   </Suspense>;
 
-  return <Suspense fallback={<p role="status">Loading school finance...</p>}>
+  return <Suspense fallback={<AccountantDashboardLoading />}>
     <LiveAccountantDashboard access={access} query={await searchParams} />
   </Suspense>;
 }
