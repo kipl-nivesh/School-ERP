@@ -78,7 +78,20 @@ export async function readStudentDirectory(form: FormData = new FormData(), scop
       .order('registration_number').order('id').range(start, start + pageSize);
     if (filters.search) {
       const pattern = '"%' + filters.search + '%"';
-      query = query.or('display_name.ilike.' + pattern + ',registration_number.ilike.' + pattern);
+      const aliasRes = await client
+        .from('student_registration_aliases')
+        .select('student_id')
+        .eq('school_id', schoolId)
+        .ilike('legacy_registration_number', `%${filters.search}%`)
+        .limit(25);
+      const aliasIds = (aliasRes.data ?? [])
+        .map(row => row.student_id)
+        .filter((id): id is string => typeof id === 'string' && uuid.test(id));
+      const orParts = ['display_name.ilike.' + pattern, 'registration_number.ilike.' + pattern];
+      if (aliasIds.length > 0) {
+        orParts.push('id.in.(' + aliasIds.join(',') + ')');
+      }
+      query = query.or(orParts.join(','));
     }
     if (filters.status) query = query.eq('enrollment_status', filters.status);
     if (filters.classId) query = query.eq('enrollment.section.class_id', filters.classId);

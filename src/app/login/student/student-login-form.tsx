@@ -86,7 +86,7 @@ export function StudentLoginForm({ liveAuthEnabled = true }: { liveAuthEnabled?:
               type="text"
               autoComplete="username"
               maxLength={80}
-              placeholder="Your admission or registration number"
+              placeholder="e.g. 20260001 (or legacy ID)"
               icon={<Hash size={15} />}
               required
               disabled={!liveAuthEnabled || pending}

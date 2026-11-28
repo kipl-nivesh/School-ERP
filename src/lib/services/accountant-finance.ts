@@ -91,6 +91,7 @@ export async function readAccountantFinance(query: AccountantQuery, workspace: A
   if ((!fees && !payments && !receipts) || workspace === 'expenses' || workspace === 'reports' || workspace === 'records') {
     return { kind: 'ready', schoolId: school, filters, schoolName: access.schoolName,
       feesAllowed: fees, paymentsAllowed: payments || receipts,
+      studentMap: {} as Record<string, { name: string; registration: string }>,
       invoiceTotals: Promise.resolve(denied), collected: Promise.resolve(denied), ledger: denied, history: denied, recent: denied,
       receipt: denied, structures: denied, classes: denied, canCollect, canConfigure,
       canReport, canRequestExport } as const;
@@ -182,8 +183,34 @@ export async function readAccountantFinance(query: AccountantQuery, workspace: A
         ? panel(fees, async () => scoped<SchoolClass>(await client.rpc('list_accountant_fee_classes', { p_school: school }), school))
         : Promise.resolve(denied),
     ]);
+    const studentIds = new Set<string>();
+    if (ledger.kind === 'ready') ledger.data.items.forEach(item => studentIds.add(item.studentId));
+    if (history.kind === 'ready') history.data.items.forEach(item => studentIds.add(item.studentId));
+    if (recent.kind === 'ready') recent.data.forEach(item => studentIds.add(item.studentId));
+    if (receipt.kind === 'ready' && receipt.data) studentIds.add(receipt.data.studentId);
+    if (filters.studentId) studentIds.add(filters.studentId);
+
+    const studentMap: Record<string, { name: string; registration: string }> = {};
+    if (studentIds.size > 0) {
+      const stuRes = await client.rpc('list_accountant_fee_students', {
+        p_school: school,
+        p_student_ids: [...studentIds],
+      });
+      if (!stuRes.error && Array.isArray(stuRes.data)) {
+        for (const row of stuRes.data) {
+          if (row.school_id === school && typeof row.id === 'string') {
+            studentMap[row.id] = {
+              name: String(row.display_name ?? ''),
+              registration: String(row.registration_number ?? ''),
+            };
+          }
+        }
+      }
+    }
+
     return { kind: 'ready', schoolId: school, schoolName: access.schoolName, filters,
       feesAllowed: fees, paymentsAllowed: payments || receipts,
+      studentMap,
       invoiceTotals: summary, collected,
       ledger, history, recent, receipt, structures, classes, canCollect, canConfigure, canReport, canRequestExport } as const;
   } catch { return unavailable; }
