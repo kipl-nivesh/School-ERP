@@ -38,6 +38,10 @@ type FinanceReady = Extract<FinanceResult, { kind: 'ready' }>;
 const route = '/staff/accountant';
 type SupportingRecords = Awaited<ReturnType<typeof readAccountantSupportingRecords>>;
 const recordAnchor = (title: string) => 'records-' + title.toLowerCase();
+const studentLabel = (data: FinanceReady, studentId: string) => {
+  const info = data.studentMap[studentId];
+  return info?.registration ? `${info.name} (${info.registration})` : 'Student record';
+};
 
 function financeLink(
   workspace: AccountantWorkspaceKey,
@@ -363,7 +367,7 @@ export function AccountantDashboardView({
             <Section id="ledger" title="Student fee ledger">
               {filters.studentId && (
                 <p>
-                  Student {filters.studentId} ·{' '}
+                  {studentLabel(data, filters.studentId)} ·{' '}
                   <Link href={financeLink('ledger', filters, { studentId: '', ledgerPage: 1, paymentPage: 1 }, 'ledger')}>
                     All students
                   </Link>
@@ -380,7 +384,7 @@ export function AccountantDashboardView({
                               {row.number} · {row.title}
                             </strong>
                             <Link href={financeLink('ledger', filters, { studentId: row.studentId, ledgerPage: 1, paymentPage: 1 }, 'ledger')}>
-                              Student {row.studentId}
+                              {studentLabel(data, row.studentId)}
                             </Link>
                             <span>
                               {row.status} · Due {row.due}
@@ -435,7 +439,7 @@ export function AccountantDashboardView({
                             </span>
                             {row.reference && <span>Reference {row.reference}</span>}
                             <Link href={financeLink('payments', filters, { studentId: row.studentId, ledgerPage: 1, paymentPage: 1 }, 'payments')}>
-                              Student {row.studentId}
+                              {studentLabel(data, row.studentId)}
                             </Link>
                             {row.receiptNumber && (
                               <Link href={financeLink('payments', filters, { receiptId: row.id }, 'receipt')}>
@@ -463,7 +467,7 @@ export function AccountantDashboardView({
                           <p>
                             <strong>{row.receiptNumber}</strong> · {data.schoolName}
                           </p>
-                          <p>Student {row.studentId}</p>
+                          <p>{studentLabel(data, row.studentId)}</p>
                           <p>
                             {row.date} · {row.method.replaceAll('_', ' ')} · Settled
                           </p>

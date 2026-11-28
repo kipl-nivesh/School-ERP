@@ -77,7 +77,7 @@ export function StudentDirectory({ initial, admissions = false }: { initial: Dir
           <input
             name="search"
             type="search"
-            placeholder="Student name or BC-..."
+            placeholder="Student name or 20260001"
             maxLength={80}
             value={search}
             onChange={event => setSearch(event.target.value)}
