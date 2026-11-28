@@ -3,6 +3,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { evaluatePermission } from '@/lib/auth/authorization';
+import { isSixDigitPinFormat } from '@/lib/auth/input-contracts';
+import { hashPin } from '@/lib/auth/pin-service';
 import { isStaffUuid } from '@/lib/staff/contracts';
 import { getStudentAdminAccess, staffClient } from '@/lib/staff/server';
 import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
@@ -31,6 +33,8 @@ export type AdminParentAccountItem = {
   email_confirmed: boolean;
   account_status: string;
   membership_status: string;
+  pin_status: 'active' | 'locked' | 'revoked' | 'not_set';
+  pin_updated_at: string | null;
   children: AdminParentChildItem[];
 };
 
@@ -212,4 +216,73 @@ export async function setParentAccountStatusAction(
       ? 'Parent access suspended and active sessions revoked.'
       : 'Parent access reactivated.',
   };
+}
+
+export async function manageParentPinAction(
+  _prev: ParentAdminActionState,
+  form: FormData,
+): Promise<ParentAdminActionState> {
+  const profileId = form.get('profileId')?.toString().trim() ?? '';
+  const intent = form.get('intent')?.toString().trim() === 'reset' ? 'reset' : 'activate';
+  const pin = typeof form.get('pin') === 'string' ? (form.get('pin') as string) : '';
+
+  if (!isStaffUuid(profileId) || !isSixDigitPinFormat(pin)) {
+    return { ok: false, message: 'Enter a valid 6-digit numeric PIN (leading zeros supported).' };
+  }
+
+  const reqPerm = intent === 'reset' ? 'security.credentials.reset' : 'security.accounts.create';
+  const admin = await requireAdminMfa('security.accounts.update');
+  if (!admin || !evaluatePermission(admin.access.context, reqPerm, Date.now()).allowed) {
+    return { ok: false, message: reasonMessages.unauthorized };
+  }
+
+  try {
+    const { hash, salt } = await hashPin(pin);
+    const res = await admin.client.rpc('admin_manage_parent_pin', {
+      p_profile: profileId,
+      p_intent: intent,
+      p_hash: hash,
+      p_salt: salt,
+    });
+    const data = res.data as { ok?: boolean; reason?: string } | null;
+    if (res.error || !data?.ok) {
+      return { ok: false, message: reasonMessages[data?.reason ?? ''] ?? 'Unable to update Parent PIN.' };
+    }
+    revalidatePath('/staff/admin');
+    return {
+      ok: true,
+      message:
+        intent === 'reset'
+          ? 'Parent PIN reset and existing Parent sessions revoked.'
+          : 'Parent PIN activated.',
+    };
+  } catch {
+    return { ok: false, message: 'Unable to update Parent PIN.' };
+  }
+}
+
+export async function revokeParentSessionsAction(
+  _prev: ParentAdminActionState,
+  form: FormData,
+): Promise<ParentAdminActionState> {
+  const profileId = form.get('profileId')?.toString().trim() ?? '';
+  if (!isStaffUuid(profileId)) {
+    return { ok: false, message: 'Invalid parent account request.' };
+  }
+
+  const admin = await requireAdminMfa('security.accounts.update');
+  if (!admin) {
+    return { ok: false, message: reasonMessages.unauthorized };
+  }
+
+  const res = await admin.client.rpc('admin_revoke_parent_sessions', {
+    p_profile: profileId,
+  });
+  const data = res.data as { ok?: boolean; reason?: string } | null;
+  if (res.error || !data?.ok) {
+    return { ok: false, message: reasonMessages[data?.reason ?? ''] ?? 'Unable to revoke Parent sessions.' };
+  }
+
+  revalidatePath('/staff/admin');
+  return { ok: true, message: 'Active Parent sessions revoked.' };
 }
