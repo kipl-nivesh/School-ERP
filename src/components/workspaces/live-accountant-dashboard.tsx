@@ -279,7 +279,7 @@ export function AccountantDashboardView({
             </div>
             <Section id="totals" title="School finance overview">
               <p className={shell.limit}>
-                All-time totals for the active school. Overdue totals require a verified school timezone.
+                All-time totals for the active school. Overdue totals are evaluated against the verified school timezone.
               </p>
               <Suspense fallback={<p role="status">Loading finance totals…</p>}>
                 <FinanceTotals data={data} />

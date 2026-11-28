@@ -23,6 +23,7 @@ import {
 import type { InvoiceStatus } from './fee-fields';
 import { readAccountantInvoiceTotals, readAccountantPaymentTotals } from './accountant-render-totals';
 import { calculateFinanceReport, checkedFinanceRows, FINANCE_REPORT_LIMIT, reportInvoiceBalance } from './finance-report-calculation';
+import { readVerifiedSchoolTimezone, schoolCalendarDate } from '../timezone/school-timezone';
 
 export * from './report-fields';
 
@@ -315,7 +316,8 @@ export async function readReportsWorkspace(form = new FormData(), accountantRend
         };
 
         // Paginated rows
-        const today = new Date().toISOString().slice(0, 10);
+        const verifiedTz = await readVerifiedSchoolTimezone(client, schoolId);
+        const today = schoolCalendarDate(new Date(), verifiedTz) ?? new Date().toISOString().slice(0, 10);
         const sectionMatch = (filters.classId || filters.sectionId) ? '!inner' : '';
         const enrollmentEmbed = `enrollment:enrollments!enrollments_student_school_fkey${sectionMatch}(school_id,section:sections!enrollments_section_year_school_fkey${sectionMatch}(id,name,class_id,school_id,classroom:classes!sections_class_school_fkey(name,school_id),year:academic_years!sections_academic_year_school_fkey(label,school_id)))`;
 
@@ -496,9 +498,12 @@ export async function readReportsWorkspace(form = new FormData(), accountantRend
         let invoiceSnapshot: Awaited<ReturnType<typeof readAccountantInvoiceTotals>> | undefined;
         let financeMetrics: FinanceReportMetrics | undefined;
         if (canReadReceipts || allowed('payments.read')) {
-          const snapshots = accountant ? await Promise.all([
-            readAccountantInvoiceTotals(schoolId), readAccountantPaymentTotals(schoolId),
-          ]) : null;
+          const [verifiedTz, snapshots] = await Promise.all([
+            readVerifiedSchoolTimezone(client, schoolId),
+            accountant ? Promise.all([
+              readAccountantInvoiceTotals(schoolId), readAccountantPaymentTotals(schoolId),
+            ]) : Promise.resolve(null),
+          ]);
           invoiceSnapshot = snapshots?.[0];
           const [invoices, payments] = snapshots ?? await Promise.all([
             client.from('fee_invoices').select('amount_paise::text,paid_paise::text,due_date,status', { count: 'exact' })
@@ -507,8 +512,8 @@ export async function readReportsWorkspace(form = new FormData(), accountantRend
               .eq('school_id', schoolId).eq('status', 'settled').limit(FINANCE_REPORT_LIMIT),
           ]);
           try {
-            // The schema has no verified school timezone. Withhold overdue totals until one is available.
-            financeMetrics = calculateFinanceReport(invoices, payments, null);
+            const schoolDate = schoolCalendarDate(new Date(), verifiedTz);
+            financeMetrics = calculateFinanceReport(invoices, payments, schoolDate);
           } catch {
             return { kind: 'error', message: 'Finance totals are unavailable because the complete records could not be verified.' };
           }

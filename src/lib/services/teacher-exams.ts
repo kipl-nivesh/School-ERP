@@ -1,6 +1,7 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
 import { staffClient, type getStaffAccess } from '../staff/server';
+import { readSchoolTodayDate } from '../timezone/school-timezone';
 import { validAttendanceDate } from './attendance-fields';
 import { isRecordId } from './management-contracts';
 import type { Exam } from './exam-workspace';
@@ -77,7 +78,7 @@ export async function readTeacherExams(access: Access, input: TeacherQuery) {
       .select(fields, options).eq('school_id', school).eq('section_id', scope.section_id).eq('subject_code', scope.subject_code);
     const validSheet = (row: Sheet) => row.school_id === school && row.section_id === scope.section_id && row.subject_code === scope.subject_code;
     const count = () => sheets('id', { head: true, count: 'exact' });
-    const cutoff = new Date(now).toISOString().slice(0, 10);
+    const cutoff = await readSchoolTodayDate(client, school, new Date(now));
     const readCounts = async () => {
       const scoped = await sheets('school_id,section_id,subject_code,exam_date,is_published', { count: 'exact' }).limit(200)
         .overrideTypes<Pick<Sheet, 'school_id' | 'section_id' | 'subject_code' | 'exam_date' | 'is_published'>[], { merge: false }>();

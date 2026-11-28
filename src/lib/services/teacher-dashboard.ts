@@ -1,6 +1,7 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
 import { staffClient, getStaffAccess } from '../staff/server';
+import { readSchoolTodayDate } from '../timezone/school-timezone';
 
 type Access = NonNullable<Awaited<ReturnType<typeof getStaffAccess>>>;
 export type TeacherQuery = Record<string, string | string[] | undefined>;
@@ -43,7 +44,7 @@ export async function readTeacherOverview(access: Access) {
       !evaluatePermission(context, 'students.read', now).allowed) return { kind: 'denied' } as const;
   try {
     const client = await staffClient();
-    const today = new Date(now).toISOString().slice(0, 10);
+    const today = await readSchoolTodayDate(client, school, new Date(now));
     const validity = 'valid_until.is.null,valid_until.gte.' + today;
     const countSections = 'section:sections!sections_class_school_fkey!inner(school_id,' + assignmentJoin + ')';
     const countTimetableSection = 'section:sections!timetable_section_school_fkey!inner(school_id,' + assignmentJoin + ')';
@@ -87,7 +88,7 @@ export async function readTeacherClasses(access: Access, input: TeacherQuery) {
   if (!filters) return { kind: 'invalid' } as const;
   try {
     const client = await staffClient();
-    const today = new Date(now).toISOString().slice(0, 10);
+    const today = await readSchoolTodayDate(client, school, new Date(now));
     const validity = 'valid_until.is.null,valid_until.gte.' + today;
     const sections = () => client.from('sections').select(sectionFields)
       .eq('school_id', school).eq('assignment.school_id', school).eq('assignment.teacher_profile_id', teacher)

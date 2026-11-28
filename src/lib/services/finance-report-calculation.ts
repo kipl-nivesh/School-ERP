@@ -1,6 +1,9 @@
+import { schoolCalendarDate } from '../timezone/school-timezone';
 import { invoiceBalance, invoiceStatuses, parsePaise } from './accountant-finance-fields';
 import { isValidDateString, type FinanceReportMetrics } from './report-fields';
 import type { PaymentMethod } from './fee-fields';
+
+export { schoolCalendarDate };
 
 export const FINANCE_REPORT_LIMIT = 1000;
 
@@ -17,20 +20,6 @@ export function checkedFinanceRows<T>(response: ReportResponse<T>, offset = 0, l
     throw new Error('Finance records are incomplete');
   }
   return data;
-}
-
-export function schoolCalendarDate(now: Date, timeZone: string | null): string | null {
-  if (!timeZone) return null;
-  try {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone, calendar: 'gregory', numberingSystem: 'latn',
-      year: 'numeric', month: '2-digit', day: '2-digit',
-    }).formatToParts(now);
-    const date = ['year', 'month', 'day'].map(part => parts.find(p => p.type === part)?.value).join('-');
-    return isValidDateString(date) ? date : null;
-  } catch {
-    return null;
-  }
 }
 
 export function reportInvoiceBalance(invoice: Invoice) {
