@@ -12,7 +12,8 @@ import {
   Save,
   ShieldCheck,
 } from 'lucide-react';
-import { updateSchoolNameAction } from '@/app/staff/school-settings-actions';
+import { updateSchoolNameAction, updateSchoolTimezoneAction } from '@/app/staff/school-settings-actions';
+import { COMMON_SCHOOL_TIMEZONES } from '@/lib/timezone/school-timezone';
 import type {
   SchoolSettingsPage,
   SettingsActionResult,
@@ -29,6 +30,7 @@ const initialActionResult: SettingsActionResult = { ok: false, message: '' };
 export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementProps) {
   const [tab, setTab] = useState<SettingsTab>('profile');
   const [actionState, formAction, isPending] = useActionState(updateSchoolNameAction, initialActionResult);
+  const [tzState, tzAction, tzPending] = useActionState(updateSchoolTimezoneAction, initialActionResult);
 
   if (initial.kind === 'denied') {
     return (
@@ -265,30 +267,95 @@ export function SchoolSettingsManagement({ initial }: SchoolSettingsManagementPr
         <section className={styles.panel} aria-labelledby="timezone-heading">
           <div className={styles.panelHeader}>
             <div>
-              <h2 id="timezone-heading" className={styles.panelTitle}>Timezone & Regional Dates</h2>
-              <p className={styles.panelDescription}>Date boundaries and attendance evaluation semantics.</p>
+              <h2 id="timezone-heading" className={styles.panelTitle}>Timezone &amp; Regional Dates</h2>
+              <p className={styles.panelDescription}>School-local calendar date, overdue fee evaluation, and display semantics.</p>
             </div>
           </div>
 
           <div className={styles.infoGrid}>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Current Database Date Model</span>
-              <span className={styles.infoValue}>Database Server Date (current_date, UTC)</span>
-              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Evaluated in PostgreSQL UTC session</span>
+              <span className={styles.infoLabel}>Configured School Timezone</span>
+              <span className={styles.infoValue}>{profile.timezone ?? 'Not configured'}</span>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{profile.timezoneOffsetLabel}</span>
             </div>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Timezone Column Status</span>
-              <span className={styles.infoValue}>Not Deployed</span>
-              <span style={{ fontSize: '0.75rem', color: '#b91c1c' }}>Schema modification required</span>
+              <span className={styles.infoLabel}>Verification Status</span>
+              <span className={styles.infoValue}>
+                {profile.timezoneVerified ? 'Verified' : 'Unverified'}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: profile.timezoneVerified ? '#047857' : '#b91c1c' }}>
+                {profile.timezoneVerified
+                  ? 'Active for overdue fees and school-local dates'
+                  : 'Verify timezone to enable school-local overdue totals'}
+              </span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Current School-Local Date &amp; Time</span>
+              <span className={styles.infoValue}>
+                {profile.schoolLocalDate && profile.schoolLocalTime
+                  ? `${profile.schoolLocalDate} · ${profile.schoolLocalTime}`
+                  : 'Awaiting verified timezone'}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>DD-MM-YYYY · 12-hour AM/PM</span>
             </div>
           </div>
 
-          <div className={styles.warningBanner} role="status">
-            <AlertTriangle size={18} className={styles.warningIcon} aria-hidden="true" />
-            <div>
-              <strong>Timezone Notice: </strong>
-              <span>{timezoneNotice}</span>
-            </div>
+          <div className={styles.formSection}>
+            <h3 className={styles.formTitle}>Configure &amp; Verify School Timezone</h3>
+            {canWriteSettings ? (
+              <form action={tzAction} className={styles.editForm}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="schoolTimezone" className={styles.formLabel}>
+                    IANA Timezone Identifier
+                  </label>
+                  <input
+                    id="schoolTimezone"
+                    name="timezone"
+                    type="text"
+                    list="common-school-timezones"
+                    defaultValue={profile.timezone ?? 'Asia/Kolkata'}
+                    required
+                    maxLength={80}
+                    className={styles.formInput}
+                    disabled={tzPending}
+                  />
+                  <datalist id="common-school-timezones">
+                    {COMMON_SCHOOL_TIMEZONES.map((tz) => (
+                      <option key={tz} value={tz} />
+                    ))}
+                  </datalist>
+                </div>
+
+                {tzState.message && (
+                  <p
+                    className={tzState.ok ? styles.feedbackSuccess : styles.feedbackError}
+                    role="status"
+                  >
+                    {tzState.message}
+                  </p>
+                )}
+
+                <button type="submit" className={styles.saveButton} disabled={tzPending}>
+                  <Save size={14} aria-hidden="true" />
+                  {tzPending ? 'Verifying & Saving…' : 'Verify & Save Timezone'}
+                </button>
+              </form>
+            ) : (
+              <div className={styles.warningBanner} role="status">
+                <Lock size={18} className={styles.warningIcon} aria-hidden="true" />
+                <div>
+                  <strong>Timezone Writes Locked: </strong>
+                  <span>
+                    Fresh Admin MFA (AAL2) and the <code>school.settings.write</code> permission are required to update the school timezone.
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.noticeBanner} role="status">
+            <Info size={18} className={styles.noticeIcon} aria-hidden="true" />
+            <span>{timezoneNotice}</span>
           </div>
         </section>
       )}

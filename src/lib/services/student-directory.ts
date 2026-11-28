@@ -1,6 +1,7 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
 import { getStudentAdminAccess, staffClient } from '../staff/server';
+import { readSchoolTodayDate } from '../timezone/school-timezone';
 
 export const studentStatuses = ['active', 'inactive', 'withdrawn'] as const;
 export type StudentStatus = typeof studentStatuses[number];
@@ -65,7 +66,7 @@ export async function readStudentDirectory(form: FormData = new FormData(), scop
     const match = joined ? '!inner' : '';
     const enrollmentFields = 'enrollment:enrollments!enrollments_student_school_fkey' + match +
       '(school_id,section:sections!enrollments_section_year_school_fkey' + match + '(' + optionFields + '))';
-    const today = new Date().toISOString().slice(0, 10);
+    const today = await readSchoolTodayDate(client, schoolId);
     const start = (filters.page - 1) * pageSize;
     let query = client.from('students').select('id,display_name,registration_number,enrollment_status,school_id,profile_id,portal_access_status,' + enrollmentFields)
       .eq('school_id', schoolId)

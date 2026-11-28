@@ -1,6 +1,7 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
 import { staffClient, type getStaffAccess } from '../staff/server';
+import { readSchoolTodayDate } from '../timezone/school-timezone';
 import { validAttendanceDate } from './attendance-fields';
 import { isRecordId } from './management-contracts';
 import type { TeacherQuery } from './teacher-dashboard';
@@ -56,7 +57,7 @@ export async function readTeacherHomework(access: Access, input: TeacherQuery) {
       if (found.error) return { kind: 'error' } as const;
       if (found.data?.[0]?.section_id !== filters.section) return { kind: 'unassigned' } as const;
     }
-    const cutoff = new Date(now).toISOString().slice(0, 10);
+    const cutoff = await readSchoolTodayDate(client, school, new Date(now));
     const join = ',placement:sections!homework_section_school_fkey!inner(school_id,class_id,academic_year_id,' + scope + ')';
     const records = (columns: string, options?: { head: true; count: 'exact' }) => {
       // When section labels are restricted, homework SELECT RLS still verifies the active assignment.

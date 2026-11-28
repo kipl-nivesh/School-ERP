@@ -1,6 +1,7 @@
 import 'server-only';
 import { evaluatePermission } from '../auth/authorization';
 import { staffClient, type getStaffAccess } from '../staff/server';
+import { readSchoolTodayDate } from '../timezone/school-timezone';
 import { attendanceId, attendanceStatuses, validAttendanceDate } from './attendance-fields';
 import type { TeacherQuery } from './teacher-dashboard';
 
@@ -82,7 +83,7 @@ export async function readTeacherAttendance(access: Access, input: TeacherQuery)
     const pageStart = (filters.page - 1) * pageSize;
     const rosterStart = (filters.rosterPage - 1) * pageSize;
     const studentFields = ',student:students!attendance_student_school_fkey(display_name,registration_number)';
-    const rosterDate = filters.date || new Date(now).toISOString().slice(0, 10);
+    const rosterDate = filters.date || await readSchoolTodayDate(client, school, new Date(now));
     let historyQuery = records(identities ? recordFields + studentFields : 'id,school_id,section_id,attendance_date,status');
     if (filters.status) historyQuery = historyQuery.eq('status', filters.status);
 

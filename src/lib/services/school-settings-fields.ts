@@ -6,6 +6,12 @@ export interface SchoolProfile {
   readonly name: string;
   readonly displayName?: string;
   readonly status: 'active' | 'suspended' | 'onboarding';
+  readonly timezone: string | null;
+  readonly timezoneVerified: boolean;
+  readonly timezoneVerifiedAt: string | null;
+  readonly schoolLocalDate: string | null;
+  readonly schoolLocalTime: string | null;
+  readonly timezoneOffsetLabel: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

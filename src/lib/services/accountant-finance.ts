@@ -8,6 +8,7 @@ import { isRecordId } from './management-contracts';
 import { invoiceBalance, invoiceStatuses, invoiceTotals, parsePaise, paymentStatuses, settledTotal } from './accountant-finance-fields';
 import type { AccountantQuery, FinancePanel, InvoiceAmount, ScopedAmount } from './accountant-finance-fields';
 import type { AccountantWorkspaceKey } from '../staff/accountant-workspace';
+import { readVerifiedSchoolTimezone, schoolCalendarDate } from '../timezone/school-timezone';
 
 const pageSize = 20;
 const totalsLimit = 500;
@@ -99,7 +100,8 @@ export async function readAccountantFinance(query: AccountantQuery, workspace: A
 
   try {
     const client = await staffClient();
-    // The current schema has no verified school timezone. Withhold overdue totals.
+    const verifiedTz = workspace === 'overview' ? await readVerifiedSchoolTimezone(client, school) : null;
+    const schoolDate = schoolCalendarDate(new Date(), verifiedTz);
     const range = (page: number) => [(page - 1) * pageSize, page * pageSize] as const;
     const historyFields = 'id,school_id,student_id,amount_paise::text,payment_date,payment_method,status';
     const receiptFields = historyFields + ',receipt_number';
@@ -108,7 +110,7 @@ export async function readAccountantFinance(query: AccountantQuery, workspace: A
     const summary = workspace === 'overview'
       ? panel(fees, async () => {
           const result = await readAccountantInvoiceTotals(school);
-          return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), null);
+          return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), schoolDate);
         })
       : Promise.resolve(denied);
     const collected = workspace === 'overview'
