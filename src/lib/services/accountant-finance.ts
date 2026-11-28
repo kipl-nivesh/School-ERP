@@ -7,6 +7,7 @@ import { validAttendanceDate } from './attendance-fields';
 import { isRecordId } from './management-contracts';
 import { invoiceBalance, invoiceStatuses, invoiceTotals, parsePaise, paymentStatuses, settledTotal } from './accountant-finance-fields';
 import type { AccountantQuery, FinancePanel, InvoiceAmount, ScopedAmount } from './accountant-finance-fields';
+import type { AccountantWorkspaceKey } from '../staff/accountant-workspace';
 
 const pageSize = 20;
 const totalsLimit = 500;
@@ -71,7 +72,7 @@ function paymentView(row: Payment, receiptVisible: boolean) {
   };
 }
 
-export async function readAccountantFinance(query: AccountantQuery) {
+export async function readAccountantFinance(query: AccountantQuery, workspace: AccountantWorkspaceKey = 'overview') {
   const access = await getAccountantRenderAccess();
   const school = access?.context.schoolId;
   if (!access || !school || access.role !== 'accountant' ||
@@ -87,10 +88,13 @@ export async function readAccountantFinance(query: AccountantQuery) {
   const canConfigure = fees && allowed('fees.write');
   const canReport = fees && allowed('reports.read');
   const canRequestExport = accountantMayRequestExport(access.context, Date.now());
-  if (!fees && !payments && !receipts) return { kind: 'ready', schoolId: school, filters, schoolName: access.schoolName,
-    invoiceTotals: Promise.resolve(denied), collected: Promise.resolve(denied), ledger: denied, history: denied, recent: denied,
-    receipt: denied, structures: denied, classes: denied, canCollect: false, canConfigure: false,
-    canReport: false, canRequestExport: false } as const;
+  if ((!fees && !payments && !receipts) || workspace === 'expenses' || workspace === 'reports' || workspace === 'records') {
+    return { kind: 'ready', schoolId: school, filters, schoolName: access.schoolName,
+      feesAllowed: fees, paymentsAllowed: payments || receipts,
+      invoiceTotals: Promise.resolve(denied), collected: Promise.resolve(denied), ledger: denied, history: denied, recent: denied,
+      receipt: denied, structures: denied, classes: denied, canCollect, canConfigure,
+      canReport, canRequestExport } as const;
+  }
 
   try {
     const client = await staffClient();
@@ -100,69 +104,87 @@ export async function readAccountantFinance(query: AccountantQuery) {
     const receiptFields = historyFields + ',receipt_number';
     const visibleFields = (receipts ? receiptFields : historyFields) + (payments ? ',transaction_reference' : '');
     const selectedStudent = (row: { student_id: string }) => !filters.studentId || row.student_id === filters.studentId;
-    const summary = panel(fees, async () => {
-      const result = await readAccountantInvoiceTotals(school);
-      return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), null);
-    });
-    const collected = panel(payments || receipts, async () => {
-      const result = await readAccountantPaymentTotals(school);
-      return settledTotal(complete(scoped<Payment>(result, school), result.count));
-    });
+    const summary = workspace === 'overview'
+      ? panel(fees, async () => {
+          const result = await readAccountantInvoiceTotals(school);
+          return invoiceTotals(complete(scoped<InvoiceAmount>(result, school), result.count), null);
+        })
+      : Promise.resolve(denied);
+    const collected = workspace === 'overview'
+      ? panel(payments || receipts, async () => {
+          const result = await readAccountantPaymentTotals(school);
+          return settledTotal(complete(scoped<Payment>(result, school), result.count));
+        })
+      : Promise.resolve(denied);
     const [ledger, history, recent, receipt, structures, classes] = await Promise.all([
-      panel(fees, async () => {
-        let request = client.from('fee_invoices')
-          .select('id,school_id,student_id,invoice_number,title,issue_date,due_date,amount_paise::text,paid_paise::text,status')
-          .eq('school_id', school);
-        if (filters.studentId) request = request.eq('student_id', filters.studentId);
-        if (filters.invoiceStatus) request = request.eq('status', filters.invoiceStatus);
-        if (filters.dateFrom) request = request.gte('issue_date', filters.dateFrom);
-        if (filters.dateTo) request = request.lte('issue_date', filters.dateTo);
-        return paginated(scoped<Invoice>(await request.order('issue_date', { ascending: false }).order('id')
-          .range(...range(filters.ledgerPage)), school), row => {
-          if (!selectedStudent(row)) throw new Error('Invoice student mismatch');
-          return { id: row.id, studentId: row.student_id, number: row.invoice_number, title: row.title,
-          due: row.due_date, status: row.status, ...invoiceBalance(row) };
-        });
-      }),
-      panel(payments || receipts, async () => {
-        let request = client.from('fee_payments').select(visibleFields).eq('school_id', school);
-        if (!payments) request = request.eq('status', 'settled');
-        if (filters.studentId) request = request.eq('student_id', filters.studentId);
-        if (filters.paymentStatus) request = request.eq('status', filters.paymentStatus);
-        if (filters.dateFrom) request = request.gte('payment_date', filters.dateFrom);
-        if (filters.dateTo) request = request.lte('payment_date', filters.dateTo);
-        return paginated(scoped<Payment>(await request.order('payment_date', { ascending: false }).order('id')
-          .range(...range(filters.paymentPage)), school), row => {
-          if (!selectedStudent(row) || (!payments && row.status !== 'settled')) throw new Error('Payment scope mismatch');
-          return paymentView(row, receipts);
-        });
-      }),
-      panel(payments || receipts, async () => scoped<Payment>(await client.from('fee_payments').select(visibleFields)
-        .eq('school_id', school).eq('status', 'settled').order('payment_date', { ascending: false })
-        .order('id').limit(5), school).map(row => {
-        if (row.status !== 'settled') throw new Error('Unexpected recent payment status');
-        return paymentView(row, receipts);
-      })),
-      panel(receipts, async () => {
-        if (!filters.receiptId) return null;
-        const rows = scoped<Payment>(await client.from('fee_payments').select(receiptFields)
-          .eq('school_id', school).eq('id', filters.receiptId).eq('status', 'settled').limit(2), school);
-        if (rows.length !== 1 || rows[0].id !== filters.receiptId || rows[0].status !== 'settled') return null;
-        return paymentView(rows[0], true);
-      }),
-      panel(fees, async () => {
-        let request = client.from('fee_structures').select('id,school_id,class_id,fee_category,amount_paise::text,frequency,due_date')
-          .eq('school_id', school);
-        if (filters.classId) request = request.eq('class_id', filters.classId);
-        return paginated(scoped<Structure>(await request.order('due_date').order('id')
-          .range(...range(filters.structurePage)), school), row => ({
-          id: row.id, classId: row.class_id, category: row.fee_category,
-          amount: parsePaise(row.amount_paise), frequency: row.frequency, due: row.due_date,
-        }));
-      }),
-      panel(fees, async () => scoped<SchoolClass>(await client.rpc('list_accountant_fee_classes', { p_school: school }), school)),
+      workspace === 'ledger'
+        ? panel(fees, async () => {
+            let request = client.from('fee_invoices')
+              .select('id,school_id,student_id,invoice_number,title,issue_date,due_date,amount_paise::text,paid_paise::text,status')
+              .eq('school_id', school);
+            if (filters.studentId) request = request.eq('student_id', filters.studentId);
+            if (filters.invoiceStatus) request = request.eq('status', filters.invoiceStatus);
+            if (filters.dateFrom) request = request.gte('issue_date', filters.dateFrom);
+            if (filters.dateTo) request = request.lte('issue_date', filters.dateTo);
+            return paginated(scoped<Invoice>(await request.order('issue_date', { ascending: false }).order('id')
+              .range(...range(filters.ledgerPage)), school), row => {
+              if (!selectedStudent(row)) throw new Error('Invoice student mismatch');
+              return { id: row.id, studentId: row.student_id, number: row.invoice_number, title: row.title,
+              due: row.due_date, status: row.status, ...invoiceBalance(row) };
+            });
+          })
+        : Promise.resolve(denied),
+      workspace === 'payments'
+        ? panel(payments || receipts, async () => {
+            let request = client.from('fee_payments').select(visibleFields).eq('school_id', school);
+            if (!payments) request = request.eq('status', 'settled');
+            if (filters.studentId) request = request.eq('student_id', filters.studentId);
+            if (filters.paymentStatus) request = request.eq('status', filters.paymentStatus);
+            if (filters.dateFrom) request = request.gte('payment_date', filters.dateFrom);
+            if (filters.dateTo) request = request.lte('payment_date', filters.dateTo);
+            return paginated(scoped<Payment>(await request.order('payment_date', { ascending: false }).order('id')
+              .range(...range(filters.paymentPage)), school), row => {
+              if (!selectedStudent(row) || (!payments && row.status !== 'settled')) throw new Error('Payment scope mismatch');
+              return paymentView(row, receipts);
+            });
+          })
+        : Promise.resolve(denied),
+      workspace === 'overview'
+        ? panel(payments || receipts, async () => scoped<Payment>(await client.from('fee_payments').select(visibleFields)
+            .eq('school_id', school).eq('status', 'settled').order('payment_date', { ascending: false })
+            .order('id').limit(5), school).map(row => {
+            if (row.status !== 'settled') throw new Error('Unexpected recent payment status');
+            return paymentView(row, receipts);
+          }))
+        : Promise.resolve(denied),
+      workspace === 'payments'
+        ? panel(receipts, async () => {
+            if (!filters.receiptId) return null;
+            const rows = scoped<Payment>(await client.from('fee_payments').select(receiptFields)
+              .eq('school_id', school).eq('id', filters.receiptId).eq('status', 'settled').limit(2), school);
+            if (rows.length !== 1 || rows[0].id !== filters.receiptId || rows[0].status !== 'settled') return null;
+            return paymentView(rows[0], true);
+          })
+        : Promise.resolve(denied),
+      workspace === 'structures'
+        ? panel(fees, async () => {
+            let request = client.from('fee_structures').select('id,school_id,class_id,fee_category,amount_paise::text,frequency,due_date')
+              .eq('school_id', school);
+            if (filters.classId) request = request.eq('class_id', filters.classId);
+            return paginated(scoped<Structure>(await request.order('due_date').order('id')
+              .range(...range(filters.structurePage)), school), row => ({
+              id: row.id, classId: row.class_id, category: row.fee_category,
+              amount: parsePaise(row.amount_paise), frequency: row.frequency, due: row.due_date,
+            }));
+          })
+        : Promise.resolve(denied),
+      workspace === 'structures'
+        ? panel(fees, async () => scoped<SchoolClass>(await client.rpc('list_accountant_fee_classes', { p_school: school }), school))
+        : Promise.resolve(denied),
     ]);
-    return { kind: 'ready', schoolId: school, schoolName: access.schoolName, filters, invoiceTotals: summary, collected,
+    return { kind: 'ready', schoolId: school, schoolName: access.schoolName, filters,
+      feesAllowed: fees, paymentsAllowed: payments || receipts,
+      invoiceTotals: summary, collected,
       ledger, history, recent, receipt, structures, classes, canCollect, canConfigure, canReport, canRequestExport } as const;
   } catch { return unavailable; }
 }

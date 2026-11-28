@@ -7,6 +7,7 @@ import { selectCurrentStudentEnrollment } from './identity-contracts';
 import { projectStudentDashboard, type StudentDashboardProjection } from './dashboard-repository';
 import type { StudentDashboardResult } from './dashboard-model';
 import { studentPortalRequestsEnabled } from './request-policy';
+import type { StudentWorkspaceKey } from './student-workspace';
 
 type Identity = {
   school_id: string; student_id: string; school_name: string; display_name: string;
@@ -65,7 +66,16 @@ function complete<T>(stage: string, result: { data: T[] | null; error: { code?: 
   return null;
 }
 
-export async function readLiveStudentDashboard(access: NonNullable<Awaited<ReturnType<typeof getStudentPortalAccess>>>): Promise<StudentDashboardResult> {
+export async function readLiveStudentDashboard(
+  access: NonNullable<Awaited<ReturnType<typeof getStudentPortalAccess>>>
+): Promise<StudentDashboardResult> {
+  return readLiveStudentModule(access, 'all');
+}
+
+export async function readLiveStudentModule(
+  access: NonNullable<Awaited<ReturnType<typeof getStudentPortalAccess>>>,
+  workspace: StudentWorkspaceKey | 'all'
+): Promise<StudentDashboardResult> {
   const { client, identity } = access;
   const scope = { schoolId: identity.school_id, studentId: identity.student_id };
   const school = scope.schoolId;
@@ -75,84 +85,136 @@ export async function readLiveStudentDashboard(access: NonNullable<Awaited<Retur
   historyStart.setUTCDate(historyStart.getUTCDate() - 364);
   const own = (row: Pick<OwnRow, 'school_id' | 'student_id'>) => row.school_id === school && row.student_id === student;
 
+  const isAll = workspace === 'all';
+  const needEnrollment =
+    isAll ||
+    workspace === 'overview' ||
+    workspace === 'profile' ||
+    workspace === 'timetable' ||
+    workspace === 'homework' ||
+    workspace === 'exams' ||
+    workspace === 'materials';
+  const needPlacement = needEnrollment;
+  const needTimetable = isAll || workspace === 'profile' || workspace === 'timetable';
+  const needHomework = isAll || workspace === 'overview' || workspace === 'homework';
+  const needExams = isAll || workspace === 'overview' || workspace === 'exams';
+  const needMarks = isAll || workspace === 'overview' || workspace === 'exams';
+  const needAttendance = isAll || workspace === 'overview' || workspace === 'attendance';
+  const needAnnouncements = isAll || workspace === 'overview' || workspace === 'announcements';
+  const needFees = isAll || workspace === 'overview' || workspace === 'fees';
+  const needMaterials = isAll || workspace === 'materials';
+
   try {
-    const enrollmentResult = await client.from('enrollments')
-      .select('id,school_id,student_id,section_id,academic_year_id,valid_from,valid_until')
-      .eq('school_id', school).eq('student_id', student)
-      .lte('valid_from', today).or('valid_until.is.null,valid_until.gte.' + today)
-      .limit(2).overrideTypes<Enrollment[], { merge: false }>();
-    if (enrollmentResult.error || !enrollmentResult.data?.every(own)) {
-      reportStudentRead('enrollment', enrollmentResult.error);
-      return unavailable;
+    let enrollments: ReturnType<typeof selectCurrentStudentEnrollment> extends infer _ ? {
+      schoolId: string; studentId: string; sectionId: string; academicYearId: string;
+      validFrom: string; validUntil: string | null;
+    }[] : never = [];
+    let enrollment: ReturnType<typeof selectCurrentStudentEnrollment> = { kind: 'none' };
+
+    if (needEnrollment) {
+      const enrollmentResult = await client.from('enrollments')
+        .select('id,school_id,student_id,section_id,academic_year_id,valid_from,valid_until')
+        .eq('school_id', school).eq('student_id', student)
+        .lte('valid_from', today).or('valid_until.is.null,valid_until.gte.' + today)
+        .limit(2).overrideTypes<Enrollment[], { merge: false }>();
+      if (enrollmentResult.error || !enrollmentResult.data?.every(own)) {
+        reportStudentRead('enrollment', enrollmentResult.error);
+        return unavailable;
+      }
+      enrollments = enrollmentResult.data.map(row => ({
+        schoolId: row.school_id, studentId: row.student_id, sectionId: row.section_id, academicYearId: row.academic_year_id,
+        validFrom: row.valid_from, validUntil: row.valid_until,
+      }));
+      enrollment = selectCurrentStudentEnrollment(scope, enrollments, today);
     }
-    const enrollments = enrollmentResult.data.map(row => ({
-      schoolId: row.school_id, studentId: row.student_id, sectionId: row.section_id, academicYearId: row.academic_year_id,
-      validFrom: row.valid_from, validUntil: row.valid_until,
-    }));
-    const enrollment = selectCurrentStudentEnrollment(scope, enrollments, today);
+
     const academic = async () => {
-      if (enrollment.kind !== 'current') return { currentClassId: null, placement: null, timetable: null, homework: null, examSchedule: null };
+      if (!needEnrollment || enrollment.kind !== 'current') {
+        return { currentClassId: null, placement: null, timetable: null, homework: null, examSchedule: null };
+      }
       const section = enrollment.sectionId;
       const [placementResult, timetableResult, homeworkResult, scheduleResult] = await Promise.all([
-        client.from('sections').select('id,school_id,name,academic_year_id,class_id,classroom:classes!sections_class_school_fkey(school_id,name),year:academic_years!sections_academic_year_school_fkey(school_id,label)')
-          .eq('school_id', school).eq('id', section).eq('academic_year_id', enrollment.academicYearId)
-          .maybeSingle().overrideTypes<Placement, { merge: false }>(),
-        client.from('timetable_slots').select('school_id,section_id,day_of_week,start_time,end_time,subject_code,room_number')
-          .eq('school_id', school).eq('section_id', section).limit(rowLimit + 1)
-          .overrideTypes<NonNullable<StudentDashboardProjection['timetable']>, { merge: false }>(),
-        client.from('homework_assignments').select('school_id,section_id,title,subject_code,due_date,status,description')
-          .eq('school_id', school).eq('section_id', section).eq('status', 'active').order('due_date').order('id').limit(rowLimit + 1)
-          .overrideTypes<NonNullable<StudentDashboardProjection['homework']>, { merge: false }>(),
-
-        client.from('student_exam_schedule').select('id,school_id,section_id,title,subject_code,exam_date,starts_at,ends_at,venue,status')
-          .eq('school_id', school).eq('section_id', section).eq('status', 'published').gte('exam_date', today)
-          .order('exam_date').order('starts_at').order('id').limit(rowLimit + 1).overrideTypes<Schedule[], { merge: false }>(),
+        needPlacement
+          ? client.from('sections').select('id,school_id,name,academic_year_id,class_id,classroom:classes!sections_class_school_fkey(school_id,name),year:academic_years!sections_academic_year_school_fkey(school_id,label)')
+              .eq('school_id', school).eq('id', section).eq('academic_year_id', enrollment.academicYearId)
+              .maybeSingle().overrideTypes<Placement, { merge: false }>()
+          : Promise.resolve({ data: null, error: null }),
+        needTimetable
+          ? client.from('timetable_slots').select('school_id,section_id,day_of_week,start_time,end_time,subject_code,room_number')
+              .eq('school_id', school).eq('section_id', section).limit(rowLimit + 1)
+              .overrideTypes<NonNullable<StudentDashboardProjection['timetable']>, { merge: false }>()
+          : Promise.resolve({ data: [], error: null }),
+        needHomework
+          ? client.from('homework_assignments').select('school_id,section_id,title,subject_code,due_date,status,description')
+              .eq('school_id', school).eq('section_id', section).eq('status', 'active').order('due_date').order('id').limit(rowLimit + 1)
+              .overrideTypes<NonNullable<StudentDashboardProjection['homework']>, { merge: false }>()
+          : Promise.resolve({ data: [], error: null }),
+        needExams
+          ? client.from('student_exam_schedule').select('id,school_id,section_id,title,subject_code,exam_date,starts_at,ends_at,venue,status')
+              .eq('school_id', school).eq('section_id', section).eq('status', 'published').gte('exam_date', today)
+              .order('exam_date').order('starts_at').order('id').limit(rowLimit + 1).overrideTypes<Schedule[], { merge: false }>()
+          : Promise.resolve({ data: [], error: null }),
       ]);
       const row = placementResult.data;
       const placement = !placementResult.error && row && row.school_id === school && row.id === section &&
         row.classroom && row.classroom.school_id === school && row.year && row.year.school_id === school
         ? { school_id: school, section_id: section, academic_year_id: row.academic_year_id,
           class_name: row.classroom.name, section_name: row.name, academic_year: row.year.label } : null;
-      if (!placement) reportStudentRead('placement', placementResult.error);
+      if (needPlacement && !placement) reportStudentRead('placement', placementResult.error);
 
-      const schedule = complete('schedule', scheduleResult);
+      const schedule = needExams ? complete('schedule', scheduleResult) : [];
       const examSchedule = schedule?.every(item => item.status === 'published' && item.school_id === school && item.section_id === section)
         ? schedule.map(item => ({ ...item, exam_name: item.title, starts_at: item.starts_at ?? undefined,
           ends_at: item.ends_at ?? undefined, venue: item.venue ?? undefined })) : null;
       return {
-        currentClassId: placement && row ? row.class_id : null, placement, timetable: complete('timetable', timetableResult), homework: complete('homework', homeworkResult), examSchedule,
-
+        currentClassId: placement && row ? row.class_id : null,
+        placement,
+        timetable: needTimetable ? complete('timetable', timetableResult) : null,
+        homework: needHomework ? complete('homework', homeworkResult) : null,
+        examSchedule,
       };
     };
 
     const [academicData, marksResult, attendanceResult, announcementsResult, invoicesResult, receiptsResult, materialsResult] = await Promise.all([
       academic(),
-      client.from('marks_entries').select('id,school_id,student_id,marks_sheet_id,marks_obtained,exam:marks_sheets!marks_entries_sheet_school_fkey!inner(id,school_id,section_id,exam_name,subject_code,exam_date,is_published,max_marks,passing_marks)')
-        .eq('school_id', school).eq('student_id', student).eq('exam.is_published', true)
-        .order('id').limit(rowLimit + 1).overrideTypes<Entry[], { merge: false }>(),
-      client.from('attendance_records').select('id,school_id,student_id,attendance_date,status')
-        .eq('school_id', school).eq('student_id', student).gte('attendance_date', historyStart.toISOString().slice(0, 10)).lte('attendance_date', today)
-        .order('attendance_date', { ascending: false }).order('id').limit(rowLimit + 1)
-        .overrideTypes<Attendance[], { merge: false }>(),
-      client.from('announcements').select('school_id,title,content,target_audience,published_at,expires_at')
-        .eq('school_id', school).in('target_audience', ['all', 'students']).order('published_at', { ascending: false })
-        .limit(rowLimit + 1).overrideTypes<NonNullable<StudentDashboardProjection['announcements']>, { merge: false }>(),
-      client.from('fee_invoices').select('school_id,student_id,invoice_number,title,due_date,amount_paise,paid_paise,status')
-        .eq('school_id', school).eq('student_id', student).order('due_date').order('id')
-        .limit(rowLimit + 1).overrideTypes<NonNullable<StudentDashboardProjection['invoices']>, { merge: false }>(),
-      client.from('fee_payments').select('id,school_id,student_id,receipt_number,payment_date,amount_paise,status')
-        .eq('school_id', school).eq('student_id', student).in('status', ['settled', 'refunded'])
-        .order('payment_date', { ascending: false }).order('id').limit(rowLimit + 1)
-        .overrideTypes<NonNullable<StudentDashboardProjection['receipts']>, { merge: false }>(),
-      client.from('student_portal_materials').select('id,school_id,student_id,section_id,class_id,audience,title,kind,status')
-        .eq('school_id', school).eq('status', 'published').order('updated_at', { ascending: false }).order('id')
-        .limit(rowLimit + 1).overrideTypes<Material[], { merge: false }>(),
+      needMarks
+        ? client.from('marks_entries').select('id,school_id,student_id,marks_sheet_id,marks_obtained,exam:marks_sheets!marks_entries_sheet_school_fkey!inner(id,school_id,section_id,exam_name,subject_code,exam_date,is_published,max_marks,passing_marks)')
+            .eq('school_id', school).eq('student_id', student).eq('exam.is_published', true)
+            .order('id').limit(rowLimit + 1).overrideTypes<Entry[], { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
+      needAttendance
+        ? client.from('attendance_records').select('id,school_id,student_id,attendance_date,status')
+            .eq('school_id', school).eq('student_id', student).gte('attendance_date', historyStart.toISOString().slice(0, 10)).lte('attendance_date', today)
+            .order('attendance_date', { ascending: false }).order('id').limit(rowLimit + 1)
+            .overrideTypes<Attendance[], { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
+      needAnnouncements
+        ? client.from('announcements').select('school_id,title,content,target_audience,published_at,expires_at')
+            .eq('school_id', school).in('target_audience', ['all', 'students']).order('published_at', { ascending: false })
+            .limit(rowLimit + 1).overrideTypes<NonNullable<StudentDashboardProjection['announcements']>, { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
+      needFees
+        ? client.from('fee_invoices').select('school_id,student_id,invoice_number,title,due_date,amount_paise,paid_paise,status')
+            .eq('school_id', school).eq('student_id', student).order('due_date').order('id')
+            .limit(rowLimit + 1).overrideTypes<NonNullable<StudentDashboardProjection['invoices']>, { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
+      needFees
+        ? client.from('fee_payments').select('id,school_id,student_id,receipt_number,payment_date,amount_paise,status')
+            .eq('school_id', school).eq('student_id', student).in('status', ['settled', 'refunded'])
+            .order('payment_date', { ascending: false }).order('id').limit(rowLimit + 1)
+            .overrideTypes<NonNullable<StudentDashboardProjection['receipts']>, { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
+      needMaterials
+        ? client.from('student_portal_materials').select('id,school_id,student_id,section_id,class_id,audience,title,kind,status')
+            .eq('school_id', school).eq('status', 'published').order('updated_at', { ascending: false }).order('id')
+            .limit(rowLimit + 1).overrideTypes<Material[], { merge: false }>()
+        : Promise.resolve({ data: [], error: null }),
     ]);
-    const marks = complete('marks', marksResult);
+    const marks = needMarks ? complete('marks', marksResult) : null;
     const results = marks?.every(row => own(row) && row.exam?.school_id === school &&
       row.exam.id === row.marks_sheet_id && row.exam.is_published === true && validAttendanceDate(row.exam.exam_date))
       ? marks.sort((a, b) => b.exam.exam_date.localeCompare(a.exam.exam_date) || a.id.localeCompare(b.id)) : null;
-    const rows = complete('attendance', attendanceResult);
+    const rows = needAttendance ? complete('attendance', attendanceResult) : null;
     const totals = { present: 0, absent: 0, late: 0, excused: 0 };
     const attendance = rows?.every(row => own(row) && Object.hasOwn(totals, row.status) && validAttendanceDate(row.attendance_date))
       ? { school_id: school, student_id: student, ...rows.reduce((counts, row) => {
@@ -162,7 +224,7 @@ export async function readLiveStudentDashboard(access: NonNullable<Awaited<Retur
     const profile = {
       displayName: identity.display_name, registration: identity.registration_number, schoolName: identity.school_name, status: 'active',
     } as const;
-    const materials = complete('materials', materialsResult);
+    const materials = needMaterials ? complete('materials', materialsResult) : null;
     const materialsVisible = materials && materials.every(row => isStaffUuid(row.id) && row.school_id === school &&
       row.status === 'published' && (row.audience === 'school' ||
         (row.audience === 'student' && row.student_id === student) ||
@@ -170,7 +232,9 @@ export async function readLiveStudentDashboard(access: NonNullable<Awaited<Retur
         (row.audience === 'section' && enrollment.kind === 'current' && row.section_id === enrollment.sectionId)));
     const dashboard = projectStudentDashboard(scope, profile, {
       databaseDate: today, enrollments, ...academicData, attendance, results,
-      announcements: complete('announcements', announcementsResult), invoices: complete('invoices', invoicesResult), receipts: complete('receipts', receiptsResult),
+      announcements: needAnnouncements ? complete('announcements', announcementsResult) : null,
+      invoices: needFees ? complete('invoices', invoicesResult) : null,
+      receipts: needFees ? complete('receipts', receiptsResult) : null,
     }, Date.now(), 'students', true);
     return { kind: 'ready', data: { ...dashboard, materials: materials && materialsVisible
       ? { kind: 'ready', data: materials.map(({ id, title, kind }) => ({ id, title, kind })) }
