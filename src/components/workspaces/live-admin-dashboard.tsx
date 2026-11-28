@@ -34,12 +34,16 @@ import { readHomework } from '@/lib/services/homework-workspace';
 import { ExamManagement } from './exam-management';
 import { readExams } from '@/lib/services/exam-workspace';
 import { AdminModuleNavigation } from './admin-module-navigation';
+import { ParentManagement } from './parent-management';
+import type { AdminParentAccountItem } from '@/app/staff/parent-management-actions';
+import { staffClient, getStaffAccess } from '@/lib/staff/server';
 import styles from './live-admin-dashboard.module.css';
 
 type Records = Awaited<ReturnType<typeof readLiveWorkspace>>['records'];
 const groups = [
   { title: 'People', sections: [
     { id: 'students', label: 'Students', icon: GraduationCap, tables: [] },
+    { id: 'parents', label: 'Parents & Guardians', icon: Users, tables: [] },
     { id: 'staff-records', label: 'Staff', icon: Users, tables: [] },
     { id: 'admissions', label: 'Admissions', icon: ClipboardList, tables: [] },
   ] },
@@ -183,10 +187,33 @@ async function LiveSchoolSettings() {
   return <SchoolSettingsManagement initial={initial} />;
 }
 
+async function LiveParentManagement() {
+  const access = await getStaffAccess('admin');
+  if (!access?.context.schoolId) return null;
+  const client = await staffClient();
+  const [parentsRes, studentsRes] = await Promise.all([
+    client.rpc('list_admin_parent_accounts'),
+    client
+      .from('students')
+      .select('id,display_name,registration_number')
+      .eq('school_id', access.context.schoolId)
+      .eq('enrollment_status', 'active')
+      .order('registration_number')
+      .limit(200),
+  ]);
+  const parentsPayload = parentsRes.data as { authorized?: boolean; parents?: AdminParentAccountItem[] } | null;
+  const parents = parentsPayload?.authorized && Array.isArray(parentsPayload.parents) ? parentsPayload.parents : [];
+  const students = (studentsRes.data ?? []) as { id: string; display_name: string; registration_number: string }[];
+  return <ParentManagement parents={parents} students={students} />;
+}
+
 export function AdminDashboardView({ data }: { data: Awaited<ReturnType<typeof readLiveWorkspace>> }) {
   const forms: Record<string, ReactNode> = {
     students: data.canReadStudents && <Suspense fallback={<p role="status">Loading student records…</p>}>
       <LiveStudentDirectory />
+    </Suspense>,
+    parents: data.canReadStudents && <Suspense fallback={<p role="status">Loading parent accounts…</p>}>
+      <LiveParentManagement />
     </Suspense>,
     'staff-records': data.canReadStaff && <Suspense fallback={<p role="status">Loading staff directory…</p>}>
       <LiveStaffDirectory />

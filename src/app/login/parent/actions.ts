@@ -10,6 +10,7 @@ import path from 'node:path';
 export type ParentActionState = {
   readonly phase: 'idle' | 'code_sent' | 'error' | 'success';
   readonly email?: string;
+  readonly cooldownSeconds?: number;
   readonly message: string;
 };
 
@@ -40,14 +41,48 @@ export async function sendParentOtp(_previous: ParentActionState, form: FormData
   }
 
   try {
+    const publicClient = createClient(config.url, config.publishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const rateRes = await publicClient.rpc('check_parent_otp_rate_limit', {
+      p_email: email,
+      p_kind: 'send',
+      p_reset: false,
+    });
+    const rateRow = Array.isArray(rateRes.data) ? rateRes.data[0] : null;
+    if (rateRow && rateRow.allowed === false) {
+      const wait = Number(rateRow.retry_after_seconds || 60);
+      return {
+        phase: 'code_sent',
+        email,
+        cooldownSeconds: wait,
+        message: `Please wait ${wait} seconds before requesting another verification code.`,
+      };
+    }
+
+    const precheckRes = await publicClient.rpc('precheck_parent_otp_target', { p_email: email });
+    const eligible = precheckRes.data === true;
+    if (!eligible) {
+      // Return generic code_sent state so account existence is never leaked
+      return {
+        phase: 'code_sent',
+        email,
+        cooldownSeconds: 60,
+        message: 'If this email is registered as an active verified guardian, a one-time code has been dispatched.',
+      };
+    }
+
     const testConfig = loadTestConfig();
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || testConfig.SUPABASE_SERVICE_ROLE_KEY;
+    // Strictly disposable-only guard: never activate on Vercel or non-disposable Supabase projects
+    const isDisposableHost =
+      !process.env.VERCEL &&
+      process.env.VERCEL_ENV !== 'production' &&
+      config.url === 'https://etlahjbwylasudkuqozc.supabase.co';
+    const isAutomatedTestMode = isDisposableHost && process.env.AUTO_TEST_MODE === '1';
 
-    const isAutomatedTestMode = process.env.AUTO_TEST_MODE === '1';
-    const syntheticParentEmail = (testConfig.TEST_PARENT_A1_EMAIL || 'parent_a1@brightcamp.test').toLowerCase();
-
-    // If running in automated local headless test mode with service role key, generate OTP directly
-    if (isAutomatedTestMode && serviceRoleKey && (email === syntheticParentEmail || email === 'sirajubai4646@gmail.com')) {
+    if (isAutomatedTestMode && serviceRoleKey) {
       const adminClient = createClient(config.url, serviceRoleKey, {
         auth: { persistSession: false, autoRefreshToken: false }
       });
@@ -58,18 +93,15 @@ export async function sendParentOtp(_previous: ParentActionState, form: FormData
       if (linkErr || !linkData.properties?.email_otp) {
         return { phase: 'error', message: 'Unable to generate verification code.' };
       }
-      updateTestOtp(email, linkData.properties.email_otp);
+      updateTestOtp(linkData.properties.email_otp);
       return {
         phase: 'code_sent',
         email,
-        message: 'A one-time verification code has been dispatched to your email.'
+        cooldownSeconds: 60,
+        message: 'A one-time verification code has been dispatched to your guardian email.',
       };
     }
 
-    // Default & Production Mode: Genuine outbound email OTP delivery via configured SMTP (Brevo)
-    const publicClient = createClient(config.url, config.publishableKey, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
     const { error: otpErr } = await publicClient.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false }
@@ -77,13 +109,14 @@ export async function sendParentOtp(_previous: ParentActionState, form: FormData
     if (otpErr) {
       return {
         phase: 'error',
-        message: otpErr.message || 'Unable to send verification email. Please ensure your guardian email is registered with the school.'
+        message: 'Unable to send verification email. Please contact the school administrator.'
       };
     }
     return {
       phase: 'code_sent',
       email,
-      message: `A one-time verification code has been dispatched to ${email}.`
+      cooldownSeconds: 60,
+      message: `A one-time verification code has been dispatched to ${email}.`,
     };
   } catch {
     return { phase: 'error', message: 'An unexpected error occurred while requesting verification code.' };
@@ -99,11 +132,34 @@ export async function verifyParentOtp(_previous: ParentActionState, form: FormDa
   const email = form.get('email')?.toString().trim().toLowerCase();
   const code = form.get('code')?.toString().trim();
 
-  if (!email || !code) {
-    return { phase: 'error', message: 'Missing email address or one-time code.' };
+  if (!email || !code || !/^\d{6,10}$/.test(code)) {
+    return {
+      phase: 'code_sent',
+      email,
+      message: 'Enter the numeric one-time code sent to your guardian email.',
+    };
   }
 
   try {
+    const publicClient = createClient(config.url, config.publishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const rateRes = await publicClient.rpc('check_parent_otp_rate_limit', {
+      p_email: email,
+      p_kind: 'verify',
+      p_reset: false,
+    });
+    const rateRow = Array.isArray(rateRes.data) ? rateRes.data[0] : null;
+    if (rateRow && rateRow.allowed === false) {
+      const wait = Number(rateRow.retry_after_seconds || 60);
+      return {
+        phase: 'code_sent',
+        email,
+        message: `Too many failed attempts. Please wait ${wait} seconds before trying again.`,
+      };
+    }
+
     const serverClient = await createServerSupabaseClient({ cookieWrites: 'allowed', httpOnlyCookies: true });
     const { data: sessionData, error: sessionErr } = await serverClient.auth.verifyOtp({
       email,
@@ -111,13 +167,42 @@ export async function verifyParentOtp(_previous: ParentActionState, form: FormDa
       type: 'email'
     });
 
-    if (sessionErr || !sessionData.session) {
+    if (sessionErr || !sessionData.session || !sessionData.user) {
       return {
         phase: 'code_sent',
         email,
         message: 'Invalid or expired verification code. Please check your email or request a new code.'
       };
     }
+
+    const claimsRes = await serverClient.auth.getClaims();
+    const sessionId = (claimsRes.data?.claims as { session_id?: string } | undefined)?.session_id;
+    if (!sessionId) {
+      await serverClient.auth.signOut();
+      return {
+        phase: 'error',
+        message: 'Unable to establish a verified guardian session.'
+      };
+    }
+
+    const bindRes = await serverClient.rpc('bind_parent_portal_session', {
+      p_session: sessionId,
+      p_profile: sessionData.user.id,
+    });
+
+    if (bindRes.error || bindRes.data !== true) {
+      await serverClient.auth.signOut();
+      return {
+        phase: 'error',
+        message: 'This account is not authorized for Parent Portal access. Please contact the school administrator.'
+      };
+    }
+
+    await publicClient.rpc('check_parent_otp_rate_limit', {
+      p_email: email,
+      p_kind: 'verify',
+      p_reset: true,
+    });
   } catch (err: unknown) {
     if (err && typeof err === 'object' && 'digest' in err && typeof (err as { digest: unknown }).digest === 'string' && (err as { digest: string }).digest.startsWith('NEXT_REDIRECT')) {
       throw err;
@@ -128,7 +213,18 @@ export async function verifyParentOtp(_previous: ParentActionState, form: FormDa
   redirect('/parent/dashboard');
 }
 
-function updateTestOtp(email: string, otp: string) {
+export async function logoutParent() {
+  try {
+    const serverClient = await createServerSupabaseClient({ cookieWrites: 'allowed', httpOnlyCookies: true });
+    await serverClient.rpc('revoke_parent_portal_session');
+    await serverClient.auth.signOut();
+  } catch {
+    // Ignore errors during sign-out cleanup
+  }
+  redirect('/login/parent');
+}
+
+function updateTestOtp(otp: string) {
   try {
     const envPath = path.resolve('.env.test.local');
     if (fs.existsSync(envPath)) {
@@ -141,6 +237,6 @@ function updateTestOtp(email: string, otp: string) {
       fs.writeFileSync(envPath, content, 'utf8');
     }
   } catch {
-    // Ignore test storage errors in production
+    // Ignore test storage errors
   }
 }

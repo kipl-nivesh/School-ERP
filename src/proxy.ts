@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   response.headers.set('Cache-Control', 'private, no-store');
   response.headers.set('Referrer-Policy', 'no-referrer');
-  if (!request.nextUrl.pathname.startsWith('/student/') && !staffRequestsEnabled()) return response;
+  if (!request.nextUrl.pathname.startsWith('/student/') && !request.nextUrl.pathname.startsWith('/parent/') && !staffRequestsEnabled()) return response;
   const configuration = getSupabasePublicConfiguration();
   if (!configuration.configured) return response;
   const client = createServerClient(configuration.url, configuration.publishableKey, {
@@ -27,4 +27,4 @@ export async function proxy(request: NextRequest) {
   try { await client.auth.getClaims(); } catch { /* No authority granted; page/DAL fails closed. */ }
   return response;
 }
-export const config = { matcher: ['/staff/:path*', '/login/staff/:path*', '/invite', '/student/:path*'] };
+export const config = { matcher: ['/staff/:path*', '/login/staff/:path*', '/invite', '/student/:path*', '/parent/:path*', '/login/parent/:path*'] };

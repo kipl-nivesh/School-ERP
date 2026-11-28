@@ -1,10 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { getStaffAccess } from '@/lib/staff/server';
 import { isStaffRole, type StaffRole } from '@/lib/staff/contracts';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { getSupabasePublicConfiguration } from '@/lib/supabase/config';
 import { staffRequestsEnabled } from '@/lib/staff/request-policy';
 import { getStudentPortalAccess } from '@/lib/student/live-dashboard';
+import { getParentPortalAccess } from '@/lib/parent/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,29 +44,7 @@ export default async function PortalWorkspace({ params }: { params: Promise<{ ro
 
   // 3. Parent Portal
   if (role === 'parent') {
-    try {
-      const config = getSupabasePublicConfiguration();
-      if (config.configured) {
-        const supabase = await createServerSupabaseClient({ cookieWrites: 'read-only' });
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          redirect('/parent/dashboard');
-        }
-      }
-    } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === 'object' &&
-        'digest' in err &&
-        typeof (err as { digest: unknown }).digest === 'string' &&
-        (err as { digest: string }).digest.startsWith('NEXT_REDIRECT')
-      ) {
-        throw err;
-      }
-    }
-    redirect('/login/parent');
+    redirect((await getParentPortalAccess()) ? '/parent/dashboard' : '/login/parent');
   }
 
   notFound();
